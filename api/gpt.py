@@ -8,6 +8,9 @@ from prompt.prompt_manager import PromptType, summaryPrompt, imagePrompt
 api_dir = "api"
 example_response_file = api_dir + os.sep + "example_response.txt"
 
+cheap_model = "gpt-4o-mini"
+math_model = "gpt-4o"
+
 class GPT:
     client: OpenAI
     debug: bool
@@ -25,7 +28,7 @@ class GPT:
         try:
             # Send the request to OpenAI API
             response = self.client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=cheap_model,
                 messages=[
                     {
                         "role": "user",
@@ -74,7 +77,7 @@ class GPT:
 
         try:
             response = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=cheap_model,
                 messages=conversation,
                 temperature=0,
                 max_tokens=300
@@ -117,13 +120,13 @@ class GPT:
         try:
             # Send the request to OpenAI API
             stream = client.chat.completions.create(
-                model="gpt-4o",
+                model=math_model,
                 messages=conversation,
                 temperature=temperature,
                 stream=True,
             )
-        except:
-            print("Ask error")
+        except Exception as e:
+            print("Ask error: ", e)
             yield "This service is currently unavailable, sorry!"
             return
 

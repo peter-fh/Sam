@@ -1,0 +1,114 @@
+.sidebar {
+	display: flex;
+	flex-direction: column;
+	text-align: center;
+	position: fixed;
+	width: 15em;
+	left: 0;
+	height: 100%;
+	background-color: var(--dark-background);
+	z-index: 12;
+	overflow-y: auto;
+  row-gap: 10vh;
+}
+
+.hidden-sidebar {
+	display: flex;
+	flex-direction: column;
+	text-align: center;
+	align-items: center;
+	justify-content: center;
+	position: fixed;
+	width: 15em;
+	margin-right: 0;
+	margin-left: 0;
+	padding: 0 0 0 0;
+	left: 0;
+	height: auto;
+	z-index: 12;
+	overflow-y: auto;
+}
+
+
+.attribution {
+	margin-bottom: 1em;
+	color: inherit;
+  font-size: 0.7rem;
+  margin-top: auto;
+}
+
+.sidebar-buttons {
+  width: 100%;
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.sidebar-button{
+	border: solid;
+	border-color: var(--outline-color);
+	border-radius: 18px;
+	background-color: light-dark(var(--light-background), var(--dark-background));
+	padding: 9px 12px 9px 12px;
+	margin: 0.5em 5px 0 5px;
+	color: var(--text-color);
+	font-size: 20px;
+}
+
+.invisible-button{
+	opacity: 0;
+	border: solid;
+	padding: 9px 12px 9px 12px;
+	margin: 0.5em 5px 0 5px;
+	font-size: 20px;
+}
+
+.sidebar-button:hover {
+	border-color: var(--clicked-button);
+}
+.sidebar-button:active {
+	color: var(--text-color);
+	background-color: var(--dark-background);
+}
+
+.options {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10vh;
+}
+
+.option > .sidebar-input-header {
+  margin-top: 0;
+  font-size: 1.3em;
+}
+
+.sidebar-select-box {
+	height: 7vh;
+	background-color: var(--light-background);
+	color: var(--text-color);
+	border-radius: 5px;
+	font-size: 15px;
+	border-color: var(--outline-color);
+	padding: 5px 5px;
+	text-align-last: center;
+	font-family: "proximanova";
+}
+
+.select-box-option.active {
+	background: var(--highlight-color);
+	border-radius: 0.3rem;
+	text-shadow:
+		0 0 3px light-dark(#404040, #a0a0a0)
+		0 0 6px var(--highlight-color);
+}
+
+.select-box-option {
+	margin: 0 0.2rem 0 0.2rem;
+	appearance: none;
+	background: none;
+	border: none;
+	color: inherit;
+	cursor: pointer; 
+	font-family: inherit;
+	font-size: 1.2rem;
+}

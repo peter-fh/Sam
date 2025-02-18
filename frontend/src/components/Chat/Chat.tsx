@@ -1,10 +1,10 @@
 import { useEffect, useRef } from 'react'
 import './Chat.css'
-import MarkTeX from './MarkTeX'
+import MarkTeX from '../MarkTeX'
 import imageCompression from 'browser-image-compression'
 import html2canvas from 'html2canvas'
-import useConversation from '../hooks/useConversation'
-import { useChatSettings } from '../context/useChatContext'
+import useConversation from './useConversation'
+import { useChatSettings } from '../../context/useChatContext'
 
 
 function Chat() {
@@ -36,7 +36,6 @@ function Chat() {
 
   const enterListener = (e: KeyboardEvent) => {
     if (e.key == "Enter" && !e.shiftKey) {
-      console.log("chatLoaded: ", chatLoaded)
       e.preventDefault()
       handleSendMessage()
     }
@@ -55,7 +54,6 @@ function Chat() {
       intro()
     } else {
     }
-      console.log("chatLoaded set")
   }, [chatLoaded])
 
   useEffect(() => {
@@ -116,9 +114,7 @@ function Chat() {
   useEffect(() => {
     if (save) {
       saveAsPdf()
-    console.log("Hi!")
     }
-    console.log("Hello!")
   }, [save])
 
   const saveAsPdf = async () => {

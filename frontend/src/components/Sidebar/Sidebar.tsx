@@ -1,7 +1,7 @@
-import { Course, DetailLevel, QuestionType } from '../types/options'
+import { Course, DetailLevel, QuestionType } from '../../types/options'
 import './Sidebar.css'
 import React, { useEffect } from 'react'
-import { useChatSettings } from '../context/useChatContext';
+import { useChatSettings } from '../../context/useChatContext';
 
 function NewConversationButton() {
   return (

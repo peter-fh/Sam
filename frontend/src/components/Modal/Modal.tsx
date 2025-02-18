@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { QuestionType, Course } from '../types/options'
+import { QuestionType, Course } from '../../types/options'
 import './Modal.css'
-import { useChatSettings } from '../context/useChatContext';
+import { useChatSettings } from '../../context/useChatContext';
 
 function Modal() {
 
@@ -40,7 +40,6 @@ function Modal() {
 	  </select>
 	  <button onClick={() => {
 	      setShowCourseSelect(false)
-	      console.log("Chat loaded on course select: ", chatLoaded)
 	    }} className="interactive modal-close-button">Done</button>
 
 	</div>
@@ -59,13 +58,11 @@ function Modal() {
 	      setChatLoaded(true)
 	      setShowTypeSelect(false)
 	      setQuestion(QuestionType.CONCEPT)
-	      console.log("Chat loaded on type select: ", chatLoaded)
 	    }}className="interactive modal-close-button">I have a question about a concept</button>
 	  <button onClick={() => {
 	      setChatLoaded(true)
 	      setShowTypeSelect(false)
 	      setQuestion(QuestionType.PROBLEM)
-	      console.log("Chat loaded on type select: ", chatLoaded)
 	    }}className="interactive modal-close-button">I have a question about a problem</button>
 
 	</div>
@@ -107,7 +104,6 @@ By continuing to use this tool, you acknowledge that you are using it ethically 
 	    </span>
 	  <button onClick={() => {
 	      setShowDisclaimer(false)
-	      console.log("Chat loaded on disclaimer hide: ", chatLoaded)
 	    }} className="interactive modal-close-button">I Accept</button>
 
 	</div>

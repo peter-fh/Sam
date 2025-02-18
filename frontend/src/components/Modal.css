@@ -1,0 +1,70 @@
+.course-modal {
+	display: block;
+	position: fixed;
+	z-index: 99;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background: var(--dark-background)
+}
+
+.course-modal-content {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+}
+
+
+.type-modal {
+	display: block;
+	position: fixed;
+	z-index: 99;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background: var(--dark-background)
+}
+
+.type-modal-content {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+}
+
+.modal-text {
+	padding: 0 2rem 0 2rem;
+}
+
+.modal-close-button{
+	border: solid;
+	border-color: var(--outline-color);
+	border-radius: 5px;
+	background-color: var(--dark-background);
+	margin: 0.5em 0em 0em 0em;
+	height: 2.5em;
+	color: var(--text-color);
+}
+
+.disclaimer-button {
+	margin-bottom: 15vh;
+	margin-top: 5vh;
+	padding: 0.5rem;
+}
+
+.disclaimer-modal-content{
+	display: flex;
+	flex-direction: column;
+	justify-content: flex-start;
+	align-items: center;
+	width: 70%;
+	margin: auto;
+	height: 100%;
+	overflow-y: auto;
+	padding-top: 10vh;
+}

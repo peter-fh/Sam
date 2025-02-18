@@ -13,7 +13,6 @@ function Modal() {
   // if unspecified is selected
   // This shouldn't be done until either more courses are added or rapid testing of the UI is not required anymore
   const { 
-    chatLoaded,
     setChatLoaded,
     setQuestion, 
     setCourse

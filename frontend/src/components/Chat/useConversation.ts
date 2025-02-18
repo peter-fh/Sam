@@ -1,11 +1,8 @@
 import { useState } from "react";
 import { Message, newMessage } from "../../types/message";
 import { useChatSettings } from "../../context/useChatContext";
+import Endpoints from "../../endpoints";
 
-const APIEndpoint = '/question'
-const IntroEndpoint = '/introduction'
-const ImageEndpoint = '/image'
-const SummaryEndpoint = '/summary'
 
 const MAX_CONVERSATION_LENGTH = 1000
 
@@ -32,7 +29,7 @@ const useConversation = () => {
 
   async function intro() {
     setLock(true)
-    const request = new Request(IntroEndpoint, {
+    const request = new Request(Endpoints.Intro, {
       method: 'GET'
     })
 
@@ -62,7 +59,7 @@ const useConversation = () => {
 
   async function readImage(image: string) {
 
-    const request = new Request(ImageEndpoint, {
+    const request = new Request(Endpoints.Image, {
       method: 'POST',
       headers: {
         'Content-Type': 'text/plain',
@@ -82,7 +79,7 @@ const useConversation = () => {
   }
 
   async function getSummary(conversation: Message[]) {
-    const request = new Request(SummaryEndpoint, {
+    const request = new Request(Endpoints.Summary, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -104,7 +101,7 @@ const useConversation = () => {
   }
 
   async function ask(conversation: Message[]) {
-    const request = new Request(APIEndpoint, {
+    const request = new Request(Endpoints.Ask, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

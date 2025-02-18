@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Message, newMessage } from "../types/message";
-import { useChatSettings } from "../context/useChatContext";
+import { Message, newMessage } from "../../types/message";
+import { useChatSettings } from "../../context/useChatContext";
 
 const APIEndpoint = '/question'
 const IntroEndpoint = '/introduction'

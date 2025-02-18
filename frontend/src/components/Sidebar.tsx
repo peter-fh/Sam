@@ -1,7 +1,7 @@
 import { Course, DetailLevel, QuestionType } from '../types/options'
-import { useGlobalState } from '../GlobalState'
 import './Sidebar.css'
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
+import { useChatSettings } from '../context/useChatContext';
 
 function NewConversationButton() {
   return (
@@ -19,7 +19,7 @@ function NewConversationButton() {
 }
 
 function SaveButton() {
-  const { setSave } = useGlobalState();
+  const { setSave } = useChatSettings();
   return (
         <button 
           title="Save Chat as PNG"
@@ -37,7 +37,7 @@ function SidebarButton() {
   const {
     sidebar,
     setSidebar,
-  } = useGlobalState()
+  } = useChatSettings()
   return (
     <button
       title='Toggle Sidebar'
@@ -62,7 +62,7 @@ function InvisibleButton() {
 }
 
 function Buttons() {
-  const { sidebar } = useGlobalState();
+  const { sidebar } = useChatSettings();
   return (
     <>
       <div className="sidebar-buttons">
@@ -84,7 +84,7 @@ function Buttons() {
 }
 
 function CourseSelect() {
-  const { course, setCourse } = useGlobalState()
+  const { course, setCourse } = useChatSettings()
   const onChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setCourse(event.target.value as Course)
   }
@@ -109,7 +109,7 @@ function CourseSelect() {
 }
 
 function QuestionTypeSelect() {
-  const { question, setQuestion } = useGlobalState()
+  const { question, setQuestion } = useChatSettings()
 
   return (
       <div className="option">
@@ -117,7 +117,7 @@ function QuestionTypeSelect() {
 
           <span>
               {Object.values(QuestionType).map((option, index) => (
-                  <>
+                  <React.Fragment key={option}>
                       <button
                           key={option}
                           onClick={() => setQuestion(option)}
@@ -130,7 +130,7 @@ function QuestionTypeSelect() {
                       {index < Object.values(QuestionType).length - 1
                           ? "|"
                           : ""}
-                  </>
+                  </React.Fragment>
               ))}
           </span>
       </div>
@@ -138,28 +138,28 @@ function QuestionTypeSelect() {
 }
 
 function BrevitySelect() {
-  const { detailLevel, setDetailLevel} = useGlobalState()
+  const { detailLevel, setDetailLevel} = useChatSettings()
 
   return (
     <div className="option">
       <h3 className='sidebar-input-header'>Level of Detail</h3>
 
-        <span>
-          {Object.values(DetailLevel).map((option, index) => (
-            <>
-              <button
-                key={option}
-                onClick={() => setDetailLevel(option)}
-                className={`select-box-option ${
-                    detailLevel === option ? "active" : ""
-                }`}
-              >
-                {option}
-              </button>
-              {index < Object.values(DetailLevel).length - 1 ? "|" : ""}
-            </>
-          ))}
-        </span>
+      <span>
+        {Object.values(DetailLevel).map((option, index) => (
+          <React.Fragment key={option}>
+            <button
+              key={option}
+              onClick={() => setDetailLevel(option)}
+              className={`select-box-option ${
+detailLevel === option ? "active" : ""
+}`}
+            >
+              {option}
+            </button>
+            {index < Object.values(DetailLevel).length - 1 ? "|" : ""}
+          </React.Fragment>
+        ))}
+      </span>
     </div>
   );
 }
@@ -177,7 +177,7 @@ function Attribution() {
 }
 
 function Sidebar() {
-  const { sidebar, setSidebar, smallScreen, setSmallScreen } = useGlobalState()
+  const { sidebar, setSidebar, smallScreen, setSmallScreen } = useChatSettings()
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth < 900) {

@@ -1,10 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
-import './Chat.css'
-import { useGlobalState } from '../GlobalState'
-import { Message, newMessage } from '../types/message'
-import MarkTeX from './MarkTeX'
-import imageCompression from 'browser-image-compression'
-import html2canvas from 'html2canvas'
+import { useState } from "react";
+import { Message, newMessage } from "../types/message";
+import { useChatSettings } from "../context/useChatContext";
 
 const APIEndpoint = '/question'
 const IntroEndpoint = '/introduction'
@@ -13,23 +9,26 @@ const SummaryEndpoint = '/summary'
 
 const MAX_CONVERSATION_LENGTH = 1000
 
-function Chat() {
-  const { 
-    conversation, 
-    setConversation,
-    chatLoaded,
-    save,
-    setSave,
-    sidebar,
-  } = useGlobalState()
+const useConversation = () => {
+
+  const {
+    question,
+    course,
+    detailLevel
+  } = useChatSettings()
+
+  const [conversation, setConversation] = useState<Message[]>([]);
   const [message, setMessage] = useState('')
-  const {question, course, detailLevel} = useGlobalState()
   const [messages, setMessages] = useState<string[]>([])
   const [aiMessage, setAiMessage] = useState('')
   const [lock, setLock] = useState(false)
   const [file, setFile] = useState('')
   const [image, setImage] = useState('')
   const [toSummarize, setToSummarize] = useState(false)
+
+  const addMessage = (message: Message) => {
+    setConversation((prevMessages) => [...prevMessages, message])
+  }
 
   async function intro() {
     setLock(true)
@@ -187,34 +186,6 @@ function Chat() {
     }
   }
 
-  const enterListener = (e: KeyboardEvent) => {
-    if (e.key == "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
-    }
-  }
-
-  useEffect(() => {
-    document.addEventListener("keydown", enterListener, false)
-
-    return () => {
-      document.removeEventListener("keydown", enterListener, false)
-    }
-  })
-
-  useEffect(() => {
-    if (chatLoaded){
-      intro()
-    }
-  }, [chatLoaded])
-
-  useEffect(() => {
-    if (toSummarize) {
-      summarize()
-    }
-  }, [conversation])
-
-
   async function summarize() {
     setToSummarize(false)
     if (conversation.length < 2) {
@@ -240,129 +211,28 @@ function Chat() {
     setLock(false)
   }
 
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const handleFileButtonClick = () => {
-    fileInputRef!.current!.click()
+  return {
+    conversation,
+    setConversation,
+    message,
+    setMessage,
+    messages,
+    setMessages,
+    aiMessage,
+    setAiMessage,
+    lock,
+    setLock,
+    file,
+    setFile,
+    image,
+    setImage,
+    toSummarize,
+    setToSummarize,
+    addMessage,
+    intro,
+    handleSendMessage,
+    summarize,
   }
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const img = event.target.files?.[0];
-    if (img) {
-      updateImage(img)
-    }
-  };
-
-  const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    const img = event.dataTransfer.files?.[0]
-    if (img) {
-      const allowedFiles = [".png",".jpg",".jpeg",".gif"]
-      for (const filetype of allowedFiles) {
-        if (img.name.endsWith(filetype)) {
-          updateImage(img)
-        }
-      }
-    }
-  }
-
-  const updateImage = async (img: File) => {
-    setFile(img.name)
-    const options = {
-      maxSizeMB: 0.1,
-      maxWidthOrHeight: 1000,
-      useWebWorker: true,
-    }
-
-    const compressedFile = await imageCompression(img, options);
-    console.log(`Transcribing ${compressedFile.size / 1024 / 1024}MB file`);
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setImage(reader!.result!.toString())
-    }
-    reader.readAsDataURL(compressedFile)
-  }
-
-  const buttonClass = file !== "" ? "button interactive file-present" : "button interactive"
-
-  const messagesRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (save) {
-      saveAsPdf()
-    }
-  }, [save])
-
-  const saveAsPdf = async () => {
-    if (messagesRef.current) {
-      const canvas = await html2canvas(messagesRef.current);
-      setSave(false)
-      const imgData = canvas.toDataURL('image/png');
-
-      // Create a link element to download the image
-      const link = document.createElement('a');
-      link.href = imgData;
-      link.download = 'AI Math Tutor Conversation.png'; // File name for the downloaded image
-      link.click();
-    }
-  }
-
-  return (
-    <>
-      <div className="chat" onDrop={handleDrop} style={{
-        marginLeft: sidebar ? '15em' : 0
-      }}>
-        <div className="messages" ref={messagesRef}>
-          {messages && messages.map((message, index) => (
-            <span key={index}className={index % 2 == 1 ? "question" : "output"}>
-              <MarkTeX content={message} isSaved={save}/>
-            </span>
-          ))}
-          {aiMessage != '' && (
-            <span key={-1}className="output">
-              <MarkTeX content={aiMessage} isSaved={save}/>
-            </span>
-          )}
-        </div>
-        <div className="input">
-          <textarea
-            onChange={(event) => {
-              setMessage(event.target.value);
-            }}
-            value={message}
-            rows={4} 
-            cols={50} 
-            placeholder="Enter your message here..."
-            className="input-block"
-          />
-          <input
-            type="file"
-            ref={fileInputRef}
-            style={{ display: "none" }}
-            accept=".png,.jpg,.jpeg,.gif"
-            key={image}
-            onChange={handleFileChange}
-          />
-          <div className="button-container">
-            <button 
-              className={buttonClass}
-              onClick={handleFileButtonClick}
-            >
-              <i className="fa-solid fa-paperclip"/>
-            </button>
-            <button 
-              className="button interactive" 
-              onClick={handleSendMessage}
-            >
-              {lock ? <i className="fa-solid fa-xmark"/>:<i className="fa-solid fa-arrow-up"/>}
-            </button>
-          </div>
-        </div>
-        <div className="chat-background"/>
-      </div>
-    </>
-  )
 }
 
-
-export default Chat
+export default useConversation

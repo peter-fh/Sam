@@ -1,18 +1,22 @@
 import { useState } from 'react'
-import { useGlobalState } from '../GlobalState'
-import { QuestionType, Course } from '../types/options'
+import { QuestionType, Course } from '../../types/options'
 import './Modal.css'
+import { useChatSettings } from '../../context/useChatContext';
 
 function Modal() {
 
-  const { setChatLoaded } = useGlobalState();
   const [showCourseSelect, setShowCourseSelect] = useState(true);
   const [showTypeSelect, setShowTypeSelect] = useState(true);
   const [showDislaimer, setShowDisclaimer] = useState(true);
+
   // TODO: Add "unspecified" option to course and don't allow closing the course modal
   // if unspecified is selected
   // This shouldn't be done until either more courses are added or rapid testing of the UI is not required anymore
-  const { setQuestion, setCourse } = useGlobalState()
+  const { 
+    setChatLoaded,
+    setQuestion, 
+    setCourse
+  } = useChatSettings();
 
   /* The course-select select box can be changed to its own function/component if the sidebar version
    * should look identical to this modal version */
@@ -20,10 +24,9 @@ function Modal() {
     const onChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
       setCourse(event.target.value as Course)
     }
+
     return (
     <>
-
-      <p>hello</p>
       <div className="course-modal">
 	<div className="course-modal-content">
 	  <p className="modal-text">Select the course you are taking</p>
@@ -46,16 +49,17 @@ function Modal() {
   const typeSelectModal = () => {
 
     return (
-
     <>
       <div id="TypeSelectModal" className="type-modal">
 	<div className="type-modal-content">
 	  <p className="modal-text">What type of question do you have?</p>
 	  <button onClick={() => {
+	      setChatLoaded(true)
 	      setShowTypeSelect(false)
 	      setQuestion(QuestionType.CONCEPT)
 	    }}className="interactive modal-close-button">I have a question about a concept</button>
 	  <button onClick={() => {
+	      setChatLoaded(true)
 	      setShowTypeSelect(false)
 	      setQuestion(QuestionType.PROBLEM)
 	    }}className="interactive modal-close-button">I have a question about a problem</button>
@@ -70,7 +74,7 @@ function Modal() {
       <>
       <div id="DisclaimerModal" className="type-modal">
 	<div className="disclaimer-modal-content">
-	  <p className="modal-text">
+	  <span className="modal-text">
 	      <h2>
 		Disclaimer
 	      </h2>
@@ -96,10 +100,10 @@ Academic Integrity: Plagiarism, including submitting work that is generated or a
 </ol>
 By continuing to use this tool, you acknowledge that you are using it ethically and responsibly to enhance your understanding of the material, while upholding academic honesty and integrity.
 
-	    </p>
+	    </span>
 	  <button onClick={() => {
 	      setShowDisclaimer(false)
-	    }}className="interactive modal-close-button">I Accept</button>
+	    }} className="interactive modal-close-button">I Accept</button>
 
 	</div>
       </div>
@@ -111,7 +115,7 @@ By continuing to use this tool, you acknowledge that you are using it ethically 
   if (showDislaimer) return disclaimerModal()
   if (showCourseSelect) return courseSelectModal()
   if (showTypeSelect) return typeSelectModal()
-  setChatLoaded(true)
+  
   return (<></>)
 }
 

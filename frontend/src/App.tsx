@@ -1,7 +1,7 @@
 import './App.css'
-import Modal from './hooks/Modal'
-import Sidebar from './hooks/Sidebar'
-import Chat from './hooks/Chat'
+import Modal from './components/Modal'
+import Sidebar from './components/Sidebar'
+import Chat from './components/Chat'
 
 function App() {
 

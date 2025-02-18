@@ -6,16 +6,16 @@ This is the frontend for the ai chatbot, written in react + typescript.
 
 This project uses raw css defined in .css files for each corresponding .tsx file. The styling for this project is not super organized and may not necessarily follow any conventions. Contributions that can help organize the stylesheets of this project, even bringing in a dependency like Tailwind, are welcome.
 
-## Global State
+## Chat Context
 
-The information that is required to process an OpenAI API request is stored in the global state, in src/GlobalState.tsx. This includes the course, detail level, and question type. All of the types are stored as enums in src/types/options.ts.
+The information that is required to process an OpenAI API request is stored in the chat context, in src/context/useChatContext.tsx. This includes the course, detail level, and question type. All of the types are stored as enums in src/types/options.ts.
 
 Any component that has a way for the user to change options for how ChatGPT should respond to their messages should interact with the global state. 
 
 For example, a component that allows the student to select which course they are asking about should retrieve the value and setter from the global state:
 
 ```ts
-  const { course, setCourse } = useGlobalState()
+  const { course, setCourse } = useChatContext()
 ```
 
 The function to interact with this component should call the setter, for example:
@@ -49,4 +49,4 @@ After a lot of trial and error, I found that the best way to render Latex and Ma
 
 ## Modals
 
-In order to ensure that the student chooses the course and type of problem they are asking about before interacting with the chatbot, a modal is shown that blocks the rest of the UI until the selections are made. There are currently two, one for selecting a course, and another for selecting the type of problem. These modals are defined in src/hooks/Modal.tsx
+In order to ensure that the student chooses the course and type of problem they are asking about before interacting with the chatbot, a modal is shown that blocks the rest of the UI until the selections are made. There are currently three, one for the disclaimer, one for selecting a course, and another for selecting the type of problem. These modals are defined in src/components/Modal/Modal.tsx

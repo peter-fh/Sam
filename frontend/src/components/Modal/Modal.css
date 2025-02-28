@@ -52,13 +52,20 @@
 	color: white;
 }
 
+.disclaimer-button {
+	margin-bottom: 15vh;
+	margin-top: 5vh;
+	padding: 0.5rem;
+}
+
 .disclaimer-modal-content{
 	display: flex;
 	flex-direction: column;
-	justify-content: center;
+	justify-content: flex-start;
 	align-items: center;
 	width: 70%;
 	margin: auto;
 	height: 100%;
-
+	overflow-y: auto;
+	padding-top: 10vh;
 }

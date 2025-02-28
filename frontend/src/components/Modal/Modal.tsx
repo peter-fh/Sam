@@ -103,7 +103,7 @@ By continuing to use this tool, you acknowledge that you are using it ethically 
 	    </span>
 	  <button onClick={() => {
 	      setShowDisclaimer(false)
-	    }} className="interactive modal-close-button">I Accept</button>
+	    }} className="interactive modal-close-button disclaimer-button">I Accept</button>
 
 	</div>
       </div>

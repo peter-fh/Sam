@@ -1,16 +1,30 @@
 :root {
 	color-scheme: light;
-	--dark-background: light-dark(#e3e3e3, #1d1d1d);
-	--light-background: light-dark(#ffffff, #222222);
-	--highlight-color: light-dark(#77bbbb, #114444);
-	--clicked-button: light-dark(black, white)
-	--text-color: light-dark(black, white);
-	--outline-color: light-dark(#303030, #707070)
+	--dark-background: #e3e3e3;
+	--light-background: #ffffff;
+	--highlight-color: #77bbbb;
+	--clicked-button: gray;
+	--text-color: black;
+	--outline-color: #303030;
 }
+
+@media (prefers-color-scheme: dark) { 
+	:root {
+		color-scheme: dark;
+		--dark-background: #1d1d1d;
+		--light-background: #222222;
+		--highlight-color: #114444;
+		--clicked-button: white;
+		--text-color: white;
+		--outline-color: #707070;
+	}
+}
+
 
 h2 {
 	text-decoration: underline;
 }
+
 
 @font-face {
   font-family: 'proximanova';

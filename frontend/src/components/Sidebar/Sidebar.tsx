@@ -100,12 +100,10 @@ function Buttons() {
           <>
             <SidebarButton/>
             <SaveButton/>
-            <ColorSchemeButton/>
             <NewConversationButton/>
           </> :
           <>
             <SidebarButton/>
-            <InvisibleButton/>
             <InvisibleButton/>
             <InvisibleButton/>
           </>

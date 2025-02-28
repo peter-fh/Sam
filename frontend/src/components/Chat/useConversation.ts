@@ -4,7 +4,7 @@ import { useChatSettings } from "../../context/useChatContext";
 import Endpoints from "../../endpoints";
 
 
-const MAX_CONVERSATION_LENGTH = 1000
+const MAX_CONVERSATION_LENGTH = 500
 
 const useConversation = () => {
 
@@ -185,11 +185,11 @@ const useConversation = () => {
 
   async function summarize() {
     setToSummarize(false)
-    if (conversation.length < 2) {
+    if (conversation.length < 3) {
       return
     }
     var total_length = 0
-    for (var i = 0; i < conversation.length; i++) {
+    for (var i = 0; i < conversation.length-1; i++) {
       total_length += conversation[i].content[0].text.length
     }
 
@@ -204,7 +204,19 @@ const useConversation = () => {
     console.log("Summarizing")
 
     setLock(true)
-    setConversation([newMessage(await getSummary(conversation.slice(0, -2)), 'system'), conversation[conversation.length - 2], conversation[conversation.length - 1]])
+    const conversationToSummarize = conversation.slice(0,-2)
+    console.log("Sending the following conversatio to summarize:")
+    console.log(conversationToSummarize)
+
+    const summary = await getSummary(conversationToSummarize)
+    const summaryMessage = newMessage(summary, 'system')
+
+    setConversation([
+      summaryMessage, 
+      conversation[conversation.length - 2], 
+      conversation[conversation.length - 1]
+    ])
+
     setLock(false)
   }
 

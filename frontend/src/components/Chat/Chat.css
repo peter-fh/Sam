@@ -11,7 +11,7 @@
 .messages {
 	width: 100%;
 	padding: 0em 1em 0em 1em;
-	background-color: #222222;
+	background-color: var(--light-background);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -26,7 +26,7 @@
 	width: 100%;
 	padding: .2em 1em .2em 1em;
 	margin: 0em 0em 1em 0em;
-	background-color: #1b1b1b;
+	background-color: var(--dark-background);
 	border-radius: 1.5em;
 	border-radius: 1em 1em 1em 0em;
 	overflow-y: auto;
@@ -36,7 +36,7 @@
 	width: auto;
 	text-align: left;
 	margin-left: auto;
-	background-color: #114444;
+	background-color: var(--highlight-color);
 	padding: 0em 1em 0em 1em;
 	border-radius: 1em 1em 0 1em;
 	margin-bottom: 1em;
@@ -49,8 +49,8 @@
 	height: 10%;
 	width: 60vw;
 	border-style: solid;
-	border-color: #555555;
-	background-color: #222222;
+	border-color: light-dark(#888888, #555555);
+	background-color: var(--light-background);
 	padding: 0.5em 1em 0.5em 1em;
 	border-radius: 1em;
 	z-index: 11;
@@ -60,14 +60,13 @@
 	font-family: "proximanova";
 	width: 100%;
 	font-size: 1em;
-	color: white;
+	color: var(--text-color);
 	display: block;
-	background-color: #222222;
+	background-color: var(--light-background);
 	border-style: none;
 	border-radius: 10px;
 	outline: none;
 	resize: none;
-	color: white;
 }
 
 .button-container {
@@ -83,17 +82,17 @@
 	border-radius: 15px;
 	border-color: transparent;
 	background-color: transparent;
-	color: white;
+	color: var(--text-color);
 	font-size: 30px;
 }
 
 .file-present {
-	background-color: #114444;
+	background-color: var(--highlight-color);
 }
 
 .chat-background {
 	display: flex;
-	background-color: #222222;
+	background-color: var(--light-background);
 	position: fixed;
 	bottom: 0;
 	padding: 1em 1em 2em 1em;

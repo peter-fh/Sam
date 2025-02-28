@@ -33,6 +33,35 @@ function SaveButton() {
     )
 }
 
+function ColorSchemeButton() {
+  const {
+    colorScheme,
+    setColorScheme,
+  } = useChatSettings()
+
+  document.documentElement.style.colorScheme = colorScheme
+  return (
+
+    <button
+      title='Toggle Sidebar'
+      className="interactive sidebar-button"
+      onClick={ () => {
+        if (colorScheme == "light") {
+          setColorScheme("dark")
+        } else {
+          setColorScheme("light")
+        }
+      }}
+    >
+      {colorScheme == "light" ? 
+        <i className="fa-regular fa-moon"></i>
+        :
+        <i className="fa-solid fa-moon"></i>
+      }
+    </button>
+    )
+}
+
 function SidebarButton() {
   const {
     sidebar,
@@ -53,6 +82,7 @@ function SidebarButton() {
   )
 }
 
+
 function InvisibleButton() {
   return (
     <button className="invisible-button">
@@ -70,10 +100,12 @@ function Buttons() {
           <>
             <SidebarButton/>
             <SaveButton/>
+            <ColorSchemeButton/>
             <NewConversationButton/>
           </> :
           <>
             <SidebarButton/>
+            <InvisibleButton/>
             <InvisibleButton/>
             <InvisibleButton/>
           </>

@@ -1,3 +1,13 @@
+:root {
+	color-scheme: light;
+	--dark-background: light-dark(#e3e3e3, #1d1d1d);
+	--light-background: light-dark(#ffffff, #222222);
+	--highlight-color: light-dark(#77bbbb, #114444);
+	--clicked-button: light-dark(black, white)
+	--text-color: light-dark(black, white);
+	--outline-color: light-dark(#303030, #707070)
+}
+
 h2 {
 	text-decoration: underline;
 }
@@ -12,9 +22,9 @@ body {
 	justify-content: center;
 	align-items: center;
 	width: 100vw;
-	background-color: #222222;
+	background-color: var(--light-background);
 	margin: 0px 0px 0px 0px;	
-	color: white;
+	color: var(--text-color);
 	font-family: "proximanova";
 	font-size: 20px;
 }

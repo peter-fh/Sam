@@ -4,7 +4,11 @@ import { useChatSettings } from "../../context/useChatContext";
 import Endpoints from "../../endpoints";
 
 
-const MAX_CONVERSATION_LENGTH = 500
+const TOKEN_THRESHOLD = 2048
+
+const estimateTokens = (characterCount: number) => {
+  return Math.ceil(characterCount * 0.25)
+}
 
 const useConversation = () => {
 
@@ -193,7 +197,7 @@ const useConversation = () => {
       total_length += conversation[i].content[0].text.length
     }
 
-    if (total_length <= MAX_CONVERSATION_LENGTH) {
+    if (estimateTokens(total_length) <= TOKEN_THRESHOLD) {
       return
     }
 

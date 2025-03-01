@@ -33,7 +33,7 @@ function SaveButton() {
     )
 }
 
-function ColorSchemeButton() {
+export function ColorSchemeButton() {
   const {
     colorScheme,
     setColorScheme,

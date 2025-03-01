@@ -11,13 +11,25 @@ example_response_file = api_dir + os.sep + "example_response.txt"
 cheap_model = "gpt-4o-mini"
 math_model = "gpt-4o"
 
+INPUT_TOKEN_COST = 2.5 / 1000000
+OUTPUT_TOKEN_COST = 10 / 1000000
+
+
 class GPT:
     client: OpenAI
     debug: bool
+    input_token_count: int
+    output_token_count: int
 
     def __init__(self, api_key: str):
         load_dotenv(override=True)
         self.client = OpenAI(api_key=api_key)
+        self.input_token_count = 0
+        self.output_token_count = 0
+
+
+    def estimateTokens(self, length):
+        return round(length * 0.25, 0)
 
     def transcribe(self, image):
 
@@ -103,7 +115,7 @@ class GPT:
             }
                         ]
         })
-        displayConversation(conversation)
+        # displayConversation(conversation)
 
         if self.debug:
             with open(example_response_file) as f:
@@ -130,12 +142,26 @@ class GPT:
             yield "This service is currently unavailable, sorry!"
             return
 
+        total_input_characters = 0
+        for message in conversation:
+            for line in message["content"][0]["text"]:
+                total_input_characters += len(line)
+
+
         # Extract the content of the returned message
+        total_output_characters = 0
         for chunk in stream:
             content = chunk.choices[0].delta.content 
             if content is not None:
+                total_output_characters += len(content)
                 yield content
 
+        self.input_token_count += self.estimateTokens(total_input_characters)
+        self.output_token_count += self.estimateTokens(total_output_characters)
+
+
+        total = self.input_token_count * INPUT_TOKEN_COST + self.output_token_count * OUTPUT_TOKEN_COST
+        print("Conversation cost since server restart: $%f" % total)
 
 
 

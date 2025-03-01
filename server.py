@@ -96,6 +96,13 @@ def question():
     return Response(stream_with_context(stream), content_type="text/plain")
 
 
+@app.route('/reset-cost')
+def reset_cost():
+    if app.debug:
+        print("Reset costs")
+        gpt.resetCost()
+    return ""
+
 
 # Run the server if this file is run
 port = 8070

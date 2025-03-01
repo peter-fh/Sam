@@ -31,6 +31,10 @@ class GPT:
     def estimateTokens(self, length):
         return round(length * 0.25, 0)
 
+    def resetCost(self):
+        self.input_token_count = 0
+        self.output_token_count = 0
+
     def transcribe(self, image):
 
         if self.debug:
@@ -161,7 +165,7 @@ class GPT:
 
 
         total = self.input_token_count * INPUT_TOKEN_COST + self.output_token_count * OUTPUT_TOKEN_COST
-        print("Conversation cost since server restart: $%f" % total)
+        print("Total Cost: $%f" % total)
 
 
 

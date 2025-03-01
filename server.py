@@ -101,7 +101,7 @@ def reset_cost():
     if app.debug:
         print("Reset costs")
         gpt.resetCost()
-    return ""
+    return "<h1>Reset costs!</h1>"
 
 
 # Run the server if this file is run

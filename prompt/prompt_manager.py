@@ -47,6 +47,7 @@ def problemPrompt(brevity: str):
     return_prompt = (prompt
         .replace("{$brevity}", brevity))
 
+    print(return_prompt)
     return return_prompt
 
 

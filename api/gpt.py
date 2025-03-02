@@ -31,7 +31,7 @@ class GPT:
 
 
     def estimateTokens(self, length):
-        return round(length * 0.25, 0)
+        return length * 0.25
 
     def resetCost(self):
         self.input_token_count = 0

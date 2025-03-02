@@ -92,6 +92,7 @@ def question():
 
     # Ask the question with its context
     stream = gpt.ask(conversation, instructions, prompt_type) 
+    print("Estimated total cost: $%d" % gpt.estimated_cost)
 
     return Response(stream_with_context(stream), content_type="text/plain")
 

@@ -20,12 +20,14 @@ class GPT:
     debug: bool
     input_token_count: int
     output_token_count: int
+    estimated_cost: float
 
     def __init__(self, api_key: str):
         load_dotenv(override=True)
         self.client = OpenAI(api_key=api_key)
         self.input_token_count = 0
         self.output_token_count = 0
+        self.estimated_cost = 0.0
 
 
     def estimateTokens(self, length):
@@ -162,13 +164,7 @@ class GPT:
 
         self.input_token_count += self.estimateTokens(total_input_characters)
         self.output_token_count += self.estimateTokens(total_output_characters)
-
-
-        total = self.input_token_count * INPUT_TOKEN_COST + self.output_token_count * OUTPUT_TOKEN_COST
-        print("Total Cost: $%f" % total)
-
-
-
+        self.estimated_cost += self.input_token_count * INPUT_TOKEN_COST + self.output_token_count * OUTPUT_TOKEN_COST
 
 def wrap(text, indent=0):
     scentences = text.split("\n")

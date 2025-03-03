@@ -189,7 +189,11 @@ const useConversation = () => {
 
   async function summarize() {
     setToSummarize(false)
-    if (conversation.length < 3) {
+    if (conversation.length < 5) {
+      return
+    }
+
+    if (conversation[conversation.length - 1].role != 'assistant') {
       return
     }
     var total_length = 0
@@ -201,15 +205,12 @@ const useConversation = () => {
       return
     }
 
-    if (conversation[conversation.length - 1].role != 'assistant') {
-      return
-    }
 
     console.log("Summarizing")
 
     setLock(true)
-    const conversationToSummarize = conversation.slice(0,-2)
-    console.log("Sending the following conversatio to summarize:")
+    const conversationToSummarize = conversation.slice(0,-4)
+    console.log("Sending the following conversation to summarize:")
     console.log(conversationToSummarize)
 
     const summary = await getSummary(conversationToSummarize)
@@ -217,8 +218,7 @@ const useConversation = () => {
 
     setConversation([
       summaryMessage, 
-      conversation[conversation.length - 2], 
-      conversation[conversation.length - 1]
+      ...conversation.slice(0,4)
     ])
 
     setLock(false)

@@ -18,8 +18,8 @@ OUTPUT_TOKEN_COST = 10 / 1000000
 class GPT:
     client: OpenAI
     debug: bool
-    input_token_count: int
-    output_token_count: int
+    input_token_count: float
+    output_token_count: float
     estimated_cost: float
 
     def __init__(self, api_key: str):
@@ -127,7 +127,7 @@ class GPT:
             with open(example_response_file) as f:
                 for line in f:
                     for word in line.split(" "):
-                        time.sleep(0.02)
+                        time.sleep(0.002)
                         yield word + " "
             return
 

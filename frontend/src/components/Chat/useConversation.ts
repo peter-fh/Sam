@@ -164,6 +164,7 @@ const useConversation = () => {
         setAiMessage("*Transcribing Image...*")
         const transcription = await readImage(image)
         final_message += transcription
+        current_message += `\n\n*[uploaded ${fileName}]*`
         setAiMessage("")
       } 
 

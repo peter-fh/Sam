@@ -28,8 +28,7 @@ h2 {
 
 @font-face {
   font-family: 'proximanova';
-
-  src: url('/proximanova.ttf') format('truetype'),
+  src: local('proximanova'), url(/font) format('truetype');
 }
 
 body {

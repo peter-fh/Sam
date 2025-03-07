@@ -9,7 +9,7 @@ api_dir = "api"
 example_response_file = api_dir + os.sep + "example_response.txt"
 
 cheap_model = "gpt-4o-mini"
-math_model = "gpt-4o"
+math_model = "o3-mini"
 
 INPUT_TOKEN_COST = 2.5 / 1000000
 OUTPUT_TOKEN_COST = 10 / 1000000
@@ -140,7 +140,7 @@ class GPT:
             stream = client.chat.completions.create(
                 model=math_model,
                 messages=conversation,
-                temperature=temperature,
+                # temperature=temperature,
                 stream=True,
             )
         except Exception as e:

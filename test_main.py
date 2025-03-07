@@ -1,4 +1,4 @@
-from tests.test_response_size import testFirstMessageLength
+from tests.test_response_size import testFirstMessageLength, testFirstMessageLengthManual
 from dotenv import load_dotenv
 from api.gpt import GPT
 import os
@@ -13,6 +13,7 @@ if openai_api_key == None:
 gpt = GPT(openai_api_key)
 gpt.debug = False
 
-testFirstMessageLength(gpt)
+# testFirstMessageLength(gpt, failing_size=500, count=3, show_all=True)
+testFirstMessageLengthManual(gpt, count=3)
 
 print("Testing completed with $%5f used." % gpt.estimated_cost)

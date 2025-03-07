@@ -114,7 +114,7 @@ class GPT:
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
         conversation.insert(0, {
-            "role": "system",
+            "role": "developer",
             "content": [{
                 "type": "text",
                 "text": prompt
@@ -124,6 +124,7 @@ class GPT:
         # displayConversation(conversation)
 
         if self.debug:
+            time.sleep(4)
             with open(example_response_file) as f:
                 for line in f:
                     for word in line.split(" "):

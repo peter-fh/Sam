@@ -9,7 +9,7 @@ api_dir = "api"
 example_response_file = api_dir + os.sep + "example_response.txt"
 
 cheap_model = "gpt-4o-mini"
-math_model = "gpt-4o"
+math_model = "o3-mini"
 
 INPUT_TOKEN_COST = 2.5 / 1000000
 OUTPUT_TOKEN_COST = 10 / 1000000
@@ -114,7 +114,7 @@ class GPT:
         client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
         conversation.insert(0, {
-            "role": "system",
+            "role": "developer",
             "content": [{
                 "type": "text",
                 "text": prompt
@@ -124,6 +124,7 @@ class GPT:
         # displayConversation(conversation)
 
         if self.debug:
+            time.sleep(4)
             with open(example_response_file) as f:
                 for line in f:
                     for word in line.split(" "):
@@ -140,7 +141,7 @@ class GPT:
             stream = client.chat.completions.create(
                 model=math_model,
                 messages=conversation,
-                temperature=temperature,
+                # temperature=temperature,
                 stream=True,
             )
         except Exception as e:

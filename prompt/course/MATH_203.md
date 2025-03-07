@@ -55,6 +55,7 @@ The following are concepts and knowledge that the student doesn't need to know a
 
 - Slant asymptotes
 - One-to-one, Injective, and Surjective properties of functions
+- Taylor expantion for limits
 
 ## Notes
 
@@ -62,4 +63,5 @@ The following are concepts and knowledge that the student doesn't need to know a
 - Lots of horizontal asymptotes have tricks where the left and right limits to infinity are different. Please be careful about these questions.
 - The expression sqrt{x^2} should be treated as |x|, and if x \to -\infty then |x|=-x
 - Inverting functions are included, but students do NOT need to know if functions are invertible or not
+- Do not use taylor expansion for limits
 

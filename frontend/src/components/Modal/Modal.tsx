@@ -15,7 +15,8 @@ function Modal() {
   const { 
     setChatLoaded,
     setQuestion, 
-    setCourse
+    setCourse,
+    chatLoaded
   } = useChatSettings();
 
   /* The course-select select box can be changed to its own function/component if the sidebar version
@@ -39,6 +40,7 @@ function Modal() {
 	  </select>
 	  <button onClick={() => {
 	      setShowCourseSelect(false)
+	      console.log("Chat loaded on course select: ", chatLoaded)
 	    }} className="interactive modal-close-button">Done</button>
 
 	</div>
@@ -57,11 +59,13 @@ function Modal() {
 	      setChatLoaded(true)
 	      setShowTypeSelect(false)
 	      setQuestion(QuestionType.CONCEPT)
+	      console.log("Chat loaded on type select: ", chatLoaded)
 	    }}className="interactive modal-close-button">I have a question about a concept</button>
 	  <button onClick={() => {
 	      setChatLoaded(true)
 	      setShowTypeSelect(false)
 	      setQuestion(QuestionType.PROBLEM)
+	      console.log("Chat loaded on type select: ", chatLoaded)
 	    }}className="interactive modal-close-button">I have a question about a problem</button>
 
 	</div>

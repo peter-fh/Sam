@@ -2,12 +2,11 @@ import time
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-from api.api import EXAMPLE_RESPONSE_FILEPATH, estimateTokens
-from api.model import MathModel
+from api.model import MathModel, EXAMPLE_RESPONSE_FILEPATH, estimateTokens
 from api.prompt import PromptManager, MODELS_DIR, PromptType
 
 
-GPT_4O_DIR = MODELS_DIR + os.sep + "o3_mini"
+GPT_4O_DIR = MODELS_DIR + os.sep + "gpt_4o"
 CONCEPT_FILE_PATH = GPT_4O_DIR + os.sep + "concept.md"
 PROBLEM_FILE_PATH = GPT_4O_DIR + os.sep + "problem.md"
 

@@ -1,7 +1,9 @@
 from abc import ABC, abstractmethod
 from collections.abc import Generator
-
+import os
 from api.prompt import PromptManager
+
+EXAMPLE_RESPONSE_FILEPATH = "api" + os.sep + "example_response.txt"
 
 class UtilityModel(ABC):
     prompt_manager: PromptManager 
@@ -18,11 +20,11 @@ class UtilityModel(ABC):
 class MathModel(ABC):
     prompt_manager: PromptManager 
     debug: bool
-    input_token_cost: float
-    output_token_cost: float
-    input_token_count: float
-    output_token_count: float
     estimated_cost: float
     @abstractmethod
     def ask(self, conversation, course_prompt, prompt_type, brevity) -> Generator[str, None, None]:
         pass
+
+def estimateTokens(length):
+    return length * 0.25
+

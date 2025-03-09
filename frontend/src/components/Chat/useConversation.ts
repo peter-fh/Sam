@@ -125,7 +125,9 @@ const useConversation = () => {
       console.log(numberOfDots)
       const thinkingMessage = "Thinking" + ".".repeat(numberOfDots)
 
-      setAiMessage("*" + thinkingMessage + "*")
+      if (elapsedIntervals != 0) {
+        setAiMessage("*" + thinkingMessage + "*")
+      }
       elapsedIntervals++
     }, 500)
     const response = await fetch(request)

@@ -2,8 +2,7 @@ import time
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
-from api.api import EXAMPLE_RESPONSE_FILEPATH, estimateTokens
-from api.model import MathModel
+from api.model import MathModel, EXAMPLE_RESPONSE_FILEPATH, estimateTokens
 from api.prompt import PromptManager, MODELS_DIR
 
 
@@ -32,8 +31,6 @@ class OpenAI_o3_mini(MathModel):
         self.estimated_cost = 0
 
     def ask(self, conversation, course_prompt, prompt_type, brevity):
-
-
         prompt = self.prompt_manager.instructions(prompt_type, brevity) + "\n" + course_prompt
 
         conversation.insert(0, {

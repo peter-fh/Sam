@@ -119,7 +119,20 @@ const useConversation = () => {
 
 
     const start_time = performance.now()
+    var elapsedIntervals = 0
+    const intervalId = setInterval(() => {
+      const numberOfDots = elapsedIntervals % 4
+      console.log(numberOfDots)
+      const thinkingMessage = "Thinking" + ".".repeat(numberOfDots)
+
+      if (elapsedIntervals != 0) {
+        setAiMessage("*" + thinkingMessage + "*")
+      }
+      elapsedIntervals++
+    }, 500)
     const response = await fetch(request)
+
+    clearInterval(intervalId);
     const reader = response.body!.getReader()
     const decoder = new TextDecoder('utf-8')
     var answer = ""
@@ -135,6 +148,7 @@ const useConversation = () => {
       setAiMessage(answer)
     }
     setAiMessage('')
+    console.log(answer)
 
     const end_time = performance.now()
     console.log(`Response took ${(end_time - start_time) / 1000}`)

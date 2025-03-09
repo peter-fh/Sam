@@ -15,7 +15,7 @@ function Modal() {
   const { 
     setChatLoaded,
     setQuestion, 
-    setCourse
+    setCourse,
   } = useChatSettings();
 
   /* The course-select select box can be changed to its own function/component if the sidebar version

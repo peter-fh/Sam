@@ -1,6 +1,9 @@
 from flask import Flask, request, send_from_directory, stream_with_context, Response
-from api.gpt import GPT
-from prompt.prompt_manager import prompt, PromptType
+from api.models.o3_mini.o3_mini import OpenAI_o3_mini
+from api.models.gpt_4o_mini.gpt_4o_mini import OpenAI_4o_mini
+from api.models.gpt_4o.gpt_4o import OpenAI_4o
+from api.prompt import PromptType
+from courses.read_course_prompt import coursePrompt
 from dotenv import load_dotenv
 from flask_cors import CORS
 import os
@@ -18,8 +21,11 @@ if openai_api_key == None:
     openai_api_key = ""
     use_example_responses = True
 
-gpt = GPT(openai_api_key)
-gpt.debug = use_example_responses
+math_model = OpenAI_o3_mini(openai_api_key)
+math_model.debug = use_example_responses
+
+utility_model = OpenAI_4o_mini(openai_api_key)
+math_model.debug = use_example_responses
 
 # Initialize the server library
 app = Flask(__name__, static_folder="frontend/dist")
@@ -51,7 +57,7 @@ def index():
 @app.route('/summary', methods=['POST'])
 def summary():
     conversation = request.get_json()
-    return gpt.summarize(conversation)
+    return utility_model.summarize(conversation)
 
 @app.route("/assets/<path:path>")
 def serve_assets(path):
@@ -74,7 +80,7 @@ def introduction():
 @app.route('/image', methods=['POST'])
 def image():
     image = request.get_data(as_text=True)
-    return gpt.transcribe(image)
+    return utility_model.transcribe(image)
 
 # Handles clicking the "Ask" button
 @app.route('/question', methods=['POST'])
@@ -87,12 +93,11 @@ def question():
     prompt_type = PromptType[question.upper()]
     conversation = request.get_json()
 
-    # Generate the prompt based on the course
-    instructions = prompt(prompt_type, course, brevity)
+    course_prompt = coursePrompt(course)
 
     # Ask the question with its context
-    stream = gpt.ask(conversation, instructions, prompt_type) 
-    print("Estimated total cost: $%5f" % gpt.estimated_cost)
+    stream = math_model.ask(conversation, course_prompt, prompt_type, brevity) 
+    print("Estimated total cost: $%5f" % math_model.estimated_cost)
 
     return Response(stream_with_context(stream), content_type="text/plain")
 
@@ -101,7 +106,7 @@ def question():
 def reset_cost():
     if app.debug:
         print("Reset costs")
-        gpt.resetCost()
+        # math_model.resetCost()
     return "<h1>Reset costs!</h1>"
 
 
@@ -115,6 +120,7 @@ if __name__ == '__main__':
     print("=" * 70)
     if len(sys.argv) > 1 and sys.argv[1] == "--no-api":
         use_example_responses=True
-    gpt.debug = use_example_responses
+    math_model.debug = use_example_responses
+    utility_model.debug = use_example_responses
     app.run(port=port, debug=True)
 

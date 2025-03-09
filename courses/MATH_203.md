@@ -55,7 +55,7 @@ The following are concepts and knowledge that the student doesn't need to know a
 
 - Slant asymptotes
 - One-to-one, Injective, and Surjective properties of functions
-- Taylor expantion for limits
+- Taylor expansion for limits
 
 ## Notes
 

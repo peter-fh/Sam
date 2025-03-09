@@ -1,33 +1,45 @@
 package api
 
 import (
-	"bytes"
-	"io"
-	"strings"
-	"time"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-const INTRODUCTION_STRING = "Hello! I'm Sam, an AI chatbot powered by Chat-GPT. I use context specific to Concordia to provide better explanations. AI makes mistakes, so please double check any answers you are given."
-
-func introWriter(outChannel chan string) {
-	for _, word := range strings.Split(INTRODUCTION_STRING, " ") {
-		outChannel <- word
-		time.Sleep(time.Millisecond * 30)
-	}
+type MathModel interface {
+	Init()
+	Ask()
 }
 
-func Introduction(ctx *gin.Context) {
-	outChannel := make(chan string)
-	go introWriter(outChannel)
-	ctx.Stream(func (w io.Writer) bool {
-		output, ok := <- outChannel
-		if !ok {
-			return false
+type UtilityModel interface {
+	Init()
+	Transcribe()
+	Summarize()
+}
+
+
+func Question(model MathModel) gin.HandlerFunc {
+
+	return func(ctx *gin.Context) {
+
+		course := ctx.GetHeader("Course")
+		brevity := ctx.GetHeader("Brevity")
+		question_type := ctx.GetHeader("Type")
+		var conversation map[string] interface{}
+
+		if err := ctx.BindJSON(&conversation); err != nil {
+			ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		}
-		outputBytes := bytes.NewBufferString(output)
-		ctx.Writer.Write(append(outputBytes.Bytes(), []byte(" ")...))
-		return true
-	})
+
+		outChannel := make(chan string)
+		go func() {
+			defer close(outChannel)
+		}()
+
+
+
+
+
+	}
+
 }

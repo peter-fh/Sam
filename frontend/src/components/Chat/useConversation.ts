@@ -44,7 +44,7 @@ const useConversation = () => {
     var answer = ""
 
     while (true) {
-      const {value, done} = await reader.read()
+      const { value, done } = await reader.read()
       if (done) {
         break
       }

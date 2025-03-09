@@ -4,14 +4,14 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from api.api import EXAMPLE_RESPONSE_FILEPATH, estimateTokens
 from api.model import MathModel
-from api.prompt import PromptManager, MODELS_DIR
+from api.prompt import PromptManager, MODELS_DIR, PromptType
 
 
-O3_DIR = MODELS_DIR + os.sep + "o3_mini"
-CONCEPT_FILE_PATH = O3_DIR + os.sep + "concept.md"
-PROBLEM_FILE_PATH = O3_DIR + os.sep + "problem.md"
+GPT_4O_DIR = MODELS_DIR + os.sep + "o3_mini"
+CONCEPT_FILE_PATH = GPT_4O_DIR + os.sep + "concept.md"
+PROBLEM_FILE_PATH = GPT_4O_DIR + os.sep + "problem.md"
 
-class OpenAI_o3_mini(MathModel):
+class OpenAI_4o(MathModel):
     debug: bool
     prompt_manager: PromptManager
     client: OpenAI
@@ -24,9 +24,9 @@ class OpenAI_o3_mini(MathModel):
     def __init__(self, api_key: str):
         load_dotenv(override=True)
         self.client = OpenAI(api_key=api_key)
-        self.input_token_cost = 1.1 / 1000000
+        self.input_token_cost = 2.5 / 1000000
         self.prompt_manager = PromptManager(CONCEPT_FILE_PATH, PROBLEM_FILE_PATH)
-        self.output_token_cost = 4.4 / 1000000
+        self.output_token_cost = 10 / 1000000
         self.input_token_count = 0
         self.output_token_count = 0
         self.estimated_cost = 0
@@ -37,7 +37,7 @@ class OpenAI_o3_mini(MathModel):
         prompt = self.prompt_manager.instructions(prompt_type, brevity) + "\n" + course_prompt
 
         conversation.insert(0, {
-            "role": "developer",
+            "role": "system",
             "content": [{
                 "type": "text",
                 "text": prompt
@@ -46,7 +46,6 @@ class OpenAI_o3_mini(MathModel):
         })
 
         if self.debug:
-            time.sleep(4)
             with open(EXAMPLE_RESPONSE_FILEPATH) as f:
                 for line in f:
                     for word in line.split(" "):
@@ -54,11 +53,16 @@ class OpenAI_o3_mini(MathModel):
                         yield word + " "
             return
 
+        temperature = 0.7
+        if prompt_type == PromptType.PROBLEM:
+            temperature = 0
 
         try:
+            # Send the request to OpenAI API
             stream = self.client.chat.completions.create(
-                model="o3-mini",
+                model="gpt-4o",
                 messages=conversation,
+                temperature=temperature,
                 stream=True,
             )
         except Exception as e:

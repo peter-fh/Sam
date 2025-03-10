@@ -21,6 +21,7 @@ class MathModel(ABC):
     prompt_manager: PromptManager 
     debug: bool
     estimated_cost: float
+    enable_logging: bool
     @abstractmethod
     def ask(self, conversation, course_prompt, prompt_type, brevity) -> Generator[str, None, None]:
         pass

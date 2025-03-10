@@ -51,7 +51,6 @@ class OpenAI_4o_mini(UtilityModel):
             return "There is supposed to be a transcription of an image, but there was a fatal error."
 
         transcription = str(response.choices[0].message.content)
-        transcription = "The following is a transcription of an image sent by the user:\n\n" + transcription
         if response.usage:
             print(f"Tokens used by image transcriptions: {response.usage.total_tokens} (${response.usage.total_tokens  * 0.00000015})")
 

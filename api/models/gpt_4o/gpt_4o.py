@@ -2,6 +2,7 @@ import time
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
+from api.log import displayConversation
 from api.model import MathModel, EXAMPLE_RESPONSE_FILEPATH, estimateTokens
 from api.prompt import PromptManager, MODELS_DIR, PromptType
 
@@ -18,6 +19,7 @@ class OpenAI_4o(MathModel):
     output_token_cost: float
     input_token_count: float
     output_token_count: float
+    enable_logging: bool
     estimated_cost: float
 
     def __init__(self, api_key: str):
@@ -29,6 +31,7 @@ class OpenAI_4o(MathModel):
         self.input_token_count = 0
         self.output_token_count = 0
         self.estimated_cost = 0
+        self.enable_logging: bool
 
     def ask(self, conversation, course_prompt, prompt_type, brevity):
 
@@ -43,6 +46,9 @@ class OpenAI_4o(MathModel):
             }
                         ]
         })
+
+        if self.enable_logging:
+            displayConversation(conversation)
 
         if self.debug:
             with open(EXAMPLE_RESPONSE_FILEPATH) as f:

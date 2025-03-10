@@ -2,6 +2,7 @@ import time
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
+from api.log import displayConversation
 from api.model import MathModel, EXAMPLE_RESPONSE_FILEPATH, estimateTokens
 from api.prompt import PromptManager, MODELS_DIR
 
@@ -12,6 +13,7 @@ PROBLEM_FILE_PATH = O3_DIR + os.sep + "problem.md"
 
 class OpenAI_o3_mini(MathModel):
     debug: bool
+    enable_logging: bool
     prompt_manager: PromptManager
     client: OpenAI
     input_token_cost: float
@@ -29,6 +31,7 @@ class OpenAI_o3_mini(MathModel):
         self.input_token_count = 0
         self.output_token_count = 0
         self.estimated_cost = 0
+        self.enable_logging = False
 
     def ask(self, conversation, course_prompt, prompt_type, brevity):
         prompt = self.prompt_manager.instructions(prompt_type, brevity) + "\n" + course_prompt
@@ -41,6 +44,9 @@ class OpenAI_o3_mini(MathModel):
             }
                         ]
         })
+
+        if self.enable_logging:
+            displayConversation(conversation)
 
         if self.debug:
             time.sleep(4)

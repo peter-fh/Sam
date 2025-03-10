@@ -10,6 +10,11 @@ const estimateTokens = (characterCount: number) => {
   return Math.ceil(characterCount * 0.25)
 }
 
+type DisplayMessage = {
+  sender: "user" | "assistant"
+  content: string
+}
+
 const useConversation = () => {
 
   const {
@@ -20,7 +25,7 @@ const useConversation = () => {
 
   const [conversation, setConversation] = useState<Message[]>([]);
   const [message, setMessage] = useState('')
-  const [messages, setMessages] = useState<string[]>([])
+  const [messages, setMessages] = useState<DisplayMessage[]>([])
   const [aiMessage, setAiMessage] = useState('')
   const [lock, setLock] = useState(false)
   const [file, setFile] = useState('')
@@ -55,7 +60,12 @@ const useConversation = () => {
     }
     setAiMessage('')
 
-    setMessages([answer])
+    const introductionMessage: DisplayMessage = {
+      sender: "assistant",
+      content: answer,
+    }
+
+    setMessages([introductionMessage])
     const end_time = performance.now()
     console.log(`Response took ${(end_time - start_time) / 1000}`)
     setLock(false)
@@ -164,30 +174,50 @@ const useConversation = () => {
       setFile('')
 
       var current_message = message
-      if (image) {
-        current_message += `\n\n*[uploaded ${fileName}]*`
+
+
+      const current_display_question: DisplayMessage = {
+        sender: "user",
+        content: current_message
+
       }
-
-
-      setMessages([...messages!, current_message])
+      const image_info: DisplayMessage = {
+        sender: "user",
+        content: ""
+      }
+      if (image) {
+        image_info.content = `\n\n*[transcribing ${fileName}...]*`
+        setMessages([...messages!, current_display_question, image_info])
+      } else {
+        setMessages([...messages!, current_display_question])
+      }
       setMessage("")
 
       var final_message = message
 
       if (image) {
-        setAiMessage("*Transcribing Image...*")
         const transcription = await readImage(image)
-        final_message += transcription
-        setAiMessage("")
+        image_info.content = `\n\n*Image Transcription:*\n\n*${transcription}*` 
+        setMessages([...messages!, current_display_question, image_info])
+        final_message += "The following is a transcription of an image sent by the user:\n\n" + transcription
       } 
 
       var json_message: any = newMessage(final_message, "user")
       const fullConversation = [...conversation, json_message]
 
-      const aiMessagePromise = ask(fullConversation)
-      const aiMessage = await aiMessagePromise
+      const ai_message_promise = ask(fullConversation)
+      const ai_message = await ai_message_promise
 
-      setMessages([...messages!, current_message, aiMessage])
+      const display_ai_message: DisplayMessage = {
+        sender: "assistant",
+        content: ai_message
+      }
+
+      if (image) {
+        setMessages([...messages!, current_display_question, image_info, display_ai_message])
+      } else {
+        setMessages([...messages!, current_display_question, display_ai_message])
+      }
       setConversation([
         ...conversation, 
         newMessage(final_message, 'user'), 

@@ -93,8 +93,8 @@ function Chat() {
   const updateImage = async (img: File) => {
     setFile(img.name)
     const options = {
-      maxSizeMB: 0.1,
-      maxWidthOrHeight: 1000,
+      maxSizeMB: 1,
+      maxWidthOrHeight: 2048,
       useWebWorker: true,
     }
 
@@ -138,8 +138,8 @@ function Chat() {
       }}>
         <div className="messages" ref={messagesRef}>
           {messages && messages.map((message, index) => (
-            <span key={index}className={index % 2 == 1 ? "question" : "output"}>
-              <MarkTeX content={message} isSaved={save}/>
+            <span key={index}className={message.sender == "user" ? "question" : "output"}>
+              <MarkTeX content={message.content} isSaved={save}/>
             </span>
           ))}
           {aiMessage != '' && (

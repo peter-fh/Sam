@@ -1,4 +1,5 @@
 from flask import Flask, request, send_from_directory, stream_with_context, Response
+from api import prompt
 from api.models.o3_mini.o3_mini import OpenAI_o3_mini
 from api.models.gpt_4o_mini.gpt_4o_mini import OpenAI_4o_mini
 from api.models.gpt_4o.gpt_4o import OpenAI_4o
@@ -21,11 +22,13 @@ if openai_api_key == None:
     openai_api_key = ""
     use_example_responses = True
 
-math_model = OpenAI_o3_mini(openai_api_key)
-math_model.debug = use_example_responses
+problem_model = OpenAI_o3_mini(openai_api_key)
+problem_model.debug = use_example_responses
+
+concept_model = OpenAI_4o(openai_api_key)
+concept_model.debug = use_example_responses
 
 utility_model = OpenAI_4o_mini(openai_api_key)
-math_model.debug = use_example_responses
 
 # Initialize the server library
 app = Flask(__name__, static_folder="frontend/dist")
@@ -95,9 +98,15 @@ def question():
 
     course_prompt = coursePrompt(course)
 
-    # Ask the question with its context
-    stream = math_model.ask(conversation, course_prompt, prompt_type, brevity) 
-    print("Estimated total cost: $%5f" % math_model.estimated_cost)
+    stream = None
+    if prompt_type == PromptType.PROBLEM:
+        stream = problem_model.ask(conversation, course_prompt, prompt_type, brevity) 
+    elif prompt_type == PromptType.CONCEPT:
+        stream = concept_model.ask(conversation, course_prompt, prompt_type, brevity) 
+    else:
+        return "Internal Server error! Invalid type of question"
+
+    print("Estimated total cost: $%5f" % (problem_model.estimated_cost + concept_model.estimated_cost))
 
     return Response(stream_with_context(stream), content_type="text/plain")
 
@@ -106,7 +115,7 @@ def question():
 def reset_cost():
     if app.debug:
         print("Reset costs")
-        # math_model.resetCost()
+    # problem_model.resetCost()
     return "<h1>Reset costs!</h1>"
 
 
@@ -120,7 +129,8 @@ if __name__ == '__main__':
     print("=" * 70)
     if len(sys.argv) > 1 and sys.argv[1] == "--no-api":
         use_example_responses=True
-    math_model.debug = use_example_responses
+    problem_model.debug = use_example_responses
+    concept_model.debug = use_example_responses
     utility_model.debug = use_example_responses
     app.run(port=port, debug=True)
 

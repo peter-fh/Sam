@@ -13,10 +13,12 @@ TRANSCRIPTION_FILE_PATH = GPT_4O_MINI_DIR + os.sep + "transcription.md"
 class OpenAI_4o_mini(UtilityModel):
     client: OpenAI
     utility_prompt_manager: UtilityPromptManager
+    debug: bool
     def __init__(self, api_key: str):
         load_dotenv(override=True)
         self.client = OpenAI(api_key=api_key)
         self.utility_prompt_manager = UtilityPromptManager(TRANSCRIPTION_FILE_PATH, SUMMARY_FILE_PATH)
+        self.debug = False
 
     def transcribe(self, image):
 

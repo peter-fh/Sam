@@ -5,25 +5,32 @@
 			"answer": "x=10/3"
 		},
 		{
-			"problem": "solve for x: $3^{2x}+2\\cdot 3^x=4^2$"
+			"problem": "solve for x: $3^{2x}+2\\cdot 3^x=4^2$",
+			"answer": "\\[x = \\log_3(\\sqrt{17} - 1). \\]"
 		},
 		{
-			"problem": "Given the function $f(x)=\\ln (1+e^{2x})$, find the inverse $f^{-1}(x)$, the range of $f^{-1}(x)$, and the range of $f(x)$."
+			"problem": "Given the function $f(x)=\\ln (1+e^{2x})$, find the inverse $f^{-1}(x)$, the range of $f^{-1}(x)$, and the range of $f(x)$.",
+			"answer": "Range of f(x): (0, infty), range of f^{-1}(x): (-infty, infty)"
 		},
 		{
-			"problem": "Let $f(x)=\\ln (1-x^2)$ and $f(x)=\\sqrt{1-x}$. Find $f\\circ g(x)$ and determine its domain."
+			"problem": "Let $f(x)=\\ln (1-x^2)$ and $f(x)=\\sqrt{1-x}$. Find $f\\circ g(x)$ and determine its domain.",
+			"answer": "f\\circ g = ln(x), domain is (0, 1]"
 		},
 		{
-			"problem": "$$\\lim_{x \\to -3} \\frac{|x+3|}{x^2+x-6}$$"
+			"problem": "$$\\lim_{x \\to -3} \\frac{|x+3|}{x^2+x-6}$$",
+			"answer": "Does Not Exist: left limit is 1/5, right limit is -1/5"
 		},
 		{
-			"problem": "$$\\lim_{x \\to 1} \\frac{x-1}{3-\\sqrt{x^2+8}}$$"
+			"problem": "$$\\lim_{x \\to 1} \\frac{x-1}{3-\\sqrt{x^2+8}}$$",
+			"answer": "-3"
 		},
 		{
-			"problem": "$$\\lim_{x \\to \\infty} \\ln \\frac{\\sqrt{x^4-9x^6}}{(2x+3)x^2}$$"
+			"problem": "$$\\lim_{x \\to \\infty} \\ln \\frac{\\sqrt{x^4-9x^6}}{(2x+3)x^2}$$",
+			"answer": "Does Not Exist: square root of 0 in the numerator"
 		},
 		{
 			"problem": "Find all horizontal and vertical asymptotes of the following function: \\[f(x)=\\frac{x\\sqrt{4x^{2}+2x+1}+2x^{2}}{x^{2}+25}\\] "
+			"answer": "No vertical asymptotes, right horizontal at y=4, left horizontal at y=0"
 		},
 		{
 			"problem": "Derivative of \\[ f(x) = \\ln (x^4 \\cdot \\sqrt{x^3-1}) - ln(e^3)\\]"
@@ -41,16 +48,22 @@
 			"problem": "Derivative of \\[(3x+\\tan x)^{\\sec(2x)}\\]"
 		},
 		{
-			"problem": "Verify that the point $(2, 1)$ belongs to the curve $xy+2\\sqrt{3+y^2}=x^3-2$, and find the equation of the tangent line to the curve at this point."
+			"problem": "Verify that the point $(2, 1)$ belongs to the curve $xy+2\\sqrt{3+y^2}=x^3-2$, and find the equation of the tangent line to the curve at this point.",
+			"answer": "y=11/3x-19/3"
 		},
 		{
-			"problem": "The length of a rectangle is increasing at the rate of 8 cm/s and its width is increasing at the rate of 5 cm/s. When the length is 20 cm and the width is 12 cm, how fast is the area of the rectangle increasing at that instant?"
+			"problem": "The length of a rectangle is increasing at the rate of 8 cm/s and its width is increasing at the rate of 5 cm/s. When the length is 20 cm and the width is 12 cm, how fast is the area of the rectangle increasing at that instant?",
+			"answer": "196cm/s"
 		},
 		{
 			"problem": "A 13 ft ladder is leaning against a vertical wall of a house when its base starts to slide away (in horizontal direction) from the wall. By the time when the base is at the distance x = 5 ft from the wall the base is moving at the rate of dx/dt = 2 ft/sec. How fast is the top of the ladder sliding down the wall at that instant?"
+			"answer": "-5/6"
 		},
 		{
-			"problem": "\\[\\lim_{x\\to 0} \\frac{e^{x^2}-1}{1-cos(2x)}\\]"
+			"problem": "\\[\\lim_{x\\to 0} \\frac{xsin(2x)}{(e^{3x}-1)^2}\\]"
+		},
+		{
+			"problem": "\\[\\lim_{x\\to 0} \\frac{e^{x^2}-1}{cos(2x)-1}\\]"
 		},
 		{
 			"problem": "\\[\\lim_{x\\to 0} \\frac{e^x-e^{-x}-2x}{x-sin(x)}\\]"

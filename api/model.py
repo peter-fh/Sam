@@ -3,7 +3,7 @@ from collections.abc import Generator
 import os
 from api.prompt import PromptManager
 
-EXAMPLE_RESPONSE_FILEPATH = "api" + os.sep + "example_response.txt"
+EXAMPLE_RESPONSE_FILEPATH = "api" + os.sep + "example_response.md"
 
 class UtilityModel(ABC):
     prompt_manager: PromptManager 

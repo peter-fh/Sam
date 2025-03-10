@@ -6,7 +6,7 @@ from api.prompt import MODELS_DIR, UtilityPromptManager
 from api.model import UtilityModel
 
 
-GPT_4O_MINI_DIR = MODELS_DIR + os.sep + "openai-4o-mini"
+GPT_4O_MINI_DIR = MODELS_DIR + os.sep + "gpt_4o_mini"
 SUMMARY_FILE_PATH = GPT_4O_MINI_DIR + os.sep + "summary.md"
 TRANSCRIPTION_FILE_PATH = GPT_4O_MINI_DIR + os.sep + "transcription.md"
 

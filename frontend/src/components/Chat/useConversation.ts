@@ -10,6 +10,10 @@ const estimateTokens = (characterCount: number) => {
   return Math.ceil(characterCount * 0.25)
 }
 
+function sleep(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 type DisplayMessage = {
   sender: "user" | "assistant"
   content: string
@@ -36,29 +40,16 @@ const useConversation = () => {
     setConversation((prevMessages) => [...prevMessages, message])
   }
 
+  const intro_message = "Hello! I'm Sam, an AI chatbot powered by Chat-GPT. I use context specific to Concordia to provide better explanations. AI makes mistakes, so please double check any answers you are given."
+
   async function intro() {
     setLock(true)
-    const request = new Request(Endpoints.Intro, {
-      method: 'GET'
-    })
-
-    const start_time = performance.now()
-    const response = await fetch(request)
-    const reader = response.body!.getReader()
-    const decoder = new TextDecoder('utf-8')
     var answer = ""
-
-    while (true) {
-      const {value, done} = await reader.read()
-      if (done) {
-        break
-      }
-
-      const chunk = decoder.decode(value, { stream: true})
-      answer += chunk
+    for (const word of intro_message.split(" ")) {
+      await sleep(30)
+      answer += word + " "
       setAiMessage(answer)
     }
-    setAiMessage('')
 
     const introductionMessage: DisplayMessage = {
       sender: "assistant",
@@ -66,8 +57,8 @@ const useConversation = () => {
     }
 
     setMessages([introductionMessage])
-    const end_time = performance.now()
-    console.log(`Response took ${(end_time - start_time) / 1000}`)
+    setAiMessage('')
+
     setLock(false)
   }
 
@@ -197,7 +188,7 @@ const useConversation = () => {
 
       if (image) {
         const transcription = await readImage(image)
-        image_info.content = `\n\n*Image Transcription:*\n\n*${transcription}*` 
+        image_info.content = `\n\n*Image Transcription:*\n\n${transcription}` 
         setMessages([...messages!, current_display_question, image_info])
         final_message += "The following is a transcription of an image sent by the user:\n\n" + transcription
       } 

@@ -1,6 +1,6 @@
-from tests.test_response_size import testFirstMessageLength, testFirstMessageLengthManual
+from api.models.o3_mini.o3_mini import OpenAI_o3_mini
+from tests.test_response_size import testFirstMessageLengthManual
 from dotenv import load_dotenv
-from api.gpt import GPT
 import os
 
 
@@ -10,10 +10,8 @@ if openai_api_key == None:
     print("OPENAI_API_KEY not found, exiting")
     exit(1)
 
-gpt = GPT(openai_api_key)
-gpt.debug = False
+model = OpenAI_o3_mini(openai_api_key)
 
-# testFirstMessageLength(gpt, failing_size=500, count=3, show_all=True)
-testFirstMessageLengthManual(gpt, count=3)
+testFirstMessageLengthManual(model, count=3)
 
-print("Testing completed with $%5f used." % gpt.estimated_cost)
+print("Testing completed with $%5f used." % model.estimated_cost)

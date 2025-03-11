@@ -13,7 +13,7 @@ PROBLEM_FILE_PATH = O3_DIR + os.sep + "problem.md"
 
 class OpenAI_o3_mini(MathModel):
     debug: bool
-    enable_logging: bool
+    mock: bool
     prompt_manager: PromptManager
     client: OpenAI
     input_token_cost: float
@@ -22,16 +22,18 @@ class OpenAI_o3_mini(MathModel):
     output_token_count: float
     estimated_cost: float
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, debug=False, mock=False):
         load_dotenv(override=True)
         self.client = OpenAI(api_key=api_key)
+        self.debug = debug
+        self.mock = mock
+
         self.input_token_cost = 1.1 / 1000000
         self.prompt_manager = PromptManager(CONCEPT_FILE_PATH, PROBLEM_FILE_PATH)
         self.output_token_cost = 4.4 / 1000000
         self.input_token_count = 0
         self.output_token_count = 0
         self.estimated_cost = 0
-        self.enable_logging = False
 
     def ask(self, conversation, course_prompt, prompt_type, brevity):
         prompt = self.prompt_manager.instructions(prompt_type, brevity) + "\n" + course_prompt
@@ -45,10 +47,10 @@ class OpenAI_o3_mini(MathModel):
                         ]
         })
 
-        if self.enable_logging:
+        if self.debug:
             displayConversation(conversation)
 
-        if self.debug:
+        if self.mock:
             time.sleep(4)
             with open(EXAMPLE_RESPONSE_FILEPATH) as f:
                 for line in f:

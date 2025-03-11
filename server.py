@@ -22,13 +22,13 @@ if openai_api_key == None:
     openai_api_key = ""
     use_example_responses = True
 
-problem_model = OpenAI_o3_mini(openai_api_key)
-problem_model.debug = use_example_responses
+problem_model = OpenAI_o3_mini(openai_api_key,debug=dev)
+problem_model.mock = use_example_responses
 
-concept_model = OpenAI_4o(openai_api_key)
-concept_model.debug = use_example_responses
+concept_model = OpenAI_4o(openai_api_key,debug=dev)
+concept_model.mock = use_example_responses
 
-utility_model = OpenAI_4o_mini(openai_api_key)
+utility_model = OpenAI_4o_mini(openai_api_key,debug=dev)
 
 # Initialize the server library
 app = Flask(__name__, static_folder="frontend/dist")
@@ -129,8 +129,8 @@ if __name__ == '__main__':
     print("=" * 70)
     if len(sys.argv) > 1 and sys.argv[1] == "--no-api":
         use_example_responses=True
-    problem_model.debug = use_example_responses
-    concept_model.debug = use_example_responses
-    utility_model.debug = use_example_responses
+    problem_model.mock = use_example_responses
+    concept_model.mock = use_example_responses
+    utility_model.mock = use_example_responses
     app.run(port=port, debug=True)
 

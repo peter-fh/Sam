@@ -13,25 +13,28 @@ PROBLEM_FILE_PATH = GPT_4O_DIR + os.sep + "problem.md"
 
 class OpenAI_4o(MathModel):
     debug: bool
+    mock: bool
     prompt_manager: PromptManager
     client: OpenAI
     input_token_cost: float
     output_token_cost: float
     input_token_count: float
     output_token_count: float
-    enable_logging: bool
     estimated_cost: float
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str, mock=False, debug=False):
         load_dotenv(override=True)
         self.client = OpenAI(api_key=api_key)
+        self.mock = mock
+        self.debug = debug
+
         self.input_token_cost = 2.5 / 1000000
         self.prompt_manager = PromptManager(CONCEPT_FILE_PATH, PROBLEM_FILE_PATH)
         self.output_token_cost = 10 / 1000000
         self.input_token_count = 0
         self.output_token_count = 0
         self.estimated_cost = 0
-        self.enable_logging: bool
+
 
     def ask(self, conversation, course_prompt, prompt_type, brevity):
 
@@ -47,10 +50,10 @@ class OpenAI_4o(MathModel):
                         ]
         })
 
-        if self.enable_logging:
+        if self.debug:
             displayConversation(conversation)
 
-        if self.debug:
+        if self.mock:
             with open(EXAMPLE_RESPONSE_FILEPATH) as f:
                 for line in f:
                     for word in line.split(" "):

@@ -1,14 +1,15 @@
 from flask import json
-from api.gpt import GPT
-from prompt.prompt_manager import PromptType, prompt
+from api.model import MathModel
+from api.prompt import PromptType
+from courses.read_course_prompt import coursePrompt
 import os
 
 test_dir = "tests"
 problem_file = test_dir + os.sep + "problems.json"
 
 
-def testFirstMessageLengthManual(gpt: GPT, count=-1):
-    instructions = prompt(PromptType.PROBLEM, "MATH_203", "Detailed")
+def testFirstMessageLengthManual(model: MathModel, count=-1):
+    course_prompt = coursePrompt("MATH 203")
 
     with open(problem_file) as f:
         cases = 0
@@ -31,7 +32,7 @@ def testFirstMessageLengthManual(gpt: GPT, count=-1):
                 }]
             }]
 
-            stream = gpt.ask(conversation, instructions, PromptType.PROBLEM)
+            stream = model.ask(conversation, course_prompt, PromptType.PROBLEM, "detailed")
             for line in stream:
                 final_response += line
 
@@ -71,8 +72,8 @@ def testFirstMessageLengthManual(gpt: GPT, count=-1):
 # try and solve too much within its first message allows us to see whether the problem 
 # prompt is working.
 # COST: ~$1.5 estimate, though the estimation is way off of reality from the API dashboard. Actual is like $0.20.
-def testFirstMessageLength(gpt: GPT, failing_size=1000, count=-1, show_all=False):
-    instructions = prompt(PromptType.PROBLEM, "MATH_203", "Detailed")
+def testFirstMessageLength(model: MathModel, failing_size=1000, count=-1, show_all=False):
+    course_prompt = coursePrompt("MATH 203")
 
     with open(problem_file) as f:
         cases = 0
@@ -95,7 +96,7 @@ def testFirstMessageLength(gpt: GPT, failing_size=1000, count=-1, show_all=False
                 }]
             }]
 
-            stream = gpt.ask(conversation, instructions, PromptType.PROBLEM)
+            stream = model.ask(conversation, course_prompt, PromptType.PROBLEM, "detailed")
             for line in stream:
                 final_response += line
 

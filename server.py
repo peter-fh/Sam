@@ -68,18 +68,6 @@ def serve_assets(path):
         raise Exception("Static folder not found!")
     return send_from_directory(app.static_folder + os.sep + "assets", path)
 
-@app.route('/introduction')
-def introduction():
-    def generateIntroduction():
-        intro_message = "Hello! I'm Sam, an AI chatbot powered by Chat-GPT. I use context specific to Concordia to provide better explanations. AI makes mistakes, so please double check any answers you are given."
-        split_message = intro_message.split(" ")
-        for word in split_message:
-            time.sleep(0.03)
-            yield word + " "
-    stream = generateIntroduction()
-    return Response(stream_with_context(stream), content_type="text/plain")
-
-
 @app.route('/image', methods=['POST'])
 def image():
     image = request.get_data(as_text=True)

@@ -6,7 +6,6 @@ import html2canvas from 'html2canvas'
 import useConversation from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
 
-
 function Chat() {
 
   const {

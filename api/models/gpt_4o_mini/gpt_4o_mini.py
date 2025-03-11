@@ -14,15 +14,18 @@ class OpenAI_4o_mini(UtilityModel):
     client: OpenAI
     utility_prompt_manager: UtilityPromptManager
     debug: bool
-    def __init__(self, api_key: str):
+    mock: bool
+    def __init__(self, api_key: str, debug=False, mock=False):
         load_dotenv(override=True)
         self.client = OpenAI(api_key=api_key)
+        self.debug = debug
+        self.mock = mock
+
         self.utility_prompt_manager = UtilityPromptManager(TRANSCRIPTION_FILE_PATH, SUMMARY_FILE_PATH)
-        self.debug = False
 
     def transcribe(self, image):
 
-        if self.debug:
+        if self.mock:
             time.sleep(2)
             return "This conversation concerns an image sent by the user. It's transcription is as follows:\n\n" + "x^2*e^x (example response)"
 
@@ -53,6 +56,9 @@ class OpenAI_4o_mini(UtilityModel):
             return "There is supposed to be a transcription of an image, but there was a fatal error."
 
         transcription = str(response.choices[0].message.content)
+        if self.debug:
+            print("Transcription: ", transcription)
+
         if response.usage:
             print(f"Tokens used by image transcriptions: {response.usage.total_tokens} (${response.usage.total_tokens  * 0.00000015})")
 
@@ -71,7 +77,7 @@ class OpenAI_4o_mini(UtilityModel):
                         ]
         })
 
-        if self.debug:
+        if self.mock:
             time.sleep(2)
             return "Example summary"
 
@@ -89,4 +95,7 @@ class OpenAI_4o_mini(UtilityModel):
 
         summary = str(response.choices[0].message.content)
         summary = "The following is a summary of the previous conversation:\n\n" + summary
+
+        if self.debug:
+            print("Summary: ", summary)
         return summary

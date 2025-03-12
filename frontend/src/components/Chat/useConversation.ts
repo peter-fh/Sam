@@ -209,10 +209,11 @@ const useConversation = () => {
       } else {
         setMessages([...messages!, current_display_question, display_ai_message])
       }
+
       setConversation([
         ...conversation, 
         newMessage(final_message, 'user'), 
-        newMessage(aiMessage, 'assistant'),
+        newMessage(ai_message, 'assistant'),
       ])
 
       setImage('')

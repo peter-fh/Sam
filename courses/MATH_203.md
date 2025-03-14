@@ -54,16 +54,19 @@ The student does not know this content and is seeking help about one of them:
 The following are concepts and knowledge that the student doesn't need to know about for their course:
 
 - Slant asymptotes
-- One-to-one, Injective, and Surjective properties of functions
+- One-to-one, Injective, and Surjective, Monotonic properties of functions
+- Horizontal line test
 - Taylor expansion for limits
 - First order approximations for limits
 
 ## Notes
 
+Make sure to take into account these notes:
+
 - Notation for derivative rules uses f and g instead of u and v
 - Lots of horizontal asymptotes have tricks where the left and right limits to infinity are different. Please be careful about these questions.
 - The expression sqrt{x^2} should be treated as |x|, and if x \to -\infty then |x|=-x
-- Inverting functions are included, but students do NOT need to know if functions are invertible or not
+- Inverting functions are included, but students do NOT need to know if functions are invertible or not or justify invertibility
 - Do not use taylor expansion for limits
 - Do not use first order approximations, small angle approximations, linearizations, or any approximations for limits
 - Use hopitals rule when the methods for limits listed as part of the course are not usable

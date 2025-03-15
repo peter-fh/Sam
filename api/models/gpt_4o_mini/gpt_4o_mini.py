@@ -2,7 +2,7 @@ import os
 import time
 from dotenv import load_dotenv
 from openai import OpenAI
-from api.prompt import MODELS_DIR, UtilityPromptManager
+from api.prompt import MODELS_DIR, PromptManager
 from api.model import UtilityModel
 
 
@@ -12,7 +12,7 @@ TRANSCRIPTION_FILE_PATH = GPT_4O_MINI_DIR + os.sep + "transcription.md"
 
 class OpenAI_4o_mini(UtilityModel):
     client: OpenAI
-    utility_prompt_manager: UtilityPromptManager
+    utility_prompt_manager: PromptManager
     debug: bool
     mock: bool
     def __init__(self, api_key: str, debug=False, mock=False):
@@ -21,7 +21,10 @@ class OpenAI_4o_mini(UtilityModel):
         self.debug = debug
         self.mock = mock
 
-        self.utility_prompt_manager = UtilityPromptManager(TRANSCRIPTION_FILE_PATH, SUMMARY_FILE_PATH)
+
+        self.prompt_manager = PromptManager()
+        self.prompt_manager.setSummary(SUMMARY_FILE_PATH)
+        self.prompt_manager.setTranscription(TRANSCRIPTION_FILE_PATH)
 
     def transcribe(self, image):
 
@@ -31,7 +34,7 @@ class OpenAI_4o_mini(UtilityModel):
 
         try:
             # Send the request to OpenAI API
-            instructions = self.utility_prompt_manager.imagePrompt()
+            instructions = self.utility_prompt_manager.transcriptionPrompt()
             response = self.client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[

@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 from api.log import displayConversation
-from api.model import MathModel, EXAMPLE_RESPONSE_FILEPATH, estimateTokens
+from api.model import TutorModel, EXAMPLE_RESPONSE_FILEPATH, estimateTokens
 from api.prompt import PromptManager, MODELS_DIR
 
 
@@ -11,7 +11,7 @@ O3_DIR = MODELS_DIR + os.sep + "o3_mini"
 CONCEPT_FILE_PATH = O3_DIR + os.sep + "concept.md"
 PROBLEM_FILE_PATH = O3_DIR + os.sep + "problem.md"
 
-class OpenAI_o3_mini(MathModel):
+class OpenAI_o3_mini(TutorModel):
     debug: bool
     mock: bool
     prompt_manager: PromptManager
@@ -29,7 +29,9 @@ class OpenAI_o3_mini(MathModel):
         self.mock = mock
 
         self.input_token_cost = 1.1 / 1000000
-        self.prompt_manager = PromptManager(CONCEPT_FILE_PATH, PROBLEM_FILE_PATH)
+        self.prompt_manager = PromptManager()
+        self.prompt_manager.setConcept(CONCEPT_FILE_PATH)
+        self.prompt_manager.setProblem(PROBLEM_FILE_PATH)
         self.output_token_cost = 4.4 / 1000000
         self.input_token_count = 0
         self.output_token_count = 0

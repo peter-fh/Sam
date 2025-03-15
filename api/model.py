@@ -18,7 +18,7 @@ class UtilityModel(ABC):
         pass
 
 
-class MathModel(ABC):
+class TutorModel(ABC):
     prompt_manager: PromptManager 
     debug: bool
     mock: bool
@@ -26,6 +26,16 @@ class MathModel(ABC):
     @abstractmethod
     def ask(self, conversation, course_prompt, prompt_type, brevity) -> Generator[str, None, None]:
         pass
+
+class ReviewerModel(ABC):
+    prompt_manager: PromptManager 
+    debug: bool
+    mock: bool
+    estimated_cost: float
+    @abstractmethod
+    def review(self, conversation, course_prompt) -> Generator[str, None, None]:
+        pass
+
 
 def estimateTokens(length):
     return length * 0.25

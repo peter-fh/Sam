@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 from api.log import displayConversation
-from api.model import MathModel, EXAMPLE_RESPONSE_FILEPATH, estimateTokens
+from api.model import TutorModel, EXAMPLE_RESPONSE_FILEPATH, estimateTokens
 from api.prompt import PromptManager, MODELS_DIR, PromptType
 
 
@@ -11,7 +11,7 @@ GPT_4O_DIR = MODELS_DIR + os.sep + "gpt_4o"
 CONCEPT_FILE_PATH = GPT_4O_DIR + os.sep + "concept.md"
 PROBLEM_FILE_PATH = GPT_4O_DIR + os.sep + "problem.md"
 
-class OpenAI_4o(MathModel):
+class OpenAI_4o(TutorModel):
     debug: bool
     mock: bool
     prompt_manager: PromptManager
@@ -29,7 +29,9 @@ class OpenAI_4o(MathModel):
         self.debug = debug
 
         self.input_token_cost = 2.5 / 1000000
-        self.prompt_manager = PromptManager(CONCEPT_FILE_PATH, PROBLEM_FILE_PATH)
+        self.prompt_manager = PromptManager()
+        self.prompt_manager.setConcept(CONCEPT_FILE_PATH)
+        self.prompt_manager.setProblem(PROBLEM_FILE_PATH)
         self.output_token_cost = 10 / 1000000
         self.input_token_count = 0
         self.output_token_count = 0

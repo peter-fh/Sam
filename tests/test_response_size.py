@@ -1,5 +1,5 @@
 from flask import json
-from api.model import MathModel
+from api.model import TutorModel
 from api.prompt import PromptType
 from courses.read_course_prompt import coursePrompt
 import os
@@ -8,7 +8,7 @@ test_dir = "tests"
 problem_file = test_dir + os.sep + "problems.json"
 
 
-def testFirstMessageLengthManual(model: MathModel, count=-1):
+def testFirstMessageLengthManual(model: TutorModel, count=-1):
     course_prompt = coursePrompt("MATH 203")
 
     with open(problem_file) as f:
@@ -72,7 +72,7 @@ def testFirstMessageLengthManual(model: MathModel, count=-1):
 # try and solve too much within its first message allows us to see whether the problem 
 # prompt is working.
 # COST: ~$1.5 estimate, though the estimation is way off of reality from the API dashboard. Actual is like $0.20.
-def testFirstMessageLength(model: MathModel, failing_size=1000, count=-1, show_all=False):
+def testFirstMessageLength(model: TutorModel, failing_size=1000, count=-1, show_all=False):
     course_prompt = coursePrompt("MATH 203")
 
     with open(problem_file) as f:

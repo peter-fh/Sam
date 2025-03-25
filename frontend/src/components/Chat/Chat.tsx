@@ -25,7 +25,7 @@ function Chat() {
     messages,
     toReview,
     review,
-    hasReviewed
+    hasReviewed,
   } = useConversation();
 
   const {

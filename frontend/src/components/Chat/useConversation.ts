@@ -29,7 +29,7 @@ const useConversation = () => {
   } = useChatSettings()
 
   const [conversation, setConversation] = useState<Message[]>([]);
-  const [_, setTotalConversation] = useState<Message[]>([]);
+  const [totalConversation, setTotalConversation] = useState<Message[]>([]);
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<DisplayMessage[]>([])
   const [aiMessage, setAiMessage] = useState('')
@@ -182,8 +182,51 @@ const useConversation = () => {
     setHasReviewed(true)
     await waitForUnlock()
     setLock(true)
+    const request = new Request(Endpoints.Review, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Course': course,
+      },
+      body: JSON.stringify(totalConversation)
+    })
 
-    const answer = REVIEW_MESSAGE
+
+
+    const start_time = performance.now()
+    var elapsedIntervals = 0
+    const intervalId = setInterval(() => {
+      const numberOfDots = elapsedIntervals % 4
+      const thinkingMessage = "Reviewing Conversation" + ".".repeat(numberOfDots)
+
+      if (elapsedIntervals != 0) {
+        setAiMessage("*" + thinkingMessage + "*")
+      }
+      elapsedIntervals++
+    }, 500)
+
+    const response = await fetch(request)
+
+    clearInterval(intervalId);
+    const reader = response.body!.getReader()
+    const decoder = new TextDecoder('utf-8')
+    var answer = ""
+
+    while (true) {
+      const {value, done} = await reader.read()
+      if (done) {
+        break
+      }
+
+      const chunk = decoder.decode(value, { stream: true})
+      answer += chunk
+      setAiMessage(answer)
+    }
+    setAiMessage('')
+    console.log(answer)
+
+    const end_time = performance.now()
+    console.log(`Response took ${(end_time - start_time) / 1000}`)
 
     const display_ai_message: DisplayMessage = {
       sender: "assistant",

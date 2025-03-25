@@ -1,6 +1,6 @@
 from flask import Flask, request, send_from_directory, stream_with_context, Response
 from api import prompt
-from api.models.o3_mini.o3_mini import OpenAI_o3_mini
+from api.models.o3_mini.o3_mini import REVIEW_FILE_PATH, OpenAI_o3_mini
 from api.models.gpt_4o_mini.gpt_4o_mini import OpenAI_4o_mini
 from api.models.gpt_4o.gpt_4o import OpenAI_4o
 from api.prompt import PromptType
@@ -10,6 +10,7 @@ from flask_cors import CORS
 import os
 import sys
 import time
+import json
 
 use_example_responses = False
 load_dotenv(override=True)
@@ -99,6 +100,29 @@ def question():
     return Response(stream_with_context(stream), content_type="text/plain")
 
 
+REVIEW_EXAMPLES_DIR = "_conversations"
+@app.route('/review', methods=['POST'])
+def review():
+
+    course = request.headers["Course"]
+    course_prompt = coursePrompt(course)
+
+    conversation = request.get_json()
+
+    if app.debug:
+        if not os.path.exists(REVIEW_EXAMPLES_DIR):
+            os.makedirs(REVIEW_EXAMPLES_DIR)
+
+        review_file_path = REVIEW_EXAMPLES_DIR + os.sep + str(int(time.time())) + ".json"
+        with open(review_file_path, "w") as f:
+            json.dump(conversation, f, indent=4)
+
+    stream = concept_model.review(conversation, course_prompt) 
+
+    print("Estimated total cost: $%5f" % (problem_model.estimated_cost + concept_model.estimated_cost))
+
+    return Response(stream_with_context(stream), content_type="text/plain")
+
 @app.route('/reset-cost')
 def reset_cost():
     if app.debug:
@@ -115,7 +139,7 @@ if __name__ == '__main__':
     print(f'{"=    Enter the following url into the browser:":<69}=')
     print(f'{"=    http://127.0.0.1:" + str(port):<69}=')
     print("=" * 70)
-    if len(sys.argv) > 1 and sys.argv[1] == "--no-api":
+    if len(sys.argv) > 1 and sys.argv[1] == "--mock":
         use_example_responses=True
     problem_model.mock = use_example_responses
     concept_model.mock = use_example_responses

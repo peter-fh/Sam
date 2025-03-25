@@ -1,0 +1,26 @@
+[
+	{
+		"role": "user",
+		"content": [{"type": "text", "text": "The length of a rectangle is increasing at the rate of 8 cm/s and its width is increasing at the rate of 5 cm/s. When the length is 20 cm and the width is 12 cm, how fast is the area of the rectangle increasing at that instant?"}]
+	},
+	{
+		"role": "assistant",
+		"content": [{"type": "text", "text": "Let's begin by setting up the problem.\n\nWe know that the area of a rectangle is given by  \n\\[\nA = l \\times w,\n\\]  \nwhere \\(l\\) is the length and \\(w\\) is the width. In this problem, both \\(l\\) and \\(w\\) are functions of time, so the area \\(A\\) is also a function of time.\n\n**Step 1: Differentiating with Respect to Time**\n\nWhen we differentiate \\(A = l \\times w\\) with respect to time \\(t\\), we need to use the product rule. Do you recall the product rule and how it\u2019s applied in this context? (Hint: The derivative with respect to time is expressed as:  \n\\[\n\\frac{dA}{dt} = l \\frac{dw}{dt} + w \\frac{dl}{dt}.\n\\]  \nSometimes the order is written as \\(\\frac{dA}{dt} = l \\frac{dl}{dt} + w \\frac{dw}{dt}\\); it depends on how we label the rates. In our case, since \\(l\\) changes at 8 cm/s and \\(w\\) changes at 5 cm/s, we want them in the appropriate spots.)\n\nCould you take a moment to explain how you'd apply the product rule to get \\(\\frac{dA}{dt}\\) from \\(A = l \\times w\\)?"}]
+	},
+	{
+		"role": "user",
+		"content": [{"type": "text", "text": "a=l'w+lw'"}]
+	},
+	{
+		"role": "assistant",
+		"content": [{"type": "text", "text": "That's correct! You've applied the product rule properly. We have:\n\n\\[\n\\frac{dA}{dt} = l' \\, w + l \\, w'\n\\]\n\nNow, can you substitute the given values\u2014\\( l = 20 \\) cm, \\( w = 12 \\) cm, \\( l' = 8 \\) cm/s, and \\( w' = 5 \\) cm/s\u2014into the formula to calculate \\(\\frac{dA}{dt}\\)?"}]
+	},
+	{
+		"role": "user",
+		"content": [{"type": "text", "text": "196cm^2/s"}]
+	},
+	{
+		"role": "assistant",
+		"content": [{"type": "text", "text": "Great job! Your answer of 196 cm\u00b2/s is correct. You correctly applied the product rule and substituted in the values for length, width, and their respective rates of change. \n\nKeep up the good work, and if you'd like more help or practice, consider booking a session with a tutor.\n\n"}]
+	}
+]

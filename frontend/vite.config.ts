@@ -29,6 +29,10 @@ export default defineConfig(({ mode }) => {
         target: 'http://127.0.0.1:8070',
         changeOrigin: true,
       },
+      '/review':{
+        target: 'http://127.0.0.1:8070',
+        changeOrigin: true,
+      },
 
       },
     }: undefined,

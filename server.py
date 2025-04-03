@@ -100,6 +100,16 @@ def question():
     return Response(stream_with_context(stream), content_type="text/plain")
 
 
+
+fake_review_message = "If you have any further questions or would like to continue working on these concepts, consider [booking a tutoring session](https://www.concordia.ca/students/success/learning-support/math-help.html#tutoring). Keep practicing these problems, and it will help solidify your understanding."
+def fake_review():
+    split_message = fake_review_message.split(" ")
+    for line in split_message:
+        for word in line.split(" "):
+            time.sleep(0.002)
+            yield word + " "
+    return
+
 REVIEW_EXAMPLES_DIR = "_conversations"
 @app.route('/review', methods=['POST'])
 def review():
@@ -117,9 +127,10 @@ def review():
         with open(review_file_path, "w") as f:
             json.dump(conversation, f, indent=4)
 
-    stream = concept_model.review(conversation, course_prompt) 
+    # stream = concept_model.review(conversation, course_prompt) 
+    stream = fake_review()
 
-    print("Estimated total cost: $%5f" % (problem_model.estimated_cost + concept_model.estimated_cost))
+    # print("Estimated total cost: $%5f" % (problem_model.estimated_cost + concept_model.estimated_cost))
 
     return Response(stream_with_context(stream), content_type="text/plain")
 

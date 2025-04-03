@@ -38,7 +38,7 @@ class OpenAI_o3_mini(TutorModel):
         self.estimated_cost = 0
 
     def ask(self, conversation, course_prompt, prompt_type, brevity):
-        prompt = self.prompt_manager.instructions(prompt_type, brevity) + "\n" + course_prompt
+        prompt = self.prompt_manager.instructions(prompt_type, brevity, debug=self.debug) + "\n" + course_prompt
 
         conversation.insert(0, {
             "role": "developer",

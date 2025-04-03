@@ -121,19 +121,21 @@ function CourseSelect() {
 
   return (
     <div className="option">
-      <h3 className="sidebar-input-header">Course</h3>
+      <div className="course-select-option">
+        <h3 className="sidebar-input-header">Course</h3>
 
-      <select
-        className="interactive sidebar-select-box"
-        onChange={onChange}
-        value={course}
-      >
-        {Object.values(Course).map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
+        <select
+          className="interactive sidebar-select-box"
+          onChange={onChange}
+          value={course}
+        >
+          {Object.values(Course).map((option) => (
+            <option key={option} value={option}>
+              {option}
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 }

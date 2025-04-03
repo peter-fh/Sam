@@ -26,10 +26,10 @@ The student does not know this content and is seeking help about one of them:
 - Properties of logarithms and exponentials
 - Solving for x in logarithmic and exponential equations
 
-- Domain
+- Domain, by solving inequalities
 - Inverse functions
 - Composite functions
-- Range, using the domain of the inverse when possible
+- Range, but only using domain of the inverse
 
 - Indeterminate forms of limits
 - Left and right limits
@@ -70,4 +70,5 @@ Make sure to take into account these notes:
 - Do not use taylor expansion for limits
 - Do not use first order approximations, small angle approximations, linearizations, or any approximations for limits
 - Use hopitals rule when the methods for limits listed as part of the course are not usable
+- Find the range of functions exclusively by finding domain of the inverse
 

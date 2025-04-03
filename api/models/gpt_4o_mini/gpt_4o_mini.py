@@ -12,7 +12,7 @@ TRANSCRIPTION_FILE_PATH = GPT_4O_MINI_DIR + os.sep + "transcription.md"
 
 class OpenAI_4o_mini(UtilityModel):
     client: OpenAI
-    utility_prompt_manager: PromptManager
+    prompt_manager: PromptManager
     debug: bool
     mock: bool
     def __init__(self, api_key: str, debug=False, mock=False):
@@ -34,7 +34,7 @@ class OpenAI_4o_mini(UtilityModel):
 
         try:
             # Send the request to OpenAI API
-            instructions = self.utility_prompt_manager.transcriptionPrompt()
+            instructions = self.prompt_manager.transcriptionPrompt()
             response = self.client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
@@ -70,7 +70,7 @@ class OpenAI_4o_mini(UtilityModel):
 
     def summarize(self, conversation):
 
-        instructions = self.utility_prompt_manager.summaryPrompt()
+        instructions = self.prompt_manager.summaryPrompt()
         conversation.insert(0, {
             "role": "system",
             "content": [{

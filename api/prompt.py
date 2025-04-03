@@ -87,6 +87,10 @@ class PromptManager:
         if not self.review_path:
             raise InvalidConfigurationException("Review prompt has not been enabled for this prompt manager")
 
+        review_file = open(self.review_path)
+
+        return review_file.read()
+
     def instructions(self, prompt_type: PromptType, brevity: str):
         if not self.problem_path or not self.concept_path:
             raise InvalidConfigurationException("Calling instructions() while missing either problem or concept prompt")

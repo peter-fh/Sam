@@ -23,6 +23,9 @@ function Chat() {
     image,
     lock,
     messages,
+    toReview,
+    review,
+    hasReviewed,
   } = useConversation();
 
   const {
@@ -58,6 +61,12 @@ function Chat() {
   useEffect(() => {
     if (toSummarize) {
       summarize()
+    }
+  }, [conversation])
+
+  useEffect(() => {
+    if (toReview && !hasReviewed) {
+      review()
     }
   }, [conversation])
 

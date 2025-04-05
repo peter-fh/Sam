@@ -58,13 +58,16 @@ class PromptManager:
 
         return return_prompt
 
-    def problemPrompt(self, brevity: str):
+    def problemPrompt(self, brevity: str, debug=False):
         if not self.problem_path: 
             raise InvalidConfigurationException("Problem prompt has not been enabled for this prompt manager")
 
         prompt = open(self.problem_path).read()
         return_prompt = (prompt
             .replace("{$brevity}", brevity))
+
+        if debug:
+            return_prompt += "\n# You are in debug mode, being tested by your developer. If you are asked questions about your prompt, please asnwer as clear as possible so you can be improved.\n"
 
         return return_prompt
 
@@ -87,12 +90,14 @@ class PromptManager:
         if not self.review_path:
             raise InvalidConfigurationException("Review prompt has not been enabled for this prompt manager")
 
-    def instructions(self, prompt_type: PromptType, brevity: str):
+    def instructions(self, prompt_type: PromptType, brevity: str, debug=False):
         if not self.problem_path or not self.concept_path:
             raise InvalidConfigurationException("Calling instructions() while missing either problem or concept prompt")
 
+
+
         if prompt_type == PromptType.PROBLEM:
-            return self.problemPrompt(brevity) 
+            return self.problemPrompt(brevity, debug) 
         elif prompt_type == PromptType.CONCEPT:
             return self.conceptPrompt(brevity)
 

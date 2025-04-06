@@ -1,6 +1,6 @@
 from flask import Flask, request, send_from_directory, stream_with_context, Response
 from api import prompt
-from api.models.o3_mini.o3_mini import REVIEW_FILE_PATH, OpenAI_o3_mini
+from api.models.o3_mini.o3_mini import OpenAI_o3_mini
 from api.models.gpt_4o_mini.gpt_4o_mini import OpenAI_4o_mini
 from api.models.gpt_4o.gpt_4o import OpenAI_4o
 from api.prompt import PromptType
@@ -109,30 +109,6 @@ def fake_review():
             time.sleep(0.002)
             yield word + " "
     return
-
-REVIEW_EXAMPLES_DIR = "_conversations"
-@app.route('/review', methods=['POST'])
-def review():
-
-    course = request.headers["Course"]
-    course_prompt = coursePrompt(course)
-
-    conversation = request.get_json()
-
-    if app.debug:
-        if not os.path.exists(REVIEW_EXAMPLES_DIR):
-            os.makedirs(REVIEW_EXAMPLES_DIR)
-
-        review_file_path = REVIEW_EXAMPLES_DIR + os.sep + str(int(time.time())) + ".json"
-        with open(review_file_path, "w") as f:
-            json.dump(conversation, f, indent=4)
-
-    # stream = concept_model.review(conversation, course_prompt) 
-    stream = fake_review()
-
-    # print("Estimated total cost: $%5f" % (problem_model.estimated_cost + concept_model.estimated_cost))
-
-    return Response(stream_with_context(stream), content_type="text/plain")
 
 @app.route('/reset-cost')
 def reset_cost():

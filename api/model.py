@@ -4,7 +4,6 @@ import os
 from api.prompt import PromptManager
 
 EXAMPLE_RESPONSE_FILEPATH = "api" + os.sep + "example_response.md"
-EXAMPLE_REVIEW_FILEPATH = "api" + os.sep + "example_review.md"
 
 class UtilityModel(ABC):
     prompt_manager: PromptManager 

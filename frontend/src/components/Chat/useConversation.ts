@@ -5,6 +5,7 @@ import Endpoints from "../../endpoints";
 
 
 const TOKEN_THRESHOLD = 2048
+const REVIEW_MESSAGE = "If you have any further questions or would like to continue working on these concepts, consider [booking a tutoring session](https://www.concordia.ca/students/success/learning-support/math-help.html#tutoring). Keep practicing these problems, and it will help solidify your understanding."
 
 const estimateTokens = (characterCount: number) => {
   return Math.ceil(characterCount * 0.25)
@@ -181,51 +182,8 @@ const useConversation = () => {
     setHasReviewed(true)
     await waitForUnlock()
     setLock(true)
-    const request = new Request(Endpoints.Review, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Course': course,
-      },
-      body: JSON.stringify(totalConversation)
-    })
 
-
-
-    const start_time = performance.now()
-    var elapsedIntervals = 0
-    const intervalId = setInterval(() => {
-      const numberOfDots = elapsedIntervals % 4
-      const thinkingMessage = "Reviewing Conversation" + ".".repeat(numberOfDots)
-
-      if (elapsedIntervals != 0) {
-        setAiMessage("*" + thinkingMessage + "*")
-      }
-      elapsedIntervals++
-    }, 500)
-
-    const response = await fetch(request)
-
-    clearInterval(intervalId);
-    const reader = response.body!.getReader()
-    const decoder = new TextDecoder('utf-8')
-    var answer = ""
-
-    while (true) {
-      const {value, done} = await reader.read()
-      if (done) {
-        break
-      }
-
-      const chunk = decoder.decode(value, { stream: true})
-      answer += chunk
-      setAiMessage(answer)
-    }
-    setAiMessage('')
-    console.log(answer)
-
-    const end_time = performance.now()
-    console.log(`Response took ${(end_time - start_time) / 1000}`)
+    const answer = REVIEW_MESSAGE
 
     const display_ai_message: DisplayMessage = {
       sender: "assistant",

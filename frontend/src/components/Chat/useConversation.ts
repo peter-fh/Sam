@@ -5,7 +5,7 @@ import Endpoints from "../../endpoints";
 
 
 const TOKEN_THRESHOLD = 2048
-const REVIEW_MESSAGE = "If you have any further questions or would like to continue working on these concepts, consider [booking a tutoring session](https://www.concordia.ca/students/success/learning-support/math-help.html#tutoring). Keep practicing these problems, and it will help solidify your understanding."
+const REVIEW_MESSAGE = "You've reached the end of the conversation! If you have any follow up questions, please feel free to ask here. If you have a new problem to work on, please start a new conversation. Consider [booking a tutoring session](https://www.concordia.ca/students/success/learning-support/math-help.html#tutoring) to help with these concepts. Keep practicing these problems, and it will help solidify you understanding!"
 
 const estimateTokens = (characterCount: number) => {
   return Math.ceil(characterCount * 0.25)
@@ -29,7 +29,7 @@ const useConversation = () => {
   } = useChatSettings()
 
   const [conversation, setConversation] = useState<Message[]>([]);
-  const [totalConversation, setTotalConversation] = useState<Message[]>([]);
+  const [_, setTotalConversation] = useState<Message[]>([]);
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<DisplayMessage[]>([])
   const [aiMessage, setAiMessage] = useState('')

@@ -30,7 +30,6 @@ class PromptManager:
     problem_path: str = ""
     summary_path: str = ""
     transcription_path: str = ""
-    review_path: str = ""
 
 
     def setConcept(self, concept_path):
@@ -44,9 +43,6 @@ class PromptManager:
 
     def setTranscription(self, transcription_path):
         self.transcription_path = transcription_path
-
-    def setReview(self, review_path):
-        self.review_path = review_path
 
     def conceptPrompt(self, brevity: str):
         if not self.concept_path: 
@@ -85,14 +81,6 @@ class PromptManager:
         image_file = open(self.transcription_path)
 
         return image_file.read()
-
-    def reviewPrompt(self):
-        if not self.review_path:
-            raise InvalidConfigurationException("Review prompt has not been enabled for this prompt manager")
-
-        review_file = open(self.review_path)
-
-        return review_file.read()
 
     def instructions(self, prompt_type: PromptType, brevity: str, debug=False):
         if not self.problem_path or not self.concept_path:

@@ -101,15 +101,6 @@ def question():
 
 
 
-fake_review_message = "If you have any further questions or would like to continue working on these concepts, consider [booking a tutoring session](https://www.concordia.ca/students/success/learning-support/math-help.html#tutoring). Keep practicing these problems, and it will help solidify your understanding."
-def fake_review():
-    split_message = fake_review_message.split(" ")
-    for line in split_message:
-        for word in line.split(" "):
-            time.sleep(0.002)
-            yield word + " "
-    return
-
 @app.route('/reset-cost')
 def reset_cost():
     if app.debug:

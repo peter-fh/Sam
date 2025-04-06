@@ -97,3 +97,4 @@ class OpenAI_4o(TutorModel):
         self.output_token_count += estimateTokens(total_output_characters)
         self.estimated_cost += self.input_token_count * self.input_token_cost + self.output_token_count * self.output_token_cost
 
+

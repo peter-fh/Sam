@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Message, newMessage } from "../../types/message";
 import { useChatSettings } from "../../context/useChatContext";
 import Endpoints from "../../endpoints";
 
 
 const TOKEN_THRESHOLD = 2048
+const REVIEW_MESSAGE = "You've reached the end of the conversation! If you have any follow up questions, please feel free to ask here. If you have a new problem to work on, please start a new conversation. Consider [booking a tutoring session](https://www.concordia.ca/students/success/learning-support/math-help.html#tutoring) to help with these concepts. Keep practicing these problems, and it will help solidify you understanding!"
 
 const estimateTokens = (characterCount: number) => {
   return Math.ceil(characterCount * 0.25)
@@ -28,13 +29,17 @@ const useConversation = () => {
   } = useChatSettings()
 
   const [conversation, setConversation] = useState<Message[]>([]);
+  const [_, setTotalConversation] = useState<Message[]>([]);
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<DisplayMessage[]>([])
   const [aiMessage, setAiMessage] = useState('')
   const [lock, setLock] = useState(false)
+  const resolveLockRef = useRef<(() => void) | null>(null);
   const [file, setFile] = useState('')
   const [image, setImage] = useState('')
   const [toSummarize, setToSummarize] = useState(false)
+  const [toReview, setToReview] = useState(false)
+  const [hasReviewed, setHasReviewed] = useState(false)
 
   const addMessage = (message: Message) => {
     setConversation((prevMessages) => [...prevMessages, message])
@@ -43,6 +48,7 @@ const useConversation = () => {
   const intro_message = "Hello! I'm Sam, an AI chatbot powered by Chat-GPT. I use context specific to Concordia to provide better explanations. AI makes mistakes, so please double check any answers you are given."
 
   async function intro() {
+    setHasReviewed(false)
     setLock(true)
     var answer = ""
     for (const word of intro_message.split(" ")) {
@@ -123,7 +129,6 @@ const useConversation = () => {
     var elapsedIntervals = 0
     const intervalId = setInterval(() => {
       const numberOfDots = elapsedIntervals % 4
-      console.log(numberOfDots)
       const thinkingMessage = "Thinking" + ".".repeat(numberOfDots)
 
       if (elapsedIntervals != 0) {
@@ -146,6 +151,11 @@ const useConversation = () => {
 
       const chunk = decoder.decode(value, { stream: true})
       answer += chunk
+      if (answer.includes("+END+")) {
+        console.log("End!")
+        answer = answer.replace("+END+", "")
+        setToReview(true)
+      }
       setAiMessage(answer)
     }
     setAiMessage('')
@@ -156,6 +166,42 @@ const useConversation = () => {
     setToSummarize(true)
 
     return answer
+  }
+
+  const waitForUnlock = (): Promise<void> => {
+    if (!lock) {
+      return Promise.resolve();
+    }
+    return new Promise((resolve: () => void) => {
+      resolveLockRef.current = resolve;
+    });
+  };
+
+  async function review() {
+    setToReview(false)
+    setHasReviewed(true)
+    await waitForUnlock()
+    setLock(true)
+
+    const answer = REVIEW_MESSAGE
+
+    const display_ai_message: DisplayMessage = {
+      sender: "assistant",
+      content: answer
+    }
+
+    setMessages([...messages!, display_ai_message])
+
+    setConversation([
+      ...conversation, 
+      newMessage(answer, 'assistant'),
+    ])
+
+    setTotalConversation([
+      ...conversation, 
+      newMessage(answer, 'assistant'),
+    ])
+    setLock(false)
   }
 
   const handleSendMessage = async () => {
@@ -216,11 +262,19 @@ const useConversation = () => {
         newMessage(ai_message, 'assistant'),
       ])
 
+      setTotalConversation([
+        ...conversation, 
+        newMessage(final_message, 'user'), 
+        newMessage(ai_message, 'assistant'),
+      ])
+
+
       setImage('')
       setLock(false)
     } else if (!lock) {
       setMessage("")
     }
+
   }
 
   async function summarize() {
@@ -281,6 +335,9 @@ const useConversation = () => {
     intro,
     handleSendMessage,
     summarize,
+    review,
+    toReview,
+    hasReviewed,
   }
 }
 

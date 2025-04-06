@@ -10,6 +10,7 @@ from flask_cors import CORS
 import os
 import sys
 import time
+import json
 
 use_example_responses = False
 load_dotenv(override=True)
@@ -99,6 +100,7 @@ def question():
     return Response(stream_with_context(stream), content_type="text/plain")
 
 
+
 @app.route('/reset-cost')
 def reset_cost():
     if app.debug:
@@ -115,7 +117,7 @@ if __name__ == '__main__':
     print(f'{"=    Enter the following url into the browser:":<69}=')
     print(f'{"=    http://127.0.0.1:" + str(port):<69}=')
     print("=" * 70)
-    if len(sys.argv) > 1 and sys.argv[1] == "--no-api":
+    if len(sys.argv) > 1 and sys.argv[1] == "--mock":
         use_example_responses=True
     problem_model.mock = use_example_responses
     concept_model.mock = use_example_responses

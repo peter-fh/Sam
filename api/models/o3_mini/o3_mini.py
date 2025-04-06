@@ -1,5 +1,6 @@
 import time
 import os
+from typing import Generator
 from dotenv import load_dotenv
 from openai import OpenAI
 from api.log import displayConversation

@@ -52,6 +52,10 @@
 			"answer": "y=11/3x-19/3"
 		},
 		{
+			"problem": "Assume that 2x+3y=12 and dy/dt=-2. Find dx/dt.",
+			"answer": "3"
+		},
+		{
 			"problem": "The length of a rectangle is increasing at the rate of 8 cm/s and its width is increasing at the rate of 5 cm/s. When the length is 20 cm and the width is 12 cm, how fast is the area of the rectangle increasing at that instant?",
 			"answer": "196cm/s"
 		},

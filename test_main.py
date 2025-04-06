@@ -4,6 +4,8 @@ from tests.test_response_size import testFirstMessageLengthManual
 from dotenv import load_dotenv
 import os
 
+from tests.test_reviews import testOneReview, testReviews
+
 
 load_dotenv(override=True)
 openai_api_key = os.getenv("OPENAI_API_KEY")
@@ -17,5 +19,6 @@ gpt4.debug = True
 
 # testFirstMessageLengthManual(model, count=3)
 
+# testOneReview(gpt4, (1, 1))
 
 print("Testing completed with $%5f used." % o3.estimated_cost)

@@ -3,6 +3,7 @@ export const Endpoints = {
   Intro: '/introduction',
   Image: '/image',
   Summary: '/summary',
+  Title: '/title',
 }
 
 export default Endpoints

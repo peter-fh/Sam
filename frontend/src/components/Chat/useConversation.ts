@@ -2,6 +2,7 @@ import { useRef, useState } from "react";
 import { Message, newMessage } from "../../types/message";
 import { useChatSettings } from "../../context/useChatContext";
 import Endpoints from "../../endpoints";
+import { DB } from "../../database/db";
 
 
 const TOKEN_THRESHOLD = 2048
@@ -29,6 +30,7 @@ const useConversation = () => {
   } = useChatSettings()
 
   const [conversation, setConversation] = useState<Message[]>([]);
+  const [conversationId, setConversationId] = useState<number | null>(null);
   const [_, setTotalConversation] = useState<Message[]>([]);
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<DisplayMessage[]>([])
@@ -66,6 +68,26 @@ const useConversation = () => {
     setAiMessage('')
 
     setLock(false)
+  }
+
+  async function getTitle(question: string) {
+    const request = new Request(Endpoints.Title, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+      body: String(question),
+    })
+    const response = await fetch(request)
+    const reader = response.body!.getReader()
+    const decoder = new TextDecoder('utf-8')
+
+    const {value} = await reader.read()
+
+    const title = decoder.decode(value, { stream: true})
+
+    console.log("Title: ", title)
+    return title
   }
 
   async function readImage(image: string) {
@@ -239,6 +261,7 @@ const useConversation = () => {
         final_message += "The following is a transcription of an image sent by the user:\n\n" + transcription
       } 
 
+
       var json_message: any = newMessage(final_message, "user")
       const fullConversation = [...conversation, json_message]
 
@@ -267,6 +290,17 @@ const useConversation = () => {
         newMessage(final_message, 'user'), 
         newMessage(ai_message, 'assistant'),
       ])
+
+      var current_conversation_id = conversationId
+      if (current_conversation_id == null) {
+        const title = await getTitle(final_message)
+        console.log(title)
+        current_conversation_id = await DB.addConversation(title)
+        setConversationId(current_conversation_id)
+      }
+
+      await DB.addMessage(current_conversation_id, "user", final_message)
+      await DB.addMessage(current_conversation_id, "assistant", ai_message)
 
 
       setImage('')
@@ -310,6 +344,8 @@ const useConversation = () => {
       summaryMessage, 
       ...conversation.slice(0,4)
     ])
+
+    await DB.updateSummary(conversationId!, summary)
 
     setLock(false)
   }

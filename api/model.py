@@ -17,6 +17,10 @@ class UtilityModel(ABC):
     def summarize(self, conversation) -> str:
         pass
 
+    @abstractmethod
+    def title(self, question) -> str:
+        pass
+
 
 class TutorModel(ABC):
     prompt_manager: PromptManager 

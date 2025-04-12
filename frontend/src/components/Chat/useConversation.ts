@@ -7,6 +7,7 @@ import { DB } from "../../database/db";
 
 const TOKEN_THRESHOLD = 2048
 const REVIEW_MESSAGE = "You've reached the end of the conversation! If you have any follow up questions, please feel free to ask here. If you have a new problem to work on, please start a new conversation. Consider [booking a tutoring session](https://www.concordia.ca/students/success/learning-support/math-help.html#tutoring) to help with these concepts. Keep practicing these problems, and it will help solidify you understanding!"
+const INTRO_MESSAGE = "Hello! I'm Sam, an AI chatbot powered by Chat-GPT. I use context specific to Concordia to provide better explanations. AI makes mistakes, so please double check any answers you are given."
 
 const estimateTokens = (characterCount: number) => {
   return Math.ceil(characterCount * 0.25)
@@ -47,13 +48,58 @@ const useConversation = () => {
     setConversation((prevMessages) => [...prevMessages, message])
   }
 
-  const intro_message = "Hello! I'm Sam, an AI chatbot powered by Chat-GPT. I use context specific to Concordia to provide better explanations. AI makes mistakes, so please double check any answers you are given."
 
+  async function loadConversation(id: number) {
+    setLock(true)
+
+    const summary = await DB.getSummary(id)
+
+    const conversationMessages = await DB.getConversation(id)
+    if (conversationMessages == null) {
+      return
+    }
+    const conversationDisplayMessages: DisplayMessage[] = []
+    const intro_message: DisplayMessage = {
+      sender: "assistant",
+      content: INTRO_MESSAGE,
+    }
+    conversationDisplayMessages.push(intro_message)
+    const formattedMessages: Message[] = []
+    console.log(conversationMessages)
+    for (const conversation_message of conversationMessages) {
+      const conversation_display_message: DisplayMessage = {
+        sender: conversation_message.role as "user" | "assistant",
+        content: conversation_message.content!,
+      }
+      conversationDisplayMessages.push(conversation_display_message)
+
+      const formatted_message = newMessage(conversation_message.content!, conversation_message.role!)
+      formattedMessages.push(formatted_message)
+      // console.log("iterating through conversation")
+      // console.log(conversation_message)
+    }
+
+    if (summary && summary.summary) {
+      const formatted_summary = newMessage(summary.summary, 'assistant')
+      setConversation([
+        formatted_summary,
+        ...formattedMessages.slice(0,4)
+      ])
+    } else {
+      setConversation([
+        ...formattedMessages
+      ])
+    }
+
+    setMessages(conversationDisplayMessages)
+
+    setLock(false)
+  }
   async function intro() {
     setHasReviewed(false)
     setLock(true)
     var answer = ""
-    for (const word of intro_message.split(" ")) {
+    for (const word of INTRO_MESSAGE.split(" ")) {
       await sleep(30)
       answer += word + " "
       setAiMessage(answer)
@@ -374,6 +420,7 @@ const useConversation = () => {
     review,
     toReview,
     hasReviewed,
+    loadConversation,
   }
 }
 

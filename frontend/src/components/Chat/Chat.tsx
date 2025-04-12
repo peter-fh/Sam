@@ -6,7 +6,11 @@ import html2canvas from 'html2canvas'
 import useConversation from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
 
-function Chat() {
+
+interface ChatProps {
+  id: number | null
+}
+const Chat: React.FC<ChatProps> = ({id}) => {
 
   const {
     handleSendMessage,
@@ -25,7 +29,8 @@ function Chat() {
     messages,
     toReview,
     review,
-    hasReviewed
+    hasReviewed,
+    loadConversation,
   } = useConversation();
 
   const {
@@ -52,7 +57,7 @@ function Chat() {
   })
 
   useEffect(() => {
-    if (chatLoaded){
+    if (chatLoaded && id == null){
       intro()
     } else {
     }
@@ -138,6 +143,13 @@ function Chat() {
       link.click();
     }
   }
+
+  useEffect(() => {
+    if (id) {
+      console.log("Loading conversation")
+      loadConversation(id)
+    }
+  }, [id])
 
   return (
     <>

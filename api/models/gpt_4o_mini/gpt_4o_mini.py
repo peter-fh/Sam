@@ -115,14 +115,14 @@ class OpenAI_4o_mini(UtilityModel):
                 messages=[
                     {
                         "role": "system",
-                        "content": "Give a title for the conversation about this question",
+                        "content": "Give a short (less than 10 word) and informal title of the conversation that starts with this message. Don'tuse latex or markdown formatting.",
                     },
                     {
                         "role": "user",
                         "content": question,
                     }
                 ],
-                max_tokens=20
+                max_tokens=40
             )
         except:
             print("Title error")

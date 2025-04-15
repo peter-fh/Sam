@@ -115,7 +115,7 @@ class OpenAI_4o_mini(UtilityModel):
                 messages=[
                     {
                         "role": "system",
-                        "content": "Give a short (less than 10 word) and informal title of the conversation that starts with this message. Don'tuse latex or markdown formatting.",
+                        "content": "Give a short (less than 10 word) title of the conversation that starts with this message. Don't use latex or markdown formatting. Don't explicilty say the exact function or question, but be descriptive. Avoid punctuation at the end of the title.",
                     },
                     {
                         "role": "user",

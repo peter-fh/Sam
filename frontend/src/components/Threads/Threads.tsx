@@ -23,7 +23,6 @@ function Threads() {
 
 	const [conversations, setConversations] = useState<ConversationItem[]>([])
 	const [loading, setLoading] = useState<boolean>(true)
-	const [_, setEmptyConversations] = useState<boolean>(false)
 
 	interface ClickableThreadProps {
 		id: number,
@@ -47,7 +46,6 @@ function Threads() {
 		const conversation_data = await DB.getConversations()
 		if (!conversation_data) {
 			setLoading(false)
-			setEmptyConversations(true)
 			return
 		}
 
@@ -79,6 +77,17 @@ function Threads() {
 			)
 		}
 
+		if (conversations.length == 0) {
+			return (
+				<>
+					<div className="threads-list">
+						<p>
+							No previous chats. Click "New Chat" to start a conversation.
+						</p>
+					</div>
+				</>
+			)
+		}
 		return (
 			<>
 				<div className="threads-list">

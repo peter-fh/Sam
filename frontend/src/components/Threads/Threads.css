@@ -1,0 +1,76 @@
+.threads {
+	width: 80vw;
+	margin-left: 15em;
+	padding: 0 0 0 0;
+	display: flex;
+	align-items: stretch;
+	flex-direction: column;
+	height: calc(100vh - 3rem);
+	justify-content: flex-start;
+}
+
+.threads-list {
+	width: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+	flex-grow: 1;
+	overflow-y: auto;
+	min-height: 0;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	flex-direction: column;
+	padding-bottom: 1rem;
+}
+.title-items {
+	max-width: 30rem;
+	width: 90%;
+	margin-inline: auto;
+}
+
+.threads-button {
+	margin-top: 3rem;
+	text-align: center;
+	width: 100%;
+	padding: 10px 12px 10px 12px;
+	border: solid;
+	border-radius: 15px;
+	background-color: var(--light-background);
+	border-color: var(--outline-color);
+	margin-bottom: 1rem;
+	font-size: 1.5rem;
+}
+
+.threads-title {
+	margin-bottom: none;
+}
+
+.thread {
+	margin-block-start: 0;
+	margin-block-end: 0;
+	max-width: 600px;
+	width: 90%;
+	margin: 0;
+	padding: 5px 0.5rem 5px 0.5rem;
+	border: 1px solid transparent;
+}
+
+.thread > * {
+	margin: 0;
+}
+
+.thread:hover {
+	border: 1px solid white;
+	border-radius: 0.5rem;
+	background-color: var(--highlight-color);
+}
+
+.separator {
+	color: var(--outline-color);
+	background-color: var(--outline-color);
+	border: none;
+	height: 1px;
+	width: 90%;
+}

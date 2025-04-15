@@ -74,6 +74,11 @@ def image():
     image = request.get_data(as_text=True)
     return utility_model.transcribe(image)
 
+@app.route('/title', methods=['POST'])
+def title():
+    question = request.get_data(as_text=True)
+    return utility_model.title(question)
+
 # Handles clicking the "Ask" button
 @app.route('/question', methods=['POST'])
 def question():

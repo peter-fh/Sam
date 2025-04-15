@@ -2,10 +2,12 @@ import { useRef, useState } from "react";
 import { Message, newMessage } from "../../types/message";
 import { useChatSettings } from "../../context/useChatContext";
 import Endpoints from "../../endpoints";
+import { DB } from "../../database/db";
 
 
 const TOKEN_THRESHOLD = 2048
 const REVIEW_MESSAGE = "You've reached the end of the conversation! If you have any follow up questions, please feel free to ask here. If you have a new problem to work on, please start a new conversation. Consider [booking a tutoring session](https://www.concordia.ca/students/success/learning-support/math-help.html#tutoring) to help with these concepts. Keep practicing these problems, and it will help solidify you understanding!"
+const INTRO_MESSAGE = "Hello! I'm Sam, an AI chatbot powered by Chat-GPT. I use context specific to Concordia to provide better explanations. AI makes mistakes, so please double check any answers you are given."
 
 const estimateTokens = (characterCount: number) => {
   return Math.ceil(characterCount * 0.25)
@@ -29,6 +31,7 @@ const useConversation = () => {
   } = useChatSettings()
 
   const [conversation, setConversation] = useState<Message[]>([]);
+  const [conversationId, setConversationId] = useState<number | null>(null);
   const [_, setTotalConversation] = useState<Message[]>([]);
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<DisplayMessage[]>([])
@@ -45,13 +48,55 @@ const useConversation = () => {
     setConversation((prevMessages) => [...prevMessages, message])
   }
 
-  const intro_message = "Hello! I'm Sam, an AI chatbot powered by Chat-GPT. I use context specific to Concordia to provide better explanations. AI makes mistakes, so please double check any answers you are given."
 
+  async function loadConversation(id: number) {
+    setLock(true)
+
+    const summary = await DB.getSummary(id)
+
+    const conversationMessages = await DB.getConversation(id)
+    if (conversationMessages == null) {
+      return
+    }
+    const conversationDisplayMessages: DisplayMessage[] = []
+    const intro_message: DisplayMessage = {
+      sender: "assistant",
+      content: INTRO_MESSAGE,
+    }
+    conversationDisplayMessages.push(intro_message)
+    const formattedMessages: Message[] = []
+    for (const conversation_message of conversationMessages) {
+      const conversation_display_message: DisplayMessage = {
+        sender: conversation_message.role as "user" | "assistant",
+        content: conversation_message.content!,
+      }
+      conversationDisplayMessages.push(conversation_display_message)
+
+      const formatted_message = newMessage(conversation_message.content!, conversation_message.role!)
+      formattedMessages.push(formatted_message)
+    }
+
+    if (summary && summary.summary) {
+      const formatted_summary = newMessage(summary.summary, 'assistant')
+      setConversation([
+        formatted_summary,
+        ...formattedMessages.slice(0,4)
+      ])
+    } else {
+      setConversation([
+        ...formattedMessages
+      ])
+    }
+
+    setMessages(conversationDisplayMessages)
+
+    setLock(false)
+  }
   async function intro() {
     setHasReviewed(false)
     setLock(true)
     var answer = ""
-    for (const word of intro_message.split(" ")) {
+    for (const word of INTRO_MESSAGE.split(" ")) {
       await sleep(30)
       answer += word + " "
       setAiMessage(answer)
@@ -66,6 +111,25 @@ const useConversation = () => {
     setAiMessage('')
 
     setLock(false)
+  }
+
+  async function getTitle(question: string) {
+    const request = new Request(Endpoints.Title, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'text/plain',
+      },
+      body: String(question),
+    })
+    const response = await fetch(request)
+    const reader = response.body!.getReader()
+    const decoder = new TextDecoder('utf-8')
+
+    const {value} = await reader.read()
+
+    const title = decoder.decode(value, { stream: true})
+
+    return title
   }
 
   async function readImage(image: string) {
@@ -239,6 +303,7 @@ const useConversation = () => {
         final_message += "The following is a transcription of an image sent by the user:\n\n" + transcription
       } 
 
+
       var json_message: any = newMessage(final_message, "user")
       const fullConversation = [...conversation, json_message]
 
@@ -268,6 +333,17 @@ const useConversation = () => {
         newMessage(ai_message, 'assistant'),
       ])
 
+      var current_conversation_id = conversationId
+      if (current_conversation_id == null) {
+        const title = await getTitle(final_message)
+        console.log(title)
+        current_conversation_id = await DB.addConversation(title)
+        setConversationId(current_conversation_id)
+      }
+
+      await DB.addMessage(current_conversation_id, "user", final_message)
+      await DB.addMessage(current_conversation_id, "assistant", ai_message)
+
 
       setImage('')
       setLock(false)
@@ -296,12 +372,8 @@ const useConversation = () => {
     }
 
 
-    console.log("Summarizing")
-
     setLock(true)
     const conversationToSummarize = conversation.slice(0,-4)
-    console.log("Sending the following conversation to summarize:")
-    console.log(conversationToSummarize)
 
     const summary = await getSummary(conversationToSummarize)
     const summaryMessage = newMessage(summary, 'system')
@@ -310,6 +382,8 @@ const useConversation = () => {
       summaryMessage, 
       ...conversation.slice(0,4)
     ])
+
+    await DB.updateSummary(conversationId!, summary)
 
     setLock(false)
   }
@@ -338,6 +412,7 @@ const useConversation = () => {
     review,
     toReview,
     hasReviewed,
+    loadConversation,
   }
 }
 

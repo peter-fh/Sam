@@ -102,3 +102,36 @@ class OpenAI_4o_mini(UtilityModel):
         if self.debug:
             print("Summary: ", summary)
         return summary
+
+    def title(self, question):
+
+        if self.mock:
+            time.sleep(2)
+            return "Example title"
+
+        try:
+            response = self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "Give a short (less than 10 word) title of the conversation that starts with this message. Don't use latex or markdown formatting. Don't explicilty say the exact function or question, but be descriptive. Avoid punctuation at the end of the title.",
+                    },
+                    {
+                        "role": "user",
+                        "content": question,
+                    }
+                ],
+                max_tokens=40
+            )
+        except:
+            print("Title error")
+            return "Error Getting Title"
+
+
+        title = str(response.choices[0].message.content)
+
+        if self.debug:
+            print("Title: ", title)
+        return title
+

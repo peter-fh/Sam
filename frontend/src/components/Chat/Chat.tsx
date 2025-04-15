@@ -6,7 +6,12 @@ import html2canvas from 'html2canvas'
 import useConversation from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
 
-function Chat() {
+
+interface ChatProps {
+  id: number | null
+}
+
+const Chat: React.FC<ChatProps> = ({id}) => {
 
   const {
     handleSendMessage,
@@ -25,7 +30,8 @@ function Chat() {
     messages,
     toReview,
     review,
-    hasReviewed
+    hasReviewed,
+    loadConversation,
   } = useConversation();
 
   const {
@@ -52,7 +58,7 @@ function Chat() {
   })
 
   useEffect(() => {
-    if (chatLoaded){
+    if (chatLoaded && id == null){
       intro()
     } else {
     }
@@ -115,7 +121,7 @@ function Chat() {
     reader.readAsDataURL(compressedFile)
   }
 
-  const buttonClass = file !== "" ? "button interactive file-present" : "button interactive"
+  const buttonClass = file !== "" ? "chat-button interactive file-present" : "chat-button interactive"
 
   const messagesRef = useRef<HTMLDivElement>(null)
 
@@ -138,6 +144,12 @@ function Chat() {
       link.click();
     }
   }
+
+  useEffect(() => {
+    if (id) {
+      loadConversation(id)
+    }
+  }, [id])
 
   return (
     <>
@@ -183,7 +195,7 @@ function Chat() {
               <i className="fa-solid fa-paperclip"/>
             </button>
             <button 
-              className="button interactive" 
+              className="chat-button interactive" 
               onClick={handleSendMessage}
             >
               {lock ? <i className="fa-solid fa-xmark"/>:<i className="fa-solid fa-arrow-up"/>}

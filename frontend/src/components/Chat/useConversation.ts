@@ -3,6 +3,7 @@ import { Message, newMessage } from "../../types/message";
 import { useChatSettings } from "../../context/useChatContext";
 import Endpoints from "../../endpoints";
 import { DB } from "../../database/db";
+import { useThreadSelectionContext } from "../../context/useThreadContext";
 
 
 const TOKEN_THRESHOLD = 2048
@@ -29,6 +30,10 @@ const useConversation = () => {
     course,
     detailLevel
   } = useChatSettings()
+
+  const {
+    setCurrentThread,
+  } = useThreadSelectionContext()
 
   const [conversation, setConversation] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<number | null>(null);
@@ -339,6 +344,7 @@ const useConversation = () => {
         console.log(title)
         current_conversation_id = await DB.addConversation(title)
         setConversationId(current_conversation_id)
+        setCurrentThread(current_conversation_id)
       }
 
       await DB.addMessage(current_conversation_id, "user", final_message)

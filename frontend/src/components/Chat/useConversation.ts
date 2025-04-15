@@ -65,7 +65,6 @@ const useConversation = () => {
     }
     conversationDisplayMessages.push(intro_message)
     const formattedMessages: Message[] = []
-    console.log(conversationMessages)
     for (const conversation_message of conversationMessages) {
       const conversation_display_message: DisplayMessage = {
         sender: conversation_message.role as "user" | "assistant",
@@ -75,8 +74,6 @@ const useConversation = () => {
 
       const formatted_message = newMessage(conversation_message.content!, conversation_message.role!)
       formattedMessages.push(formatted_message)
-      // console.log("iterating through conversation")
-      // console.log(conversation_message)
     }
 
     if (summary && summary.summary) {
@@ -132,7 +129,6 @@ const useConversation = () => {
 
     const title = decoder.decode(value, { stream: true})
 
-    console.log("Title: ", title)
     return title
   }
 
@@ -376,12 +372,8 @@ const useConversation = () => {
     }
 
 
-    console.log("Summarizing")
-
     setLock(true)
     const conversationToSummarize = conversation.slice(0,-4)
-    console.log("Sending the following conversation to summarize:")
-    console.log(conversationToSummarize)
 
     const summary = await getSummary(conversationToSummarize)
     const summaryMessage = newMessage(summary, 'system')

@@ -11,8 +11,7 @@ export namespace DB {
     const { data } = await supabase
       .from("conversations")
       .select()
-      .order("created_at", { ascending: true })
-    console.log(data)
+      .order("created_at", { ascending: false })
     return data
   }
 

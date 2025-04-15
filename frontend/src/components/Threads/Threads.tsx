@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react"
 import { useThreadSelectionContext } from "../../context/useThreadContext"
 import { DB } from "../../database/db"
+import './Threads.css'
+import { useChatSettings } from "../../context/useChatContext"
+
 
 interface ConversationItem {
 	title: string,
@@ -14,9 +17,13 @@ function Threads() {
 		setCurrentThread,
 	} = useThreadSelectionContext()
 
+	const {
+		sidebar,
+	} = useChatSettings()
+
 	const [conversations, setConversations] = useState<ConversationItem[]>([])
 	const [loading, setLoading] = useState<boolean>(true)
-	const [emptyConversations, setEmptyConversations] = useState<boolean>(false)
+	const [_, setEmptyConversations] = useState<boolean>(false)
 
 	interface ClickableThreadProps {
 		id: number,
@@ -29,11 +36,12 @@ function Threads() {
 			setThreadsOpen(false)
 		}
 		return (
-		<div onClick={handleClick}>
+		<div className="thread" onClick={handleClick}>
 			<p>{props.title}</p>
 		</div>
 		)
 	}
+
 
 	async function updateConversations() {
 		const conversation_data = await DB.getConversations()
@@ -62,36 +70,45 @@ function Threads() {
 		if (loading) {
 			return (
 				<>
-					<div>
-						Loading Conversations
+					<div className="threads-list">
+					<i>
+						Loading Conversations...
+						</i>
 					</div>
 				</>
 			)
 		}
 
 		return (
-		<>
-				<div>
-					<h2>Items from Database</h2>
+			<>
+				<div className="threads-list">
 					<ul>
 						{conversations.map((conversation) => (
-							<ClickableThread id={conversation.id} title={conversation.title}/>
+							<ClickableThread key={conversation.id} id={conversation.id} title={conversation.title}/>
 						))}
 					</ul>
 				</div>
-		</>
+			</>
 		)
 	}
+
 	return (
 		<>
-			<button onClick={() => {
-				setThreadsOpen(false)
-				setCurrentThread(null)
-			}} 
-				className="interactive">
-				New Conversation
-			</button>
-			<ConversationList/>
+			<div className="threads" style={{
+				marginLeft: sidebar ? '15em' : 0
+			}}>
+				<div className="title-items">
+					<button className="threads-button interactive" onClick={() => {
+						setThreadsOpen(false)
+						setCurrentThread(null)
+					}} 
+					>
+						New Chat 
+					</button>
+				</div>
+				<hr className="separator"/>
+				<ConversationList/>
+			</div>
 		</>
 	)
 }

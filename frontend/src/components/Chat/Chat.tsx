@@ -10,6 +10,7 @@ import { useChatSettings } from '../../context/useChatContext'
 interface ChatProps {
   id: number | null
 }
+
 const Chat: React.FC<ChatProps> = ({id}) => {
 
   const {
@@ -120,7 +121,7 @@ const Chat: React.FC<ChatProps> = ({id}) => {
     reader.readAsDataURL(compressedFile)
   }
 
-  const buttonClass = file !== "" ? "button interactive file-present" : "button interactive"
+  const buttonClass = file !== "" ? "chat-button interactive file-present" : "chat-button interactive"
 
   const messagesRef = useRef<HTMLDivElement>(null)
 
@@ -146,7 +147,6 @@ const Chat: React.FC<ChatProps> = ({id}) => {
 
   useEffect(() => {
     if (id) {
-      console.log("Loading conversation")
       loadConversation(id)
     }
   }, [id])
@@ -195,7 +195,7 @@ const Chat: React.FC<ChatProps> = ({id}) => {
               <i className="fa-solid fa-paperclip"/>
             </button>
             <button 
-              className="button interactive" 
+              className="chat-button interactive" 
               onClick={handleSendMessage}
             >
               {lock ? <i className="fa-solid fa-xmark"/>:<i className="fa-solid fa-arrow-up"/>}

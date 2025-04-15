@@ -23,4 +23,5 @@
 	padding: 10px 12px 10px 12px;
 	border: solid;
 	border-radius: 15px;
+	background-color: var(--light-background)
 }

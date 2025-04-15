@@ -5,7 +5,7 @@ from tests.test_response_size import testFirstMessageLengthManual
 from dotenv import load_dotenv
 import os
 
-from tests.test_titles import testConversationTitles
+from tests.test_titles import testCasualConversationTitles, testConversationTitles
 
 
 load_dotenv(override=True)
@@ -21,6 +21,7 @@ utility_model = OpenAI_4o_mini(openai_api_key)
 
 # testFirstMessageLengthManual(model, count=3)
 testConversationTitles(utility_model)
+# testCasualConversationTitles(utility_model)
 
 
 print("Testing completed with $%5f used." % o3.estimated_cost)

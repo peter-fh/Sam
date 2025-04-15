@@ -31,6 +31,7 @@ class PromptManager:
     summary_path: str = ""
     transcription_path: str = ""
     review_path: str = ""
+    title_path: str = ""
 
 
     def setConcept(self, concept_path):
@@ -47,6 +48,9 @@ class PromptManager:
 
     def setReview(self, review_path):
         self.review_path = review_path
+
+    def setTitle(self, title_path):
+        self.title_path = title_path
 
     def conceptPrompt(self, brevity: str):
         if not self.concept_path: 
@@ -93,6 +97,14 @@ class PromptManager:
         review_file = open(self.review_path)
 
         return review_file.read()
+
+    def titlePrompt(self, question):
+        if not self.title_path:
+            raise InvalidConfigurationException("Title prompt has not been enabled for this prompt manager")
+
+        title_file = open(self.title_path)
+
+        return title_file.read().replace("${question}", question)
 
     def instructions(self, prompt_type: PromptType, brevity: str, debug=False):
         if not self.problem_path or not self.concept_path:

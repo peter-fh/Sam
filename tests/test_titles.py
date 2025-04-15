@@ -6,6 +6,10 @@ from api.model import UtilityModel
 test_dir = "tests"
 problem_file = test_dir + os.sep + "problems.json"
 
+questions= [
+    "hi"
+]
+
 def testConversationTitles(model, count=-1):
     with open(problem_file) as f:
         test_cases = json.load(f)
@@ -22,3 +26,16 @@ def testConversationTitles(model, count=-1):
             print("=" * 50)
             print()
 
+
+def testCasualConversationTitles(model, count=-1):
+    if count > len(questions) or count < 0:
+        count = len(questions)
+
+    for question in questions:
+        
+        title = model.title(question)
+        print("=" * 50)
+        print("Question: ", question)
+        print("Title: ", title)
+        print("=" * 50)
+        print()

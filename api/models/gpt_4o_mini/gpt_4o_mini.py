@@ -9,6 +9,7 @@ from api.model import UtilityModel
 GPT_4O_MINI_DIR = MODELS_DIR + os.sep + "gpt_4o_mini"
 SUMMARY_FILE_PATH = GPT_4O_MINI_DIR + os.sep + "summary.md"
 TRANSCRIPTION_FILE_PATH = GPT_4O_MINI_DIR + os.sep + "transcription.md"
+TITLE_FILE_PATH = GPT_4O_MINI_DIR + os.sep + "title.md"
 
 class OpenAI_4o_mini(UtilityModel):
     client: OpenAI
@@ -25,6 +26,7 @@ class OpenAI_4o_mini(UtilityModel):
         self.prompt_manager = PromptManager()
         self.prompt_manager.setSummary(SUMMARY_FILE_PATH)
         self.prompt_manager.setTranscription(TRANSCRIPTION_FILE_PATH)
+        self.prompt_manager.setTitle(TITLE_FILE_PATH)
 
     def transcribe(self, image):
 
@@ -109,18 +111,15 @@ class OpenAI_4o_mini(UtilityModel):
             time.sleep(2)
             return "Example title"
 
+        instructions = self.prompt_manager.titlePrompt(question)
         try:
             response = self.client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[
                     {
-                        "role": "system",
-                        "content": "Give a short (less than 10 word) title of the conversation that starts with this message. Don't use latex or markdown formatting. Don't explicilty say the exact function or question, but be descriptive. Avoid punctuation at the end of the title.",
-                    },
-                    {
                         "role": "user",
-                        "content": question,
-                    }
+                        "content": instructions,
+                    },
                 ],
                 max_tokens=40
             )

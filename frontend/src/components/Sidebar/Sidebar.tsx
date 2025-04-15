@@ -2,6 +2,7 @@ import { Course, DetailLevel, QuestionType } from '../../types/options'
 import './Sidebar.css'
 import React, { useEffect } from 'react'
 import { useChatSettings } from '../../context/useChatContext';
+import { useThreadSelectionContext } from '../../context/useThreadContext';
 
 function NewConversationButton() {
   return (
@@ -18,7 +19,7 @@ function NewConversationButton() {
   );
 }
 
-function SaveButton() {
+export function SaveButton() {
   const { setSave } = useChatSettings();
   return (
         <button 
@@ -62,6 +63,28 @@ export function ColorSchemeButton() {
     )
 }
 
+export function OpenThreadsButton() {
+  const {
+    threadsOpen,
+    setThreadsOpen,
+  } = useThreadSelectionContext()
+  return (
+    <button
+      title='Open Chat History'
+      className="interactive sidebar-button"
+      onClick={ () => {
+        if (threadsOpen) {
+          setThreadsOpen(false)
+        } else {
+          setThreadsOpen(true)
+        }
+      }}
+    >
+      <i className="fa-solid fa-comments"></i>
+    </button>
+    )
+}
+
 function SidebarButton() {
   const {
     sidebar,
@@ -99,7 +122,7 @@ function Buttons() {
         { sidebar ? 
           <>
             <SidebarButton/>
-            <SaveButton/>
+            <OpenThreadsButton/>
             <NewConversationButton/>
           </> :
           <>

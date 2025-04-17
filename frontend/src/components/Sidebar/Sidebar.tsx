@@ -13,6 +13,7 @@ function NewConversationButton() {
   const {
     setCurrentThread,
     setThreadsOpen,
+    setStartingThread,
   } = useThreadSelectionContext()
 
   return (
@@ -23,6 +24,7 @@ function NewConversationButton() {
         setChatLoaded(false)
         setThreadsOpen(false)
         setCurrentThread(null)
+        setStartingThread(null)
         setStartNewConversation(true)
         console.log("Set thread to null")
       }}

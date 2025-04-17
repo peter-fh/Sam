@@ -15,6 +15,7 @@ function Threads() {
 	const {
 		setThreadsOpen,
 		setCurrentThread,
+		setStartingThread,
 	} = useThreadSelectionContext()
 
 	const {
@@ -33,6 +34,7 @@ function Threads() {
 
 	function ClickableThread(props: ClickableThreadProps) {
 		const handleClick = () => {
+			setStartingThread(props.id)
 			setCurrentThread(props.id)
 			setThreadsOpen(false)
 		}
@@ -113,6 +115,7 @@ function Threads() {
 						setChatLoaded(false)
 						setThreadsOpen(false)
 						setCurrentThread(null)
+						setStartingThread(null)
 						setStartNewConversation(true)
 					}} 
 					>

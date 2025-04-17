@@ -101,6 +101,7 @@ const useConversation = () => {
   async function intro() {
     setHasReviewed(false)
     setLock(true)
+    setMessages([])
     var answer = ""
     for (const word of INTRO_MESSAGE.split(" ")) {
       await sleep(30)

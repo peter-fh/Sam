@@ -18,7 +18,7 @@ function App() {
       { threadsOpen ? 
         <Threads/>
         :
-        <Chat id={currentThread}/>
+        <Chat key={currentThread} id={currentThread}/>
       }
     </>
   )

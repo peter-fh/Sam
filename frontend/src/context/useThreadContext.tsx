@@ -5,6 +5,8 @@ interface ThreadSelectionContextType {
   setCurrentThread: (t: number | null) => void
   threadsOpen: boolean
   setThreadsOpen: (o: boolean) => void
+  startingThread: number | null
+  setStartingThread: (s: number | null) => void
 }
 
 const ThreadSelectionContext = createContext<ThreadSelectionContextType | undefined>(undefined)
@@ -12,12 +14,14 @@ const ThreadSelectionContext = createContext<ThreadSelectionContextType | undefi
 
 export function ThreadSelectionProvider({children }: {children: ReactNode}) {
   const [currentThread, setCurrentThread] = useState<number | null>(null)
+  const [startingThread, setStartingThread] = useState<number | null>(null)
   const [threadsOpen, setThreadsOpen] = useState<boolean>(false)
   return (
     <ThreadSelectionContext.Provider
       value={{
         currentThread, setCurrentThread,
         threadsOpen, setThreadsOpen,
+        startingThread, setStartingThread,
       }}
     >
       {children}

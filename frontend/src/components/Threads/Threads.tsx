@@ -19,6 +19,8 @@ function Threads() {
 
 	const {
 		sidebar,
+		setStartNewConversation,
+		setChatLoaded,
 	} = useChatSettings()
 
 	const [conversations, setConversations] = useState<ConversationItem[]>([])
@@ -35,9 +37,9 @@ function Threads() {
 			setThreadsOpen(false)
 		}
 		return (
-		<div className="thread" onClick={handleClick}>
-			<p>{props.title}</p>
-		</div>
+			<div className="thread" onClick={handleClick}>
+				<p>{props.title}</p>
+			</div>
 		)
 	}
 
@@ -69,8 +71,8 @@ function Threads() {
 			return (
 				<>
 					<div className="threads-list">
-					<i>
-						Loading Conversations...
+						<i>
+							Loading Conversations...
 						</i>
 					</div>
 				</>
@@ -108,8 +110,10 @@ function Threads() {
 			}}>
 				<div className="title-items">
 					<button className="threads-button interactive" onClick={() => {
+						setChatLoaded(false)
 						setThreadsOpen(false)
 						setCurrentThread(null)
+						setStartNewConversation(true)
 					}} 
 					>
 						New Chat 

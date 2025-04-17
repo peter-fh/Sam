@@ -5,33 +5,47 @@ import { useChatSettings } from '../../context/useChatContext';
 import { useThreadSelectionContext } from '../../context/useThreadContext';
 
 function NewConversationButton() {
+  const {
+    setStartNewConversation,
+    setChatLoaded,
+  } = useChatSettings()
+
+  const {
+    setCurrentThread,
+    setThreadsOpen,
+  } = useThreadSelectionContext()
+
   return (
-      <button
-          title="New Chat"
-          className="interactive sidebar-button"
-          onClick={() => {
-              window.location.reload();
-          }}
-      >
-          {/* <i className="fa-solid fa-plus" /> */}
-          <i className="fa-solid fa-pen-to-square" />
-      </button>
+    <button
+      title="New Chat"
+      className="interactive sidebar-button"
+      onClick={() => {
+        setChatLoaded(false)
+        setThreadsOpen(false)
+        setCurrentThread(null)
+        setStartNewConversation(true)
+        console.log("Set thread to null")
+      }}
+    >
+      {/* <i className="fa-solid fa-plus" /> */}
+      <i className="fa-solid fa-pen-to-square" />
+    </button>
   );
 }
 
 export function SaveButton() {
   const { setSave } = useChatSettings();
   return (
-        <button 
-          title="Save Chat as PNG"
-          className="interactive sidebar-button"
-          onClick={ () => {
-            setSave(true)
-          }}
-        >
-          <i className="fa-solid fa-download"/>
-        </button>
-    )
+    <button 
+      title="Save Chat as PNG"
+      className="interactive sidebar-button"
+      onClick={ () => {
+        setSave(true)
+      }}
+    >
+      <i className="fa-solid fa-download"/>
+    </button>
+  )
 }
 
 export function ColorSchemeButton() {
@@ -60,7 +74,7 @@ export function ColorSchemeButton() {
         <i className="fa-solid fa-moon"></i>
       }
     </button>
-    )
+  )
 }
 
 export function OpenThreadsButton() {
@@ -82,7 +96,7 @@ export function OpenThreadsButton() {
     >
       <i className="fa-solid fa-comments"></i>
     </button>
-    )
+  )
 }
 
 function SidebarButton() {
@@ -165,28 +179,28 @@ function QuestionTypeSelect() {
   const { question, setQuestion } = useChatSettings()
 
   return (
-      <div className="option">
-          <h3 className="sidebar-input-header">Question Type</h3>
+    <div className="option">
+      <h3 className="sidebar-input-header">Question Type</h3>
 
-          <span>
-              {Object.values(QuestionType).map((option, index) => (
-                  <React.Fragment key={option}>
-                      <button
-                          key={option}
-                          onClick={() => setQuestion(option)}
-                          className={`select-box-option ${
-                              question === option ? "active" : ""
-                          }`}
-                      >
-                          {option}
-                      </button>
-                      {index < Object.values(QuestionType).length - 1
-                          ? "|"
-                          : ""}
-                  </React.Fragment>
-              ))}
-          </span>
-      </div>
+      <span>
+        {Object.values(QuestionType).map((option, index) => (
+          <React.Fragment key={option}>
+            <button
+              key={option}
+              onClick={() => setQuestion(option)}
+              className={`select-box-option ${
+question === option ? "active" : ""
+}`}
+            >
+              {option}
+            </button>
+            {index < Object.values(QuestionType).length - 1
+              ? "|"
+              : ""}
+          </React.Fragment>
+        ))}
+      </span>
+    </div>
   );
 }
 
@@ -224,7 +238,7 @@ function Attribution() {
       href="https://www.flaticon.com/free-icons/robot" 
       target='_blank'
       title="robot icons">
-        &copy; Robot icons created by Fajriah Robiatul Adawiah - Flaticon
+      &copy; Robot icons created by Fajriah Robiatul Adawiah - Flaticon
     </a>
   )
 }

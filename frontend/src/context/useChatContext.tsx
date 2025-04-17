@@ -18,6 +18,8 @@ interface ChatSettingsContextType {
   setSmallScreen: (s: boolean) => void
   colorScheme: string
   setColorScheme: (s: string) => void
+  startNewConversation: boolean
+  setStartNewConversation: (s: boolean) => void
 }
 
 const ChatSettingsContext = createContext<ChatSettingsContextType | undefined>(undefined)
@@ -32,6 +34,7 @@ export function ChatSettingsProvider({ children }: { children: ReactNode }) {
   const [sidebar, setSidebar] = useState<boolean>(true);
   const [smallScreen, setSmallScreen] = useState<boolean>(true);
   const [colorScheme, setColorScheme] = useState<string>("dark");
+  const [startNewConversation, setStartNewConversation] = useState<boolean>(false);
 
   return (
     <ChatSettingsContext.Provider
@@ -44,6 +47,7 @@ export function ChatSettingsProvider({ children }: { children: ReactNode }) {
         sidebar, setSidebar,
         smallScreen, setSmallScreen,
         colorScheme, setColorScheme,
+        startNewConversation, setStartNewConversation
       }}
     >
       {children}

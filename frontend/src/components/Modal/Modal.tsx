@@ -1,10 +1,14 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { QuestionType, Course } from '../../types/options'
 import './Modal.css'
 import { useChatSettings } from '../../context/useChatContext';
 
 function Modal() {
 
+  const {
+    startNewConversation,
+    setStartNewConversation,
+  } = useChatSettings()
   const [showCourseSelect, setShowCourseSelect] = useState(true);
   const [showTypeSelect, setShowTypeSelect] = useState(true);
   const [showDislaimer, setShowDisclaimer] = useState(true);
@@ -17,6 +21,14 @@ function Modal() {
     setQuestion, 
     setCourse,
   } = useChatSettings();
+
+  useEffect(() => {
+    if (startNewConversation) {
+      setStartNewConversation(false)
+      setShowTypeSelect(true)
+    }
+  }, [startNewConversation])
+
 
   /* The course-select select box can be changed to its own function/component if the sidebar version
    * should look identical to this modal version */

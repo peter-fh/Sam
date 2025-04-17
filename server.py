@@ -1,8 +1,10 @@
 from flask import Flask, request, send_from_directory, stream_with_context, Response
 from api import prompt
-from api.models.o3_mini.o3_mini import OpenAI_o3_mini
-from api.models.gpt_4o_mini.gpt_4o_mini import OpenAI_4o_mini
-from api.models.gpt_4o.gpt_4o import OpenAI_4o
+from api.models.o3_mini.model import OpenAI_o3_mini
+from api.models.gpt_4o_mini.model import OpenAI_4o_mini
+from api.models.gpt_4o.model import OpenAI_4o
+from api.models.gpt_4_1.model import OpenAI_4_1
+from api.models.o4_mini.model import OpenAI_o4_mini
 from api.prompt import PromptType
 from courses.read_course_prompt import coursePrompt
 from dotenv import load_dotenv
@@ -23,10 +25,10 @@ if openai_api_key == None:
     openai_api_key = ""
     use_example_responses = True
 
-problem_model = OpenAI_o3_mini(openai_api_key,debug=dev)
+problem_model = OpenAI_o4_mini(openai_api_key,debug=dev)
 problem_model.mock = use_example_responses
 
-concept_model = OpenAI_4o(openai_api_key,debug=dev)
+concept_model = OpenAI_4_1(openai_api_key,debug=dev)
 concept_model.mock = use_example_responses
 
 utility_model = OpenAI_4o_mini(openai_api_key,debug=dev)

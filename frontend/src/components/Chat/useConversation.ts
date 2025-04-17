@@ -56,6 +56,7 @@ const useConversation = () => {
 
   async function loadConversation(id: number) {
     setLock(true)
+    setConversationId(id)
 
     const summary = await DB.getSummary(id)
 
@@ -340,6 +341,7 @@ const useConversation = () => {
 
       var current_conversation_id = conversationId
       if (current_conversation_id == null) {
+        console.log("Starting conversation")
         const title = await getTitle(final_message)
         console.log(title)
         current_conversation_id = await DB.addConversation(title)

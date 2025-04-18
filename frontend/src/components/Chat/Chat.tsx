@@ -78,6 +78,7 @@ const Chat: React.FC<ChatProps> = ({id}) => {
 
 
 
+  console.log("Loaded Chat")
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleFileButtonClick = () => {
@@ -149,7 +150,7 @@ const Chat: React.FC<ChatProps> = ({id}) => {
     if (id) {
       loadConversation(id)
     }
-  }, [id])
+  }, [])
 
   return (
     <>

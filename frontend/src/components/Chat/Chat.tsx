@@ -77,9 +77,6 @@ const Chat: React.FC<ChatProps> = ({id}) => {
   }, [conversation])
 
 
-
-  console.log("Loaded Chat")
-
   const fileInputRef = useRef<HTMLInputElement>(null);
   const handleFileButtonClick = () => {
     fileInputRef!.current!.click()

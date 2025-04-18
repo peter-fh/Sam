@@ -26,7 +26,6 @@ function NewConversationButton() {
         setCurrentThread(null)
         setStartingThread(null)
         setStartNewConversation(true)
-        console.log("Set thread to null")
       }}
     >
       {/* <i className="fa-solid fa-plus" /> */}

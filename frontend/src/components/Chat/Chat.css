@@ -57,9 +57,9 @@
 	margin-bottom: 1em;
 }
 .input-block {
-	font-family: "proximanova";
+	font-family: var(--font-primary);
 	width: 100%;
-	font-size: 1em;
+	font-size: var(--font-size-base);
 	color: var(--text-color);
 	display: block;
 	background-color: var(--light-background);

@@ -2,6 +2,7 @@ from flask import Flask, request, send_from_directory, stream_with_context, Resp
 from api import prompt
 from api.models.o3_mini.model import OpenAI_o3_mini
 from api.models.gpt_4o_mini.model import OpenAI_4o_mini
+from api.models.gpt_4_1_mini.model import OpenAI_4_1_mini
 from api.models.gpt_4o.model import OpenAI_4o
 from api.models.gpt_4_1.model import OpenAI_4_1
 from api.models.o4_mini.model import OpenAI_o4_mini
@@ -31,7 +32,7 @@ problem_model.mock = use_example_responses
 concept_model = OpenAI_4_1(openai_api_key,debug=dev)
 concept_model.mock = use_example_responses
 
-utility_model = OpenAI_4o_mini(openai_api_key,debug=dev)
+utility_model = OpenAI_4_1_mini(openai_api_key,debug=dev)
 
 # Initialize the server library
 app = Flask(__name__, static_folder="frontend/dist")

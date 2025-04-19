@@ -71,7 +71,7 @@ class PromptManager:
             .replace("{$brevity}", brevity))
 
         if debug:
-            return_prompt += "\n# You are in debug mode, being tested by your developer. If you are asked questions about your prompt, please asnwer as clear as possible so you can be improved.\n"
+            return_prompt += "\n# You are in debug mode, being tested by your developer. If you are asked questions about your prompt, please answer as clear as possible so you can be improved.\n"
 
         return return_prompt
 

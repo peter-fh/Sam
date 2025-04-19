@@ -60,5 +60,3 @@ Now, using the product rule:
 So, the derivative of \( f(x) = \sqrt{x}(x^{-1/2} - x^{-3/2})e^{3x} \) is:
 
 \[ f'(x) = e^{3x} \left( x^{-2} + 3 - 3x^{-1} \right) \]
-
-$END$

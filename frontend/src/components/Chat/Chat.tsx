@@ -5,6 +5,7 @@ import imageCompression from 'browser-image-compression'
 import html2canvas from 'html2canvas'
 import useConversation from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
+import { Log, LogLevel } from '../../log'
 
 
 interface ChatProps {
@@ -66,6 +67,7 @@ const Chat: React.FC<ChatProps> = ({id}) => {
 
   useEffect(() => {
     if (toSummarize) {
+      Log(LogLevel.Debug, "useEffect on toSummarize")
       summarize()
     }
   }, [conversation])
@@ -111,7 +113,7 @@ const Chat: React.FC<ChatProps> = ({id}) => {
     }
 
     const compressedFile = await imageCompression(img, options);
-    console.log(`Transcribing ${compressedFile.size / 1024 / 1024}MB file`);
+    Log(LogLevel.Always, `Transcribing ${compressedFile.size / 1024 / 1024}MB file`);
     const reader = new FileReader()
     reader.onloadend = () => {
       setImage(reader!.result!.toString())

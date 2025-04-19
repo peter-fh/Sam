@@ -4,9 +4,9 @@ import { useChatSettings } from "../../context/useChatContext";
 import Endpoints from "../../endpoints";
 import { DB } from "../../database/db";
 import { useThreadSelectionContext } from "../../context/useThreadContext";
+import { Log, LogLevel } from "../../log";
 
 
-const TOKEN_THRESHOLD = 2048
 const TOKEN_THRESHOLD = 1024
 const REVIEW_MESSAGE = "You've reached the end of the conversation! If you have any follow up questions, please feel free to ask here. If you have a new problem to work on, please start a new conversation. Consider [booking a tutoring session](https://www.concordia.ca/students/success/learning-support/math-help.html#tutoring) to help with these concepts. Keep practicing these problems, and it will help solidify you understanding!"
 const INTRO_MESSAGE = "Hello! I'm Sam, an AI chatbot powered by Chat-GPT. I use context specific to Concordia to provide better explanations. AI makes mistakes, so please double check any answers you are given."
@@ -157,7 +157,7 @@ const useConversation = () => {
 
     const transcription = decoder.decode(value, { stream: true})
 
-    console.log("Image transcription:\n", transcription)
+    Log(LogLevel.Debug, "Image transcription:\n", transcription)
     return transcription
   }
 
@@ -178,7 +178,7 @@ const useConversation = () => {
 
     const summary = decoder.decode(value, { stream: true})
 
-    console.log("Summarized conversation:\n", summary)
+    Log(LogLevel.Debug, "Summarized conversation:\n", summary)
 
     return summary
   }
@@ -226,10 +226,10 @@ const useConversation = () => {
       setAiMessage(answer)
     }
     setAiMessage('')
-    console.log(answer)
+    Log(LogLevel.Debug, answer)
 
     const end_time = performance.now()
-    console.log(`Response took ${(end_time - start_time) / 1000}`)
+    Log(LogLevel.Always, `Response took ${(end_time - start_time) / 1000}`)
     setToSummarize(true)
 
     return answer
@@ -338,9 +338,8 @@ const useConversation = () => {
 
       var current_conversation_id = conversationId
       if (current_conversation_id == null) {
-        console.log("Starting conversation")
         const title = await getTitle(final_message)
-        console.log(title)
+        Log(LogLevel.Debug, "Title: ", title)
         current_conversation_id = await DB.addConversation(title)
         setConversationId(current_conversation_id)
         setCurrentThread(current_conversation_id)
@@ -373,6 +372,9 @@ const useConversation = () => {
     }
 
     if (estimateTokens(total_length) <= TOKEN_THRESHOLD) {
+      Log(LogLevel.Debug, "Estimated tokens: " + estimateTokens(total_length))
+      Log(LogLevel.Debug, "Threshold: " + TOKEN_THRESHOLD)
+      Log(LogLevel.Debug, "Does not meet token threshold")
       return
     }
 

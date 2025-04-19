@@ -79,7 +79,7 @@ export namespace DB {
   export async function updateSummary(conversation_id: number, summary: string) {
     const { error } = await supabase
       .from("conversations")
-      .insert({
+      .update({
         summary: summary,
       })
       .eq('id', conversation_id)

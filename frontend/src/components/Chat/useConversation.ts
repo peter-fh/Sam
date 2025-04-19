@@ -7,6 +7,7 @@ import { useThreadSelectionContext } from "../../context/useThreadContext";
 
 
 const TOKEN_THRESHOLD = 2048
+const TOKEN_THRESHOLD = 1024
 const REVIEW_MESSAGE = "You've reached the end of the conversation! If you have any follow up questions, please feel free to ask here. If you have a new problem to work on, please start a new conversation. Consider [booking a tutoring session](https://www.concordia.ca/students/success/learning-support/math-help.html#tutoring) to help with these concepts. Keep practicing these problems, and it will help solidify you understanding!"
 const INTRO_MESSAGE = "Hello! I'm Sam, an AI chatbot powered by Chat-GPT. I use context specific to Concordia to provide better explanations. AI makes mistakes, so please double check any answers you are given."
 
@@ -83,10 +84,10 @@ const useConversation = () => {
     }
 
     if (summary && summary.summary) {
-      const formatted_summary = newMessage(summary.summary, 'assistant')
+      const formatted_summary = newMessage(summary.summary, 'user')
       setConversation([
         formatted_summary,
-        ...formattedMessages.slice(0,4)
+        ...formattedMessages.slice(1).slice(-4),
       ])
     } else {
       setConversation([
@@ -222,11 +223,6 @@ const useConversation = () => {
 
       const chunk = decoder.decode(value, { stream: true})
       answer += chunk
-      if (answer.includes("+END+")) {
-        console.log("End!")
-        answer = answer.replace("+END+", "")
-        setToReview(true)
-      }
       setAiMessage(answer)
     }
     setAiMessage('')

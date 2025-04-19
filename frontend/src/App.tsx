@@ -8,8 +8,8 @@ import { useThreadSelectionContext } from './context/useThreadContext'
 function App() {
   const {
     currentThread,
-    startingThread,
     threadsOpen,
+    threadKey
   } = useThreadSelectionContext()
 
   return (
@@ -19,7 +19,7 @@ function App() {
       { threadsOpen ? 
         <Threads/>
         :
-        <Chat key={startingThread} id={currentThread}/>
+        <Chat key={threadKey} id={currentThread}/>
       }
     </>
   )

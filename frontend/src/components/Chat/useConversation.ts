@@ -201,7 +201,7 @@ const useConversation = () => {
     var elapsedIntervals = 0
     const intervalId = setInterval(() => {
       const numberOfDots = elapsedIntervals % 4
-      const thinkingMessage = "Thinking" + ".".repeat(numberOfDots)
+      const thinkingMessage = "Solving" + ".".repeat(numberOfDots)
 
       if (elapsedIntervals != 0) {
         setAiMessage("*" + thinkingMessage + "*")

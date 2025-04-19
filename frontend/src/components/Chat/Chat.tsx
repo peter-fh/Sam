@@ -146,7 +146,9 @@ const Chat: React.FC<ChatProps> = ({id}) => {
   }
 
   useEffect(() => {
+    Log(LogLevel.Debug, "Refreshing chat component")
     if (id) {
+      Log(LogLevel.Debug, "Loading conversation with ID ", id)
       loadConversation(id)
     }
   }, [])

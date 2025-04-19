@@ -3,6 +3,7 @@ import './Sidebar.css'
 import React, { useEffect } from 'react'
 import { useChatSettings } from '../../context/useChatContext';
 import { useThreadSelectionContext } from '../../context/useThreadContext';
+import { v4 as uuidv4 } from 'uuid';
 
 function NewConversationButton() {
   const {
@@ -13,7 +14,7 @@ function NewConversationButton() {
   const {
     setCurrentThread,
     setThreadsOpen,
-    setStartingThread,
+    setThreadKey,
   } = useThreadSelectionContext()
 
   return (
@@ -24,7 +25,7 @@ function NewConversationButton() {
         setChatLoaded(false)
         setThreadsOpen(false)
         setCurrentThread(null)
-        setStartingThread(null)
+        setThreadKey(uuidv4())
         setStartNewConversation(true)
       }}
     >

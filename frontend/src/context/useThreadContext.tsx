@@ -1,12 +1,13 @@
 import { createContext, ReactNode, useContext, useState } from "react";
+import { v4 as uuidv4 } from 'uuid';
 
 interface ThreadSelectionContextType {
   currentThread: number | null
   setCurrentThread: (t: number | null) => void
   threadsOpen: boolean
   setThreadsOpen: (o: boolean) => void
-  startingThread: number | null
-  setStartingThread: (s: number | null) => void
+  threadKey: string
+  setThreadKey: (k: string) => void
 }
 
 const ThreadSelectionContext = createContext<ThreadSelectionContextType | undefined>(undefined)
@@ -14,14 +15,14 @@ const ThreadSelectionContext = createContext<ThreadSelectionContextType | undefi
 
 export function ThreadSelectionProvider({children }: {children: ReactNode}) {
   const [currentThread, setCurrentThread] = useState<number | null>(null)
-  const [startingThread, setStartingThread] = useState<number | null>(null)
   const [threadsOpen, setThreadsOpen] = useState<boolean>(false)
+  const [threadKey, setThreadKey] = useState<string>(() => uuidv4())
   return (
     <ThreadSelectionContext.Provider
       value={{
         currentThread, setCurrentThread,
         threadsOpen, setThreadsOpen,
-        startingThread, setStartingThread,
+        threadKey, setThreadKey
       }}
     >
       {children}

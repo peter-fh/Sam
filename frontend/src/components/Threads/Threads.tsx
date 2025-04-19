@@ -3,6 +3,7 @@ import { useThreadSelectionContext } from "../../context/useThreadContext"
 import { DB } from "../../database/db"
 import './Threads.css'
 import { useChatSettings } from "../../context/useChatContext"
+import { v4 as uuidv4 } from 'uuid';
 
 
 interface ConversationItem {
@@ -15,7 +16,7 @@ function Threads() {
 	const {
 		setThreadsOpen,
 		setCurrentThread,
-		setStartingThread,
+		setThreadKey,
 	} = useThreadSelectionContext()
 
 	const {
@@ -34,7 +35,7 @@ function Threads() {
 
 	function ClickableThread(props: ClickableThreadProps) {
 		const handleClick = () => {
-			setStartingThread(props.id)
+			setThreadKey(uuidv4())
 			setCurrentThread(props.id)
 			setThreadsOpen(false)
 		}
@@ -115,7 +116,7 @@ function Threads() {
 						setChatLoaded(false)
 						setThreadsOpen(false)
 						setCurrentThread(null)
-						setStartingThread(null)
+						setThreadKey(uuidv4())
 						setStartNewConversation(true)
 					}} 
 					>

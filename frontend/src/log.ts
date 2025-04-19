@@ -9,8 +9,8 @@ const isDebugMode = () => {
   return import.meta.env.MODE == "development"
 }
 
-export function Log(level: LogLevel, ...args: string[]) {
-  if (level == LogLevel.Debug && isDebugMode()) {
+export function Log(level: LogLevel, ...args: any[]) {
+  if (level == LogLevel.Debug && !isDebugMode()) {
     return
   }
 

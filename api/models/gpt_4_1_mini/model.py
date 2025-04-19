@@ -54,7 +54,7 @@ class OpenAI_4_1_mini(UtilityModel):
                     }
                 ],
                 temperature=0,
-                max_tokens=300
+                max_tokens=1000
             )   
         except:
             print("Transcription error")

@@ -58,12 +58,14 @@ The following are concepts and knowledge that the student doesn't need to know a
 - Horizontal line test
 - Taylor expansion for limits
 - First order approximations for limits
+- Integral calculus
 
 ## Notes
 
 Make sure to take into account these notes:
 
 - Notation for derivative rules uses f and g instead of u and v
+- When differentiating implicitly, use Lagrange notation. For example, to differentiate x(t) with respect to t, use x' instead of dx/dt.
 - Lots of horizontal asymptotes have tricks where the left and right limits to infinity are different. Please be careful about these questions.
 - The expression sqrt{x^2} should be treated as |x|, and if x \to -\infty then |x|=-x
 - Inverting functions are included, but students do NOT need to know if functions are invertible or not or justify invertibility

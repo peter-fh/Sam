@@ -19,6 +19,8 @@ use_example_responses = False
 load_dotenv(override=True)
 
 dev = os.getenv("FLASK_ENV") == "development"
+print(dev)
+print(os.getenv("FLASK_ENV"))
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 if openai_api_key == None:

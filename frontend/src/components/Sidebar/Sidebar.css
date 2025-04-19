@@ -9,7 +9,7 @@
 	background-color: var(--dark-background);
 	z-index: 12;
 	overflow-y: auto;
-	row-gap: 14%;
+	row-gap: 10%;
 }
 
 .options {
@@ -41,7 +41,7 @@
 .attribution {
 	margin-bottom: 1em;
 	color: inherit;
-	font-size: 0.7rem;
+	font-size: var(--font-size-base);
 	margin-top: auto;
 }
 
@@ -59,7 +59,7 @@
 	padding: 9px 12px 9px 12px;
 	margin: 0.5em 5px 0 5px;
 	color: var(--text-color);
-	font-size: 20px;
+	font-size: var(--font-size-base);
 }
 
 .invisible-button{
@@ -67,7 +67,7 @@
 	border: solid;
 	padding: 9px 12px 9px 12px;
 	margin: 0.5em 5px 0 5px;
-	font-size: 20px;
+	font-size: var(--font-size-base);
 }
 
 .sidebar-button:hover {
@@ -85,20 +85,20 @@
 
 
 .option > .sidebar-input-header {
-	font-size: 1.3rem;
+	font-size: var(--font-size-lg);
 }
 
 .sidebar-select-box {
 	height: 3.5rem;
-	width: 7rem;
+	width: 8rem;
 	background-color: var(--light-background);
 	color: var(--text-color);
 	border-radius: 0.3rem;
-	font-size: 1rem;
+	font-size: var(--font-size-base);
 	border-color: var(--outline-color);
 	padding: 5px 5px;
 	text-align-last: center;
-	font-family: "proximanova";
+	font-family: var(--font-primary);
 }
 
 .select-box-option.active {
@@ -116,6 +116,6 @@
 	border: none;
 	color: inherit;
 	cursor: pointer; 
-	font-family: inherit;
-	font-size: 1.2rem;
+	font-family: var(--font-primary);
+	font-size: var(--font-size-lg);
 }

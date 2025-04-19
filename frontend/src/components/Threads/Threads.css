@@ -40,7 +40,7 @@
 	background-color: var(--light-background);
 	border-color: var(--outline-color);
 	margin-bottom: 1rem;
-	font-size: 1.5rem;
+	font-size: var(--font-size-lg);
 }
 
 .threads-title {
@@ -55,6 +55,7 @@
 	margin: 0;
 	padding: 5px 0.5rem 5px 0.5rem;
 	border: 1px solid transparent;
+	font-size: var(--font-size-base);
 }
 
 .thread > * {

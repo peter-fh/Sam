@@ -49,13 +49,6 @@ def icon():
 
     return send_from_directory(app.static_folder, 'icon.png', mimetype='image/png')
 
-@app.route('/font')
-def font():
-    if not app.static_folder:
-        raise Exception("Static folder not found!")
-
-    return send_from_directory(app.static_folder, 'proximanova.ttf')
-
 # Handles showing the website's main page
 @app.route('/')
 def index():

@@ -10,10 +10,6 @@ export default defineConfig(({ mode }) => {
   envDir: "../",
   server: mode === 'development' ? {
     proxy: {
-      '/font':{
-        target: 'http://127.0.0.1:8070',
-        changeOrigin: true,
-      },
       '/summary':{
         target: 'http://127.0.0.1:8070',
         changeOrigin: true,

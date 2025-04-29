@@ -40,6 +40,8 @@
 
 .attribution {
 	margin-bottom: 1em;
+	margin-left: 1rem;
+	margin-right: 1rem;
 	color: inherit;
 	font-size: var(--font-size-base);
 	margin-top: auto;

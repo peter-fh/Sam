@@ -237,10 +237,10 @@ function Attribution() {
   return (
     <a 
       className="attribution" 
-      href="https://www.flaticon.com/free-icons/robot" 
+      href="https://www.concordia.ca/students/success/learning-support/math-help.html"
       target='_blank'
       title="robot icons">
-      &copy; Robot icons created by Fajriah Robiatul Adawiah - Flaticon
+      Get learning support for math-based courses via the Student Success Center
     </a>
   )
 }

@@ -28,7 +28,7 @@ if openai_api_key == None:
     openai_api_key = ""
     use_example_responses = True
 
-problem_model = OpenAI_o4_mini(openai_api_key,debug=dev)
+problem_model = OpenAI_o3_mini(openai_api_key,debug=dev)
 problem_model.mock = use_example_responses
 
 concept_model = OpenAI_4_1(openai_api_key,debug=dev)

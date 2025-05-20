@@ -1,11 +1,11 @@
 :root {
-	color-scheme: light;
-	--dark-background: #e3e3e3;
-	--light-background: #ffffff;
-	--highlight-color: #77bbbb;
-	--clicked-button: gray;
-	--text-color: black;
-	--outline-color: #303030;
+	color-scheme: dark;
+	--dark-background: #1d1d1d;
+	--light-background: #222222;
+	--highlight-color: #114444;
+	--clicked-button: white;
+	--text-color: white;
+	--outline-color: #707070;
 	--font-primary: "Open Sans", sans-serif;
 	--font-size-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
 	--font-size-lg: clamp(1rem, 0.95rem + 0.25vw, 1.15rem);
@@ -13,18 +13,6 @@
 	--font-size-2xl: clamp(1.3rem, 1.2rem + 0.5vw, 1.75rem);
 	--line-height-base: 1.5;
 	--line-height-tight: 1.25;
-}
-
-@media (prefers-color-scheme: dark) { 
-	:root {
-		color-scheme: dark;
-		--dark-background: #1d1d1d;
-		--light-background: #222222;
-		--highlight-color: #114444;
-		--clicked-button: white;
-		--text-color: white;
-		--outline-color: #707070;
-	}
 }
 
 .open-sans-default{

@@ -12,6 +12,8 @@ interface ChatSettingsContextType {
   setSidebar: (s: boolean) => void
   smallScreen: boolean
   setSmallScreen: (s: boolean) => void
+  disclaimerAccepted: boolean
+  setDisclaimerAccepted: (s: boolean) => void
 }
 
 const ChatSettingsContext = createContext<ChatSettingsContextType | undefined>(undefined)
@@ -23,6 +25,7 @@ export function ChatSettingsProvider({ children }: { children: ReactNode }) {
   const [detailLevel, setDetailLevel] = useState<DetailLevel>(DetailLevel.DETAILED);
   const [sidebar, setSidebar] = useState<boolean>(true);
   const [smallScreen, setSmallScreen] = useState<boolean>(true);
+  const [disclaimerAccepted, setDisclaimerAccepted] = useState<boolean>(false);
 
   return (
     <ChatSettingsContext.Provider
@@ -32,6 +35,7 @@ export function ChatSettingsProvider({ children }: { children: ReactNode }) {
         detailLevel, setDetailLevel,
         sidebar, setSidebar,
         smallScreen, setSmallScreen,
+        disclaimerAccepted, setDisclaimerAccepted
       }}
     >
       {children}

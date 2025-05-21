@@ -6,9 +6,10 @@ import { useNavigate } from 'react-router-dom';
 
 function Modal() {
 
-  const [showCourseSelect, setShowCourseSelect] = useState(true);
-  const [showTypeSelect] = useState(true);
-  const [showDislaimer, setShowDisclaimer] = useState(true);
+  const {
+  } = useChatSettings()
+  const [showCourseSelect, setShowCourseSelect] = useState(true)
+  const [showTypeSelect] = useState(true)
 
   // TODO: Add "unspecified" option to course and don't allow closing the course modal
   // if unspecified is selected
@@ -16,6 +17,7 @@ function Modal() {
   const { 
     setQuestion, 
     setCourse,
+    disclaimerAccepted, setDisclaimerAccepted
   } = useChatSettings();
 
   const navigate = useNavigate()
@@ -103,7 +105,7 @@ By continuing to use this tool, you acknowledge that you are using it ethically 
 
 	    </span>
 	  <button onClick={() => {
-	      setShowDisclaimer(false)
+	      setDisclaimerAccepted(true)
 	    }} className="interactive modal-close-button disclaimer-button">I Accept</button>
 
 	</div>
@@ -113,7 +115,7 @@ By continuing to use this tool, you acknowledge that you are using it ethically 
   }
 
 
-  if (showDislaimer) return disclaimerModal()
+  if (!disclaimerAccepted) return disclaimerModal()
   if (showCourseSelect) return courseSelectModal()
   if (showTypeSelect) return typeSelectModal()
   

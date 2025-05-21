@@ -11,4 +11,5 @@ export enum DetailLevel {
 export enum QuestionType {
   CONCEPT = "Concept",
   PROBLEM = "Problem",
+  STRATEGY = "Strategies"
 }

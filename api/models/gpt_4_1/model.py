@@ -10,6 +10,7 @@ from api.prompt import PromptManager, MODELS_DIR, PromptType
 GPT_4_1_DIR = MODELS_DIR + os.sep + "gpt_4_1"
 CONCEPT_FILE_PATH = GPT_4_1_DIR + os.sep + "concept.md"
 PROBLEM_FILE_PATH = GPT_4_1_DIR + os.sep + "problem.md"
+STRATEGIES_FILE_PATH = GPT_4_1_DIR + os.sep + "strategy.md"
 
 class OpenAI_4_1(TutorModel):
     debug: bool
@@ -32,6 +33,7 @@ class OpenAI_4_1(TutorModel):
         self.prompt_manager = PromptManager()
         self.prompt_manager.setConcept(CONCEPT_FILE_PATH)
         self.prompt_manager.setProblem(PROBLEM_FILE_PATH)
+        self.prompt_manager.setStrategies(STRATEGIES_FILE_PATH)
         self.output_token_cost = 10 / 1000000
         self.input_token_count = 0
         self.output_token_count = 0

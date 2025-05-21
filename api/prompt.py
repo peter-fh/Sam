@@ -4,9 +4,12 @@ from enum import Enum
 
 MODELS_DIR = "api" + os.sep + "models" 
 
+BREVITY_PLACEHOLDER = "{$brevity}"
+
 class PromptType(Enum):
     PROBLEM = 1
     CONCEPT = 2
+    STRATEGIES = 3
 
 
 @dataclass
@@ -15,6 +18,8 @@ class PromptManagerConfig:
     concept_path: str = ""
     Problem: bool = False
     problem_path: str = ""
+    Strategy: bool = False
+    study_path = ""
     Summary: bool = False
     summary_path: str = ""
     Transcription: bool = False
@@ -28,6 +33,7 @@ class InvalidConfigurationException(Exception):
 class PromptManager:
     concept_path: str = ""
     problem_path: str = ""
+    strategies_path: str = ""
     summary_path: str = ""
     transcription_path: str = ""
     review_path: str = ""
@@ -39,6 +45,9 @@ class PromptManager:
 
     def setProblem(self, problem_path):
         self.problem_path = problem_path
+
+    def setStrategies(self, strategies_path):
+        self.strategies_path = strategies_path
 
     def setSummary(self, summary_path):
         self.summary_path = summary_path
@@ -58,7 +67,7 @@ class PromptManager:
 
         prompt = open(self.concept_path).read()
         return_prompt = (prompt
-            .replace("{$brevity}", brevity))
+            .replace(BREVITY_PLACEHOLDER, brevity))
 
         return return_prompt
 
@@ -68,11 +77,19 @@ class PromptManager:
 
         prompt = open(self.problem_path).read()
         return_prompt = (prompt
-            .replace("{$brevity}", brevity))
+            .replace(BREVITY_PLACEHOLDER, brevity))
 
         if debug:
             return_prompt += "\n# You are in debug mode, being tested by your developer. If you are asked questions about your prompt, please answer as clear as possible so you can be improved.\n"
 
+        return return_prompt
+
+    def strategyPrompt(self, brevity: str):
+        if not self.strategies_path:
+            raise InvalidConfigurationException("Strategy prompt has not been enabled for this prompt manager")
+
+        prompt = open(self.strategies_path).read()
+        return_prompt = prompt.replace(BREVITY_PLACEHOLDER, brevity)
         return return_prompt
 
     def summaryPrompt(self):
@@ -116,4 +133,6 @@ class PromptManager:
             return self.problemPrompt(brevity, debug) 
         elif prompt_type == PromptType.CONCEPT:
             return self.conceptPrompt(brevity)
+        elif prompt_type == PromptType.STRATEGIES:
+            return self.strategyPrompt(brevity)
 

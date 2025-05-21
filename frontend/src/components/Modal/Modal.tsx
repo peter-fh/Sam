@@ -1,33 +1,26 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { QuestionType, Course } from '../../types/options'
 import './Modal.css'
 import { useChatSettings } from '../../context/useChatContext';
+import { useNavigate } from 'react-router-dom';
 
 function Modal() {
 
   const {
-    startNewConversation,
-    setStartNewConversation,
   } = useChatSettings()
-  const [showCourseSelect, setShowCourseSelect] = useState(true);
-  const [showTypeSelect, setShowTypeSelect] = useState(true);
-  const [showDislaimer, setShowDisclaimer] = useState(true);
+  const [showCourseSelect, setShowCourseSelect] = useState(true)
+  const [showTypeSelect] = useState(true)
 
   // TODO: Add "unspecified" option to course and don't allow closing the course modal
   // if unspecified is selected
   // This shouldn't be done until either more courses are added or rapid testing of the UI is not required anymore
   const { 
-    setChatLoaded,
     setQuestion, 
     setCourse,
+    disclaimerAccepted, setDisclaimerAccepted
   } = useChatSettings();
 
-  useEffect(() => {
-    if (startNewConversation) {
-      setStartNewConversation(false)
-      setShowTypeSelect(true)
-    }
-  }, [startNewConversation])
+  const navigate = useNavigate()
 
 
   /* The course-select select box can be changed to its own function/component if the sidebar version
@@ -66,13 +59,11 @@ function Modal() {
 	<div className="type-modal-content">
 	  <p className="modal-text">What type of question do you have?</p>
 	  <button onClick={() => {
-	      setChatLoaded(true)
-	      setShowTypeSelect(false)
+	      navigate("/chat")
 	      setQuestion(QuestionType.CONCEPT)
 	    }}className="interactive modal-close-button">I have a question about a concept</button>
 	  <button onClick={() => {
-	      setChatLoaded(true)
-	      setShowTypeSelect(false)
+	      navigate("/chat")
 	      setQuestion(QuestionType.PROBLEM)
 	    }}className="interactive modal-close-button">I have a question about a problem</button>
 
@@ -114,7 +105,7 @@ By continuing to use this tool, you acknowledge that you are using it ethically 
 
 	    </span>
 	  <button onClick={() => {
-	      setShowDisclaimer(false)
+	      setDisclaimerAccepted(true)
 	    }} className="interactive modal-close-button disclaimer-button">I Accept</button>
 
 	</div>
@@ -124,7 +115,7 @@ By continuing to use this tool, you acknowledge that you are using it ethically 
   }
 
 
-  if (showDislaimer) return disclaimerModal()
+  if (!disclaimerAccepted) return disclaimerModal()
   if (showCourseSelect) return courseSelectModal()
   if (showTypeSelect) return typeSelectModal()
   

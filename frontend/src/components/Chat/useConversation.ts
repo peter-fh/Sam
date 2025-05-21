@@ -33,7 +33,7 @@ const useConversation = () => {
   } = useChatSettings()
 
   const {
-    setCurrentThread,
+    setSelectedThread
   } = useThreadSelectionContext()
 
   const [conversation, setConversation] = useState<Message[]>([]);
@@ -342,7 +342,7 @@ const useConversation = () => {
         Log(LogLevel.Debug, "Title: ", title)
         current_conversation_id = await DB.addConversation(title)
         setConversationId(current_conversation_id)
-        setCurrentThread(current_conversation_id)
+        setSelectedThread(current_conversation_id)
       }
 
       await DB.addMessage(current_conversation_id, "user", final_message)

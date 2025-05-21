@@ -2,7 +2,6 @@ import { useEffect, useRef } from 'react'
 import './Chat.css'
 import MarkTeX from '../MarkTeX'
 import imageCompression from 'browser-image-compression'
-import html2canvas from 'html2canvas'
 import useConversation from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
 import { Log, LogLevel } from '../../log'
@@ -37,9 +36,6 @@ const Chat: React.FC<ChatProps> = ({id}) => {
 
   const {
     sidebar,
-    chatLoaded,
-    save,
-    setSave,
   } = useChatSettings();
 
 
@@ -59,11 +55,10 @@ const Chat: React.FC<ChatProps> = ({id}) => {
   })
 
   useEffect(() => {
-    if (chatLoaded && id == null){
+    if (!id) {
       intro()
-    } else {
     }
-  }, [chatLoaded])
+  }, [])
 
   useEffect(() => {
     if (toSummarize) {
@@ -125,25 +120,6 @@ const Chat: React.FC<ChatProps> = ({id}) => {
 
   const messagesRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    if (save) {
-      saveAsPdf()
-    }
-  }, [save])
-
-  const saveAsPdf = async () => {
-    if (messagesRef.current) {
-      const canvas = await html2canvas(messagesRef.current);
-      setSave(false)
-      const imgData = canvas.toDataURL('image/png');
-
-      // Create a link element to download the image
-      const link = document.createElement('a');
-      link.href = imgData;
-      link.download = 'AI Math Tutor Conversation.png'; // File name for the downloaded image
-      link.click();
-    }
-  }
 
   useEffect(() => {
     Log(LogLevel.Debug, "Refreshing chat component")
@@ -161,12 +137,12 @@ const Chat: React.FC<ChatProps> = ({id}) => {
         <div className="messages" ref={messagesRef}>
           {messages && messages.map((message, index) => (
             <span key={index}className={message.sender == "user" ? "question" : "output"}>
-              <MarkTeX content={message.content} isSaved={save}/>
+              <MarkTeX content={message.content}/>
             </span>
           ))}
           {aiMessage != '' && (
             <span key={-1}className="output">
-              <MarkTeX content={aiMessage} isSaved={save}/>
+              <MarkTeX content={aiMessage}/>
             </span>
           )}
         </div>

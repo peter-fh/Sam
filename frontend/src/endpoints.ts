@@ -1,9 +1,9 @@
 export const Endpoints = {
-  Ask: '/question',
-  Intro: '/introduction',
-  Image: '/image',
-  Summary: '/summary',
-  Title: '/title',
+  Ask: '/api/question',
+  Intro: '/api/introduction',
+  Image: '/api/image',
+  Summary: '/api/summary',
+  Title: '/api/title',
 }
 
 export default Endpoints

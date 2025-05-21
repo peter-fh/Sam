@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { QuestionType, Course } from '../../types/options'
 import './Modal.css'
 import { useChatSettings } from '../../context/useChatContext';
+import { useNavigate } from 'react-router-dom';
 
 function Modal() {
 
@@ -17,7 +18,6 @@ function Modal() {
   // if unspecified is selected
   // This shouldn't be done until either more courses are added or rapid testing of the UI is not required anymore
   const { 
-    setChatLoaded,
     setQuestion, 
     setCourse,
   } = useChatSettings();
@@ -28,6 +28,8 @@ function Modal() {
       setShowTypeSelect(true)
     }
   }, [startNewConversation])
+
+  const navigate = useNavigate()
 
 
   /* The course-select select box can be changed to its own function/component if the sidebar version
@@ -66,13 +68,11 @@ function Modal() {
 	<div className="type-modal-content">
 	  <p className="modal-text">What type of question do you have?</p>
 	  <button onClick={() => {
-	      setChatLoaded(true)
-	      setShowTypeSelect(false)
+	      navigate("/chat")
 	      setQuestion(QuestionType.CONCEPT)
 	    }}className="interactive modal-close-button">I have a question about a concept</button>
 	  <button onClick={() => {
-	      setChatLoaded(true)
-	      setShowTypeSelect(false)
+	      navigate("/chat")
 	      setQuestion(QuestionType.PROBLEM)
 	    }}className="interactive modal-close-button">I have a question about a problem</button>
 

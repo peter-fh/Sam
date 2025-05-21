@@ -37,7 +37,6 @@ const Chat: React.FC<ChatProps> = ({id}) => {
 
   const {
     sidebar,
-    chatLoaded,
     save,
     setSave,
   } = useChatSettings();
@@ -59,11 +58,10 @@ const Chat: React.FC<ChatProps> = ({id}) => {
   })
 
   useEffect(() => {
-    if (chatLoaded && id == null){
+    if (!id) {
       intro()
-    } else {
     }
-  }, [chatLoaded])
+  }, [])
 
   useEffect(() => {
     if (toSummarize) {

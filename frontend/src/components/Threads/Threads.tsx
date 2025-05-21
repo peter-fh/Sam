@@ -4,6 +4,7 @@ import { DB } from "../../database/db"
 import './Threads.css'
 import { useChatSettings } from "../../context/useChatContext"
 import { v4 as uuidv4 } from 'uuid';
+import { useNavigate } from "react-router-dom"
 
 
 interface ConversationItem {
@@ -13,10 +14,11 @@ interface ConversationItem {
 
 
 function Threads() {
+
+	const navigate = useNavigate()
+
 	const {
-		setThreadsOpen,
-		setCurrentThread,
-		setThreadKey,
+		setSelectedThread
 	} = useThreadSelectionContext()
 
 	const {
@@ -35,9 +37,8 @@ function Threads() {
 
 	function ClickableThread(props: ClickableThreadProps) {
 		const handleClick = () => {
-			setThreadKey(uuidv4())
-			setCurrentThread(props.id)
-			setThreadsOpen(false)
+			navigate(`/chat/${props.id}`)
+			setSelectedThread(props.id)
 		}
 		return (
 			<div className="thread" onClick={handleClick}>
@@ -118,6 +119,7 @@ function Threads() {
 						setCurrentThread(null)
 						setThreadKey(uuidv4())
 						setStartNewConversation(true)
+
 					}} 
 					>
 						New Chat 

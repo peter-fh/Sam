@@ -67,8 +67,7 @@ function Modal() {
 	      setQuestion(QuestionType.PROBLEM)
 	    }}className="interactive modal-close-button type-button">I have a question about a problem</button>
 	  <button onClick={() => {
-	      setChatLoaded(true)
-	      setShowTypeSelect(false)
+	      navigate("/chat")
 	      setQuestion(QuestionType.STRATEGY)
 	    }}className="interactive modal-close-button type-button">I have a question about study strategies</button>
 

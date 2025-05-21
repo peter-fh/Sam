@@ -30,7 +30,7 @@ problem_model.mock = use_example_responses
 concept_model = OpenAI_4_1(openai_api_key,debug=dev)
 concept_model.mock = use_example_responses
 
-strategy_model = OpenAI_4_1(openai_api_key, debug=dev)
+strategy_model = OpenAI_4_1_mini(openai_api_key, debug=dev)
 strategy_model.mock = use_example_responses
 
 utility_model = OpenAI_4_1_mini(openai_api_key,debug=dev)
@@ -80,7 +80,7 @@ def question():
         stream = problem_model.ask(conversation, course_prompt, prompt_type, brevity) 
     elif prompt_type == PromptType.CONCEPT:
         stream = concept_model.ask(conversation, course_prompt, prompt_type, brevity) 
-    elif prompt_type == PromptType.STRATEGIES:
+    elif prompt_type == PromptType.STUDYING:
         stream = strategy_model.ask(conversation, course_prompt, prompt_type, brevity) 
     else:
         return "Internal Server error! Invalid type of question"

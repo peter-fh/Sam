@@ -42,13 +42,6 @@ if dev:
     CORS(app)
 
 
-@app.route('/icon.png')
-def icon():
-    if not app.static_folder:
-        raise Exception("Static folder not found!")
-
-    return send_from_directory(app.static_folder, 'icon.png', mimetype='image/png')
-
 # Handles showing the website's main page
 @app.route('/')
 def index():
@@ -56,29 +49,30 @@ def index():
         raise Exception("Static folder not found!")
     return send_from_directory(app.static_folder, "index.html")
 
-@app.route('/summary', methods=['POST'])
-def summary():
-    conversation = request.get_json()
-    return utility_model.summarize(conversation)
-
 @app.route("/assets/<path:path>")
 def serve_assets(path):
     if not app.static_folder:
         raise Exception("Static folder not found!")
     return send_from_directory(app.static_folder + os.sep + "assets", path)
 
-@app.route('/image', methods=['POST'])
+@app.route('/api/summary', methods=['POST'])
+def summary():
+    conversation = request.get_json()
+    return utility_model.summarize(conversation)
+
+
+@app.route('/api/image', methods=['POST'])
 def image():
     image = request.get_data(as_text=True)
     return utility_model.transcribe(image)
 
-@app.route('/title', methods=['POST'])
+@app.route('/api/title', methods=['POST'])
 def title():
     question = request.get_data(as_text=True)
     return utility_model.title(question)
 
 # Handles clicking the "Ask" button
-@app.route('/question', methods=['POST'])
+@app.route('/api/question', methods=['POST'])
 def question():
 
     # Retrieve question and its context from the request
@@ -102,14 +96,6 @@ def question():
 
     return Response(stream_with_context(stream), content_type="text/plain")
 
-
-
-@app.route('/reset-cost')
-def reset_cost():
-    if app.debug:
-        print("Reset costs")
-    # problem_model.resetCost()
-    return "<h1>Reset costs!</h1>"
 
 
 # Run the server if this file is run

@@ -3,7 +3,6 @@ import { useThreadSelectionContext } from "../../context/useThreadContext"
 import { DB } from "../../database/db"
 import './Threads.css'
 import { useChatSettings } from "../../context/useChatContext"
-import { v4 as uuidv4 } from 'uuid';
 import { useNavigate } from "react-router-dom"
 
 
@@ -23,8 +22,6 @@ function Threads() {
 
 	const {
 		sidebar,
-		setStartNewConversation,
-		setChatLoaded,
 	} = useChatSettings()
 
 	const [conversations, setConversations] = useState<ConversationItem[]>([])
@@ -114,13 +111,8 @@ function Threads() {
 			}}>
 				<div className="title-items">
 					<button className="threads-button interactive" onClick={() => {
-						setChatLoaded(false)
-						setThreadsOpen(false)
-						setCurrentThread(null)
-						setThreadKey(uuidv4())
-						setStartNewConversation(true)
-
-					}} 
+						navigate("/")
+					}}
 					>
 						New Chat 
 					</button>

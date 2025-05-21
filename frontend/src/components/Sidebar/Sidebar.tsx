@@ -3,7 +3,6 @@ import './Sidebar.css'
 import React, { useEffect } from 'react'
 import { useChatSettings } from '../../context/useChatContext';
 import { useThreadSelectionContext } from '../../context/useThreadContext';
-import { v4 as uuidv4 } from 'uuid';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 
@@ -38,9 +37,6 @@ function Sidebar() {
   }, [smallScreen]);
 
   function NewConversationButton() {
-    const {
-      setStartNewConversation,
-    } = useChatSettings()
 
 
     return (
@@ -49,7 +45,6 @@ function Sidebar() {
         className="interactive sidebar-button"
         onClick={() => {
           navigate("/")
-          setStartNewConversation(true)
         }}
       >
         {/* <i className="fa-solid fa-plus" /> */}

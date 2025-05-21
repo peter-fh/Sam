@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { QuestionType, Course } from '../../types/options'
 import './Modal.css'
 import { useChatSettings } from '../../context/useChatContext';
@@ -6,12 +6,8 @@ import { useNavigate } from 'react-router-dom';
 
 function Modal() {
 
-  const {
-    startNewConversation,
-    setStartNewConversation,
-  } = useChatSettings()
   const [showCourseSelect, setShowCourseSelect] = useState(true);
-  const [showTypeSelect, setShowTypeSelect] = useState(true);
+  const [showTypeSelect] = useState(true);
   const [showDislaimer, setShowDisclaimer] = useState(true);
 
   // TODO: Add "unspecified" option to course and don't allow closing the course modal
@@ -21,13 +17,6 @@ function Modal() {
     setQuestion, 
     setCourse,
   } = useChatSettings();
-
-  useEffect(() => {
-    if (startNewConversation) {
-      setStartNewConversation(false)
-      setShowTypeSelect(true)
-    }
-  }, [startNewConversation])
 
   const navigate = useNavigate()
 

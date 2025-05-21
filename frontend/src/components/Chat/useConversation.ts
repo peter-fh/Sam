@@ -49,6 +49,7 @@ const useConversation = () => {
   const [toSummarize, setToSummarize] = useState(false)
   const [toReview, setToReview] = useState(false)
   const [hasReviewed, setHasReviewed] = useState(false)
+  const [loading, setLoading] = useState(false)
 
   const addMessage = (message: Message) => {
     setConversation((prevMessages) => [...prevMessages, message])
@@ -57,6 +58,7 @@ const useConversation = () => {
 
   async function loadConversation(id: number) {
     setLock(true)
+    setLoading(true)
     setConversationId(id)
 
     const summary = await DB.getSummary(id)
@@ -97,6 +99,7 @@ const useConversation = () => {
 
     setMessages(conversationDisplayMessages)
 
+    setLoading(false)
     setLock(false)
   }
   async function intro() {
@@ -420,6 +423,7 @@ const useConversation = () => {
     toReview,
     hasReviewed,
     loadConversation,
+    loading,
   }
 }
 

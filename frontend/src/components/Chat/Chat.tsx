@@ -32,6 +32,7 @@ const Chat: React.FC<ChatProps> = ({id}) => {
     review,
     hasReviewed,
     loadConversation,
+    loading,
   } = useConversation();
 
   const {
@@ -72,6 +73,11 @@ const Chat: React.FC<ChatProps> = ({id}) => {
       review()
     }
   }, [conversation])
+
+const bottomMarkerRef = useRef<HTMLDivElement>(null);
+  const scrollIntoView = () => {
+    bottomMarkerRef.current?.scrollIntoView()
+  }
 
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -129,6 +135,10 @@ const Chat: React.FC<ChatProps> = ({id}) => {
     }
   }, [])
 
+  useEffect(() => {
+    scrollIntoView()
+  }, [loading])
+
   return (
     <>
       <div className="chat" onDrop={handleDrop} style={{
@@ -145,7 +155,9 @@ const Chat: React.FC<ChatProps> = ({id}) => {
               <MarkTeX content={aiMessage}/>
             </span>
           )}
+          <div ref={bottomMarkerRef} style={{ height: 0, margin: 0, padding: 0, border: 'none', lineHeight: 0 }} />
         </div>
+
         <div className="input">
           <textarea
             onChange={(event) => {

@@ -12,8 +12,6 @@ from dotenv import load_dotenv
 from flask_cors import CORS
 import os
 import sys
-import time
-import json
 
 use_example_responses = False
 load_dotenv(override=True)
@@ -40,14 +38,6 @@ utility_model = OpenAI_4_1_mini(openai_api_key,debug=dev)
 app = Flask(__name__, static_folder="frontend/dist")
 if dev:
     CORS(app)
-
-
-# Handles showing the website's main page
-@app.route('/')
-def index():
-    if not app.static_folder:
-        raise Exception("Static folder not found!")
-    return send_from_directory(app.static_folder, "index.html")
 
 @app.route("/assets/<path:path>")
 def serve_assets(path):
@@ -97,6 +87,12 @@ def question():
     return Response(stream_with_context(stream), content_type="text/plain")
 
 
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def index(path):
+    if not app.static_folder:
+        raise Exception("Static folder not found!")
+    return send_from_directory(app.static_folder, "index.html")
 
 # Run the server if this file is run
 port = 8070

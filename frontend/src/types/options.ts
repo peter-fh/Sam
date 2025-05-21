@@ -1,5 +1,6 @@
 export enum Course {
   MATH203 = "MATH 203",
+  ENGR213 = "ENGR 213",
 }
 
 export enum DetailLevel {

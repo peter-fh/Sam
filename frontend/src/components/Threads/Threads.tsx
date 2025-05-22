@@ -17,7 +17,7 @@ function Threads() {
 	const navigate = useNavigate()
 
 	const {
-		setSelectedThread
+		setSelectedThread,
 	} = useThreadSelectionContext()
 
 	const {

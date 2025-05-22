@@ -5,6 +5,7 @@ import Endpoints from "../../endpoints";
 import { DB } from "../../database/db";
 import { useThreadSelectionContext } from "../../context/useThreadContext";
 import { Log, LogLevel } from "../../log";
+import { Course, QuestionType } from "../../types/options";
 
 
 const TOKEN_THRESHOLD = 1024
@@ -27,9 +28,9 @@ type DisplayMessage = {
 const useConversation = () => {
 
   const {
-    question,
-    course,
-    detailLevel
+    question, setQuestion,
+    course, setCourse,
+    detailLevel,
   } = useChatSettings()
 
   const {
@@ -67,6 +68,13 @@ const useConversation = () => {
     if (conversationMessages == null) {
       return
     }
+
+    const conversationSettings = await DB.getSettings(id)
+    if (conversationSettings && conversationSettings.course && conversationSettings.mode) {
+      setCourse(conversationSettings.course as Course)
+      setQuestion(conversationSettings.mode as QuestionType)
+    }
+
     const conversationDisplayMessages: DisplayMessage[] = []
     const intro_message: DisplayMessage = {
       sender: "assistant",
@@ -343,7 +351,7 @@ const useConversation = () => {
       if (current_conversation_id == null) {
         const title = await getTitle(final_message)
         Log(LogLevel.Debug, "Title: ", title)
-        current_conversation_id = await DB.addConversation(title)
+        current_conversation_id = await DB.addConversation(title, course, question)
         setConversationId(current_conversation_id)
         setSelectedThread(current_conversation_id)
       }

@@ -15,6 +15,20 @@ export namespace DB {
     return data
   }
 
+  export async function getSettings(id: number) {
+    const { data, error } = await supabase
+    .from("conversations")
+    .select("course, mode")
+    .eq("id", id)
+    .single()
+
+    if (error) {
+      console.error("Supabase error:", error.message, error.details)
+    } 
+
+    return data
+  }
+
   export async function getConversation(id: number) {
     const { data, error }  = await supabase
       .from("messages")
@@ -59,11 +73,13 @@ export namespace DB {
 
   }
 
-  export async function addConversation(title: string) {
+  export async function addConversation(title: string, course: string, type: string) {
     const { data, error } = await supabase
       .from("conversations")
       .insert({
         title: title,
+        course: course,
+        mode: type,
       })
       .select()
       .single()

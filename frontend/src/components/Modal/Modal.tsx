@@ -61,11 +61,15 @@ function Modal() {
 	  <button onClick={() => {
 	      navigate("/chat")
 	      setQuestion(QuestionType.CONCEPT)
-	    }}className="interactive modal-close-button">I have a question about a concept</button>
+	    }}className="interactive modal-close-button type-button">I have a question about a concept</button>
 	  <button onClick={() => {
 	      navigate("/chat")
 	      setQuestion(QuestionType.PROBLEM)
-	    }}className="interactive modal-close-button">I have a question about a problem</button>
+	    }}className="interactive modal-close-button type-button">I have a question about a problem</button>
+	  <button onClick={() => {
+	      navigate("/chat")
+	      setQuestion(QuestionType.STRATEGY)
+	    }}className="interactive modal-close-button type-button">I have a question about study strategies</button>
 
 	</div>
       </div>

@@ -51,6 +51,10 @@
 	color: var(--text-color);
 }
 
+.type-button {
+	width: 17rem;
+}
+
 .disclaimer-button {
 	margin-bottom: 15vh;
 	margin-top: 5vh;

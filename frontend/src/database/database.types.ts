@@ -36,19 +36,28 @@ export type Database = {
     Tables: {
       conversations: {
         Row: {
+          course: string | null
+          created_at: string | null
           id: number
+          mode: string | null
           summary: string | null
           title: string | null
           updated_at: string
         }
         Insert: {
+          course?: string | null
+          created_at?: string | null
           id?: number
+          mode?: string | null
           summary?: string | null
           title?: string | null
           updated_at?: string
         }
         Update: {
+          course?: string | null
+          created_at?: string | null
           id?: number
+          mode?: string | null
           summary?: string | null
           title?: string | null
           updated_at?: string

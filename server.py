@@ -46,6 +46,13 @@ def serve_assets(path):
         raise Exception("Static folder not found!")
     return send_from_directory(app.static_folder + os.sep + "assets", path)
 
+@app.route('/icon.png')
+def icon():
+    if not app.static_folder:
+        raise Exception("Static folder not found!")
+
+    return send_from_directory(app.static_folder, 'icon.png', mimetype='image/png')
+
 @app.route('/api/summary', methods=['POST'])
 def summary():
     conversation = request.get_json()

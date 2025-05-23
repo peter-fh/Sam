@@ -7,20 +7,30 @@ const supabase = createClient<Database>(
 )
 
 export namespace DB {
+
   export async function getConversations() {
+    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+      const { data } = await supabase
+        .from("conversations")
+        .select()
+        .order("updated_at", { ascending: false })
+      return data
+    }
+
     const { data } = await supabase
       .from("conversations")
       .select()
+      .or(`course.eq.MATH 203,course.is.null`)
       .order("updated_at", { ascending: false })
     return data
   }
 
   export async function getSettings(id: number) {
     const { data, error } = await supabase
-    .from("conversations")
-    .select("course, mode")
-    .eq("id", id)
-    .single()
+      .from("conversations")
+      .select("course, mode")
+      .eq("id", id)
+      .single()
 
     if (error) {
       console.error("Supabase error:", error.message, error.details)

@@ -398,7 +398,7 @@ const useConversation = () => {
 
     setConversation([
       summaryMessage, 
-      ...conversation.slice(0,4)
+      ...conversation.slice(-4)
     ])
 
     await DB.updateSummary(conversationId!, summary)

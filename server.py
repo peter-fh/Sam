@@ -105,8 +105,9 @@ def create_app(test_config=None):
 
     return app
 
+app = create_app()
+
 if __name__ == "__main__":
-    app = create_app()
 
     if len(sys.argv) > 1 and sys.argv[1] == "--mock":
         app.config["MOCK_MODE"] = True

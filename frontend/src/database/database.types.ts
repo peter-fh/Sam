@@ -36,31 +36,64 @@ export type Database = {
     Tables: {
       conversations: {
         Row: {
-          course: string | null
+          course_id: number | null
           created_at: string | null
           id: number
-          mode: string | null
+          mode_id: number | null
           summary: string | null
           title: string | null
           updated_at: string
         }
         Insert: {
-          course?: string | null
+          course_id?: number | null
           created_at?: string | null
           id?: number
-          mode?: string | null
+          mode_id?: number | null
           summary?: string | null
           title?: string | null
           updated_at?: string
         }
         Update: {
-          course?: string | null
+          course_id?: number | null
           created_at?: string | null
           id?: number
-          mode?: string | null
+          mode_id?: number | null
           summary?: string | null
           title?: string | null
           updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_mode_id_fkey"
+            columns: ["mode_id"]
+            isOneToOne: false
+            referencedRelation: "modes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          code: string
+          created_at: string
+          id: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: number
         }
         Relationships: []
       }
@@ -92,6 +125,85 @@ export type Database = {
             columns: ["conversation_id"]
             isOneToOne: false
             referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      modes: {
+        Row: {
+          created_at: string
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      outlines: {
+        Row: {
+          course_id: number | null
+          created_at: string
+          id: number
+          text: string | null
+        }
+        Insert: {
+          course_id?: number | null
+          created_at?: string
+          id?: number
+          text?: string | null
+        }
+        Update: {
+          course_id?: number | null
+          created_at?: string
+          id?: number
+          text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "outlines_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      prompts: {
+        Row: {
+          created_at: string
+          id: number
+          mode_id: number | null
+          model: string | null
+          text: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          mode_id?: number | null
+          model?: string | null
+          text?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          mode_id?: number | null
+          model?: string | null
+          text?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prompts_mode_id_fkey"
+            columns: ["mode_id"]
+            isOneToOne: false
+            referencedRelation: "modes"
             referencedColumns: ["id"]
           },
         ]

@@ -71,8 +71,8 @@ const useConversation = () => {
 
     const conversationSettings = await DB.getSettings(id)
     if (conversationSettings && conversationSettings.course && conversationSettings.mode) {
-      setCourse(conversationSettings.course as Course)
-      setQuestion(conversationSettings.mode as QuestionType)
+      setCourse(conversationSettings.course.code as Course)
+      setQuestion(conversationSettings.mode.name as QuestionType)
     }
 
     const conversationDisplayMessages: DisplayMessage[] = []

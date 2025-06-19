@@ -3,7 +3,7 @@ import time
 from dotenv import load_dotenv
 from api.log import displayConversation
 from openai import OpenAI
-from api.prompt import MODELS_DIR, PromptManager, PromptType
+from api.prompt import MODELS_DIR, PromptManager, PromptManagerConfig, PromptType
 from api.model import EXAMPLE_RESPONSE_FILEPATH, UtilityModel, TutorModel
 
 
@@ -25,11 +25,14 @@ class OpenAI_4_1_mini(UtilityModel, TutorModel):
         self.mock = mock
 
 
-        self.prompt_manager = PromptManager()
-        self.prompt_manager.setSummary(SUMMARY_FILE_PATH)
-        self.prompt_manager.setTranscription(TRANSCRIPTION_FILE_PATH)
-        self.prompt_manager.setTitle(TITLE_FILE_PATH)
-        self.prompt_manager.setStrategy(STRATEGY_FILE_PATH)
+        config = PromptManagerConfig()
+        config.Transcription = True
+        config.Title = True
+        config.Strategy = True
+        config.transcription_path = TRANSCRIPTION_FILE_PATH
+        config.title_path = TITLE_FILE_PATH
+        config.strategy_path = STRATEGY_FILE_PATH
+        self.prompt_manager = PromptManager(config)
 
     def transcribe(self, image):
 

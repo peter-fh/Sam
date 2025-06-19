@@ -1,121 +1,122 @@
-from flask import Flask, request, send_from_directory, stream_with_context, Response
-from api import prompt
-from api.models.o3_mini.model import OpenAI_o3_mini
-from api.models.gpt_4o_mini.model import OpenAI_4o_mini
-from api.models.gpt_4_1_mini.model import OpenAI_4_1_mini
-from api.models.gpt_4o.model import OpenAI_4o
-from api.models.gpt_4_1.model import OpenAI_4_1
-from api.models.o4_mini.model import OpenAI_o4_mini
-from api.prompt import PromptType
-from courses.read_course_prompt import coursePrompt
-from dotenv import load_dotenv
-from flask_cors import CORS
 import os
 import sys
 
-use_example_responses = False
-load_dotenv(override=True)
+from flask import Flask, request, send_from_directory, stream_with_context, Response
+from flask_cors import CORS
+from openai import OpenAI
+from dotenv import load_dotenv
+from supabase import Client, create_client
 
-dev = os.getenv("FLASK_ENV") == "development"
-openai_api_key = os.getenv("OPENAI_API_KEY")
+from api.prompt import PromptType
+from api.api import API, APIConfig, ModelType
+from db import Database
 
-if openai_api_key == None:
-    print("OPENAI_API_KEY not found, defaulting to debug mode")
-    openai_api_key = ""
-    use_example_responses = True
+def create_app(test_config=None):
+    app = Flask(__name__, static_folder="frontend/dist")
 
-problem_model = OpenAI_o3_mini(openai_api_key,debug=dev)
-problem_model.mock = use_example_responses
+    load_dotenv(override=True)
 
-concept_model = OpenAI_4_1(openai_api_key,debug=dev)
-concept_model.mock = use_example_responses
+    app.config.from_mapping(
+        FLASK_ENV=os.getenv("FLASK_ENV", "production"),
+        OPENAI_API_KEY=os.getenv("OPENAI_API_KEY"),
+        SUPABASE_URL=os.getenv("SUPABASE_URL"),
+        SUPABASE_KEY=os.getenv("SUPABASE_SERVICE_KEY"),
+        MOCK_MODE=False,
+    )
 
-strategy_model = OpenAI_4_1_mini(openai_api_key, debug=dev)
-strategy_model.mock = use_example_responses
+    if test_config:
+            app.config.update(test_config)
 
-utility_model = OpenAI_4_1_mini(openai_api_key,debug=dev)
+    if not app.config["OPENAI_API_KEY"]:
+        print("OPENAI_API_KEY not found, defaulting to mock mode")
+        app.config["MOCK_MODE"] = True
 
-# Initialize the server library
-app = Flask(__name__, static_folder="frontend/dist")
-if dev:
-    CORS(app)
+    if app.config["FLASK_ENV"] == "development":
+            CORS(app)
 
-@app.route("/assets/<path:path>")
-def serve_assets(path):
-    if not app.static_folder:
-        raise Exception("Static folder not found!")
-    return send_from_directory(app.static_folder + os.sep + "assets", path)
+    openai_client = OpenAI(api_key=app.config["OPENAI_API_KEY"])
+    supabase: Client = create_client(
+        app.config["SUPABASE_URL"], app.config["SUPABASE_KEY"]
+    )
+    db = Database(supabase)
+    api_config = APIConfig(
+        concept_model=ModelType.gpt_4_1,
+        problem_model=ModelType.o3_mini,
+        study_model=ModelType.gpt_4_1_mini,
+        utility_model=ModelType.gpt_4_1_mini,
+        debug_mode=app.config["FLASK_ENV"] == "development",
+        mock_mode=app.config["MOCK_MODE"],
+    )
+    api = API(api_config, openai_client, db)
 
-@app.route('/icon.png')
-def icon():
-    if not app.static_folder:
-        raise Exception("Static folder not found!")
+    @app.route("/assets/<path:path>")
+    def serve_assets(path):
+        if not app.static_folder:
+            raise Exception("Static folder not found!")
+        return send_from_directory(app.static_folder + os.sep + "assets", path)
 
-    return send_from_directory(app.static_folder, 'icon.png', mimetype='image/png')
+    @app.route('/icon.png')
+    def icon():
+        if not app.static_folder:
+            raise Exception("Static folder not found!")
 
-@app.route('/api/summary', methods=['POST'])
-def summary():
-    conversation = request.get_json()
-    return utility_model.summarize(conversation)
-
-
-@app.route('/api/image', methods=['POST'])
-def image():
-    image = request.get_data(as_text=True)
-    return utility_model.transcribe(image)
-
-@app.route('/api/title', methods=['POST'])
-def title():
-    question = request.get_data(as_text=True)
-    return utility_model.title(question)
-
-# Handles clicking the "Ask" button
-@app.route('/api/question', methods=['POST'])
-def question():
-
-    # Retrieve question and its context from the request
-    course = request.headers["Course"]
-    brevity = request.headers["Brevity"]
-    question = request.headers["Type"]
-    prompt_type = PromptType[question.upper()]
-    conversation = request.get_json()
-
-    course_prompt = coursePrompt(course)
-
-    stream = None
-    if prompt_type == PromptType.PROBLEM:
-        stream = problem_model.ask(conversation, course_prompt, prompt_type, brevity) 
-    elif prompt_type == PromptType.CONCEPT:
-        stream = concept_model.ask(conversation, course_prompt, prompt_type, brevity) 
-    elif prompt_type == PromptType.STUDYING:
-        stream = strategy_model.ask(conversation, course_prompt, prompt_type, brevity) 
-    else:
-        return "Internal Server error! Invalid type of question"
-
-    print("Estimated total cost: $%5f" % (problem_model.estimated_cost + concept_model.estimated_cost))
-
-    return Response(stream_with_context(stream), content_type="text/plain")
+        return send_from_directory(app.static_folder, 'icon.png', mimetype='image/png')
 
 
-@app.route('/', defaults={'path': ''})
-@app.route('/<path:path>')
-def index(path):
-    if not app.static_folder:
-        raise Exception("Static folder not found!")
-    return send_from_directory(app.static_folder, "index.html")
+    @app.route('/api/summary', methods=['POST'])
+    def summary():
+        conversation = request.get_json()
+        return api.summarize(conversation)
 
-# Run the server if this file is run
-port = 8070
-if __name__ == '__main__':
-    print("\n\n\n")
-    print("=" * 70)
+
+    @app.route('/api/image', methods=['POST'])
+    def image():
+        image = request.get_data(as_text=True)
+        return api.transcribe(image)
+
+    @app.route('/api/title', methods=['POST'])
+    def title():
+        question = request.get_data(as_text=True)
+        return api.title(question)
+
+    # Handles clicking the "Ask" button
+    @app.route('/api/question', methods=['POST'])
+    def question():
+
+        # Retrieve question and its context from the request
+        course = request.headers["Course"]
+        brevity = request.headers["Brevity"]
+        question = request.headers["Type"]
+        print(question)
+        prompt_type = PromptType[question.upper()]
+        conversation = request.get_json()
+
+        stream = api.ask(conversation, course, prompt_type, brevity) 
+
+        return Response(stream_with_context(stream), content_type="text/plain")
+
+
+    @app.route('/', defaults={'path': ''})
+    @app.route('/<path:path>')
+    def index(path):
+        if not app.static_folder:
+            raise Exception("Static folder not found!")
+        return send_from_directory(app.static_folder, "index.html")
+
+    return app
+
+if __name__ == "__main__":
+    app = create_app()
+
+    if len(sys.argv) > 1 and sys.argv[1] == "--mock":
+        app.config["MOCK_MODE"] = True
+        print("Running in --mock mode.")
+
+    port = 8070
+    print("\n" + "=" * 70)
     print(f'{"=    Enter the following url into the browser:":<69}=')
     print(f'{"=    http://127.0.0.1:" + str(port):<69}=')
-    print("=" * 70)
-    if len(sys.argv) > 1 and sys.argv[1] == "--mock":
-        use_example_responses=True
-    problem_model.mock = use_example_responses
-    concept_model.mock = use_example_responses
-    utility_model.mock = use_example_responses
-    app.run(port=port, debug=True)
+    print("=" * 70 + "\n")
+
+    app.run(port=port, debug=app.config["FLASK_ENV"] == "development")
 

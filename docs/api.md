@@ -2,6 +2,8 @@
 
 ## API: /api/{endpoint}
 
+All API endpoints integrate with the OpenAI API. The instructions, models used, and content of the queries to the API differ depending on the endpoint.
+
 ### /api/question
 Used for asking Sam a question. Sends the user question directly to whatever model is chosen, using instructions based on the mode selected and outline based on the course selected.
 

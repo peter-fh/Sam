@@ -2,6 +2,10 @@
 
 This is the frontend for the ai chatbot, written in react + typescript.
 
+## Database integration
+
+This frontend uses direct integration with the database to fetch and save conversations and messages. This means that Row-Level Security is disabled currently for all tables needed to be accessed via the frontend, however once authentication is implemented into Sam this can be re-enabled. This integration may not continue into the future (i.e. specific endpoints may be added to the API to avoid direct database access from the frontend).
+
 
 ## Routes
 

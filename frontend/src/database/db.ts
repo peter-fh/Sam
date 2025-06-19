@@ -20,7 +20,7 @@ export namespace DB {
     const { data } = await supabase
       .from("conversations")
       .select()
-      .or(`course.eq.MATH 203,course.is.null`)
+      .or(`course_id.eq.1,course_id.is.null`)
       .order("updated_at", { ascending: false })
     return data
   }
@@ -28,7 +28,10 @@ export namespace DB {
   export async function getSettings(id: number) {
     const { data, error } = await supabase
       .from("conversations")
-      .select("course, mode")
+      .select(`
+        course:course_id (code), 
+        mode:mode_id (name)
+      `)
       .eq("id", id)
       .single()
 
@@ -84,12 +87,39 @@ export namespace DB {
   }
 
   export async function addConversation(title: string, course: string, type: string) {
+    const { data: modeData, error: modeError } = await supabase
+      .from("modes")
+      .select("id")
+      .eq("name", type)
+      .single()
+
+    if (modeError) {
+      console.error("Supabase error:", modeError.message, modeError.details)
+      return
+    } 
+
+    const mode_id = modeData!.id
+
+    const { data: courseData, error: courseError } = await supabase
+      .from("courses")
+      .select("id")
+      .eq("code", course)
+      .single()
+
+    if (courseError) {
+      console.error("Supabase error:", courseError.message, courseError.details)
+      return
+    } 
+
+    const course_id = courseData!.id
+
+
     const { data, error } = await supabase
       .from("conversations")
       .insert({
         title: title,
-        course: course,
-        mode: type,
+        course_id: course_id,
+        mode_id: mode_id,
       })
       .select()
       .single()

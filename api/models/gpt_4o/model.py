@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from api.log import displayConversation
 from api.model import TutorModel, EXAMPLE_RESPONSE_FILEPATH, estimateTokens
-from api.prompt import PromptManager, MODELS_DIR, PromptType
+from api.prompt import PromptManager, MODELS_DIR, PromptManagerConfig, PromptType
 
 
 GPT_4O_DIR = MODELS_DIR + os.sep + "gpt_4o"
@@ -22,16 +22,19 @@ class OpenAI_4o(TutorModel):
     output_token_count: float
     estimated_cost: float
 
-    def __init__(self, api_key: str, mock=False, debug=False):
+    def __init__(self, api_key: str, debug=False, mock=False):
         load_dotenv(override=True)
         self.client = OpenAI(api_key=api_key)
         self.mock = mock
         self.debug = debug
 
         self.input_token_cost = 2.5 / 1000000
-        self.prompt_manager = PromptManager()
-        self.prompt_manager.setConcept(CONCEPT_FILE_PATH)
-        self.prompt_manager.setProblem(PROBLEM_FILE_PATH)
+        config = PromptManagerConfig()
+        config.Concept = True
+        config.Problem = True
+        config.concept_path = CONCEPT_FILE_PATH
+        config.problem_path = PROBLEM_FILE_PATH
+        self.prompt_manager = PromptManager(config)
         self.output_token_cost = 10 / 1000000
         self.input_token_count = 0
         self.output_token_count = 0

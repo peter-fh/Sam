@@ -2,7 +2,7 @@ import os
 import time
 from dotenv import load_dotenv
 from openai import OpenAI
-from api.prompt import MODELS_DIR, PromptManager
+from api.prompt import MODELS_DIR, PromptManager, PromptManagerConfig
 from api.model import UtilityModel
 
 
@@ -23,10 +23,14 @@ class OpenAI_4o_mini(UtilityModel):
         self.mock = mock
 
 
-        self.prompt_manager = PromptManager()
-        self.prompt_manager.setSummary(SUMMARY_FILE_PATH)
-        self.prompt_manager.setTranscription(TRANSCRIPTION_FILE_PATH)
-        self.prompt_manager.setTitle(TITLE_FILE_PATH)
+        config = PromptManagerConfig()
+        config.Summary = True
+        config.Transcription = True
+        config.Title = True
+        config.summary_path = SUMMARY_FILE_PATH
+        config.transcription_path = TRANSCRIPTION_FILE_PATH
+        config.title_path = TITLE_FILE_PATH
+        self.prompt_manager = PromptManager(config)
 
     def transcribe(self, image):
 

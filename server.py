@@ -111,7 +111,7 @@ if __name__ == "__main__":
 
     if len(sys.argv) > 1 and sys.argv[1] == "--mock":
         app.config["MOCK_MODE"] = True
-        print("Running in --mock mode.")
+        print("Running in --mock mode")
 
     port = 8070
     print("\n" + "=" * 70)

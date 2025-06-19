@@ -351,7 +351,11 @@ const useConversation = () => {
       if (current_conversation_id == null) {
         const title = await getTitle(final_message)
         Log(LogLevel.Debug, "Title: ", title)
-        current_conversation_id = await DB.addConversation(title, course, question)
+        const add_conversation_result = await DB.addConversation(title, course, question)
+        if (add_conversation_result == null) {
+          throw new Error("Did not find course or title")
+        }
+        current_conversation_id = add_conversation_result
         setConversationId(current_conversation_id)
         setSelectedThread(current_conversation_id)
       }

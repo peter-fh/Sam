@@ -36,3 +36,32 @@ class Database:
         data = response.data
         prompt = data["text"]
         return prompt
+
+    def addPrompt(self, text, mode, model):
+        print("Adding prompt for: ", mode, " ", model)
+
+        mode_response = (
+            self.client
+                .table("modes")
+                .select("id")
+                .eq("name", mode)
+                .limit(1)
+                .single()
+                .execute()
+        )
+        mode_id = mode_response.data["id"]
+
+        response = (
+            self.client
+                .table("prompts")
+                .insert({
+                    "text": text,
+                    "model": model,
+                    "mode_id": mode_id
+                })
+                .execute()
+        )
+
+        data = response.data[0]
+        return data
+

@@ -95,13 +95,13 @@ def create_app(test_config=None):
 
         return Response(stream_with_context(stream), content_type="text/plain")
 
-
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
     def index(path):
         if not app.static_folder:
             raise Exception("Static folder not found!")
         return send_from_directory(app.static_folder, "index.html")
+
 
     return app
 

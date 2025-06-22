@@ -6,24 +6,25 @@ import argparse
 from supabase import Client, create_client
 
 
-class PromptEditor:
+class OutlineEditor:
     db: Database
     def __init__(self, db):
         self.db = db
-    def copyPrompt(self, mode, model):
-        prompt = ""
+    def copyOutline(self, course):
+        outline = ""
         try:
-            prompt = self.db.getPrompt(mode, model)
+            outline = self.db.getOutline(course)
         except:
             pass
-        filename = f'{mode}_{model}.md'
+        print(outline)
+        filename = f'{course}.md'
         with open(filename, 'w') as f:
-            f.write(prompt)
+            f.write(outline)
 
-    def updatePrompt(self, mode, model):
-        filename = f'{mode}_{model}.md'
-        prompt = open(filename, 'r').read()
-        self.db.addPrompt(prompt, mode, model)
+    def updateOutline(self, course):
+        filename = f'{course}.md'
+        outline = open(filename, 'r').read()
+        self.db.addOutline(outline, course)
 
 
 if __name__ == "__main__":
@@ -44,17 +45,10 @@ if __name__ == "__main__":
         help="Takes the content of the file that was previously pulled from the database and edited and writes to the db"
     )
     parser.add_argument(
-        "-ml",
-        "--model",
-        dest="model",
-        help="Model for prompt being edited",
-        required=True,
-    )
-    parser.add_argument(
-        "-md",
-        "--mode",
-        dest="mode",
-        help="Mode for prompt being edited",
+        "-c",
+        "--course",
+        dest="course",
+        help="Course that is being edited",
         required=True,
     )
 
@@ -69,11 +63,11 @@ if __name__ == "__main__":
         supabase_url, supabase_key
     )
     db = Database(supabase)
-    editor = PromptEditor(db)
+    editor = OutlineEditor(db)
     args = parser.parse_args()
     if args.write:
-        editor.updatePrompt(args.mode, args.model)
+        editor.updateOutline(args.course)
     else:
-        editor.copyPrompt(args.mode, args.model)
+        editor.copyOutline(args.course)
 
 

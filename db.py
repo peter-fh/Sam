@@ -16,7 +16,6 @@ class Database:
                 .execute()
         )
         data = response.data
-        print(data)
         prompt = data["text"]
         return prompt
 
@@ -62,6 +61,28 @@ class Database:
                 .execute()
         )
 
+        data = response.data[0]
+        return data
+
+    def addOutline(self, text, course_code):
+        course_response = (
+            self.client
+                .table("courses")
+                .select("id")
+                .eq("code", course_code)
+                .single()
+                .execute()
+        )
+        course_id = course_response.data["id"]
+        response = (
+            self.client
+                .table("outlines")
+                .insert({
+                    "text": text,
+                    "course_id": course_id,
+                })
+                .execute()
+        )
         data = response.data[0]
         return data
 

@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 from flask import Flask, request, send_from_directory, stream_with_context, Response
 from flask_cors import CORS
@@ -102,7 +103,11 @@ def create_app(test_config=None):
         course = request.headers["Course"]
         brevity = request.headers["Brevity"]
         mode = request.headers["Mode"]
-        prompt_type = PromptType[mode.upper()]
+        try:
+            prompt_type = PromptType[mode.upper()]
+        except KeyError:
+            return "Could not get prompt type! Was given \"%s\"" % mode
+
         conversation = request.get_json()
 
         stream = api.ask(conversation, course, prompt_type, brevity) 

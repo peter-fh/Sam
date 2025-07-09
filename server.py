@@ -82,7 +82,7 @@ def create_app(test_config=None):
 
     @app.route('/api/mode', methods=['POST'])
     def mode():
-        start = time.time()
+        total_start = time.time()
         mode = request.headers["Mode"]
         prompt_type = None
         try:
@@ -90,13 +90,17 @@ def create_app(test_config=None):
         except:
             pass
         conversation = request.get_json()
+        api_start = time.time()
         prompt_type = api.getMode(conversation, prompt_type)
+        api_end = time.time()
         if prompt_type == None:
             return "Did not get type"
 
-        end = time.time()
-        duration = end - start
-        print("Get mode took %s seconds" % duration)
+        total_end = time.time()
+        total_duration = total_end - total_start
+        api_duration = api_end - api_start
+        print("Total get mode took %s seconds" % total_duration)
+        print("API get mode took %s seconds" % api_duration)
 
         return prompt_type.value
 

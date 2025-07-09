@@ -1,13 +1,11 @@
 from enum import Enum
 import time
 from dataclasses import dataclass
-from typing import Literal
 
 from openai import OpenAI
 from pydantic import BaseModel
 
-from api.log import displayConversation
-from api.prompt import PromptType
+from api.prompt import Mode
 from db import Database
 import os
 
@@ -35,8 +33,9 @@ class APIConfig:
     mock_mode: bool
     pass
 
+
 class ModeResponse(BaseModel):
-    mode: Literal['Problem', 'Concept', 'Other']
+    mode: Mode
 
 class API:
     config: APIConfig
@@ -47,15 +46,13 @@ class API:
         self.client = client
         self.db = db
 
-    def getModel(self, prompt_type: PromptType):
-        if prompt_type == PromptType.PROBLEM:
+    def getModel(self, prompt_type: Mode):
+        if prompt_type == Mode.PROBLEM:
             return self.config.problem_model
-        elif prompt_type == PromptType.CONCEPT:
+        elif prompt_type == Mode.CONCEPT:
             return self.config.concept_model
-        elif prompt_type == PromptType.STUDYING:
+        elif prompt_type == Mode.STUDYING:
             return self.config.study_model
-        else:
-            raise ValueError("Prompt type is invalid!")
 
     def getDeveloperRole(self, model):
         if model == ModelType.o3_mini or model == ModelType.o4_mini:
@@ -63,7 +60,7 @@ class API:
         else:
             return "system"
 
-    def ask(self, conversation, course_code, prompt_type: PromptType, brevity):
+    def ask(self, conversation, course_code, prompt_type: Mode, brevity):
 
         model = self.getModel(prompt_type)
         print("===")
@@ -218,23 +215,24 @@ class API:
             print("Title: ", title)
         return title
 
-    def getModePromptPath(self, mode: PromptType | None):
-        if mode == PromptType.PROBLEM:
+    def getModePromptPath(self, mode: Mode | None):
+        if mode == Mode.PROBLEM:
             return GET_MODE_DIR + os.sep + "problem.md"
-        elif mode == PromptType.CONCEPT:
+        elif mode == Mode.CONCEPT:
             return GET_MODE_DIR + os.sep + "concept.md"
-        elif mode == PromptType.STUDYING:
+        elif mode == Mode.STUDYING:
             return GET_MODE_DIR + os.sep + "other.md"
 
         return GET_MODE_DIR + os.sep + "none.md"
 
-    def getMode(self, question, type: PromptType | None):
+    def getMode(self, question, type: Mode | None):
         if self.config.mock_mode:
             time.sleep(1)
-            return PromptType.PROBLEM
+            return Mode.PROBLEM
 
         instructions_path = self.getModePromptPath(type)
         instructions = open(instructions_path).read().replace("${question}", str(question))
+        start_time = time.time()
         response = self.client.responses.parse(
             model=self.config.utility_model.value,
             input=[
@@ -245,6 +243,9 @@ class API:
             ],
             text_format=ModeResponse
         )
+        end_time = time.time()
+        duration = end_time - start_time
+        print("Duration for only OpenAI API call: %s" % duration)
 
 
         res = response.output_parsed
@@ -255,10 +256,4 @@ class API:
 
         if self.config.debug_mode:
             print("Mode: ", mode_raw)
-        if mode_raw == "Problem":
-            return PromptType.PROBLEM
-        if mode_raw == "Concept":
-            return PromptType.CONCEPT
-        if mode_raw == "Other":
-            return PromptType.STUDYING
-        return None
+        return mode_raw

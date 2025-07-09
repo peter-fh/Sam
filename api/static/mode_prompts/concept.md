@@ -8,4 +8,4 @@ If they have just asked a question about a specific problem, or asked to solve a
 
 ## Other
 
-If they have just asked about study planning or study strategies, switch to "Other" mode. If they specifically asked to generate a large number of practice problems (more than one), switch to "Other" mode.
+If they have just asked about study planning or study strategies, switch to "Other" mode. This mode is also best for generating practice problems, but only switch if multiple practice problems are asked for at once (i.e. for generating a practice exam)

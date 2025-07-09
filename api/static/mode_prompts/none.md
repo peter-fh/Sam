@@ -10,7 +10,6 @@ If the general conversation surrounding the most recent message is about a probl
 
 If the most recent question asked, as well as the thread of conversation previously, is conceptual, the AI assistant should respond in "Concept" mode.
 
-
 ## Other
 
 If the question and conversation thread is not about a concept or a problem, the assistant should respond in "Other" mode. Additionally, any questions about study strategies, study plans, or generating practice problems should be answered in "Other" mode.

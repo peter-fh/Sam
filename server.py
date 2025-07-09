@@ -8,7 +8,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from supabase import Client, create_client
 
-from api.prompt import PromptType
+from api.prompt import Mode
 from api.api import API, APIConfig, ModelType
 from db import Database
 
@@ -86,7 +86,7 @@ def create_app(test_config=None):
         mode = request.headers["Mode"]
         prompt_type = None
         try:
-            prompt_type = PromptType[mode.upper()]
+            prompt_type = Mode[mode.upper()]
         except:
             pass
         conversation = request.get_json()
@@ -113,7 +113,7 @@ def create_app(test_config=None):
         brevity = request.headers["Brevity"]
         mode = request.headers["Mode"]
         try:
-            prompt_type = PromptType[mode.upper()]
+            prompt_type = Mode[mode.upper()]
         except KeyError:
             return "Could not get prompt type! Was given \"%s\"" % mode
 

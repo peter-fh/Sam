@@ -217,6 +217,7 @@ const useConversation = () => {
       throw new Error("Could not fetch mode")
     }
     const mode = mode_raw as QuestionType
+    Log(LogLevel.Debug, mode)
     return mode
   }
 

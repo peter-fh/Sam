@@ -5,7 +5,7 @@ from enum import Enum
 from db import Database
 
 
-class PromptType(Enum):
+class Mode(Enum):
     PROBLEM = "Problem"
     CONCEPT = "Concept"
     STUDYING = "Studying"

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import './Chat.css'
 import MarkTeX from '../MarkTeX'
 import imageCompression from 'browser-image-compression'

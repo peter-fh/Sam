@@ -4,7 +4,7 @@ Based on the conversation, you must select the mode that the assistant should re
 
 ## Problem
 
-If the general conversation surrounding the most recent message is about a problem, answering a problem, or solving something, you should select "Problem" mode. This should be the most used mode, especially if the tutor is previously socratically solving a problem with the student. If the thread is of a problem being solved, you should only switch to other modes in special cases.
+If the general conversation surrounding the most recent message is about a problem, answering a problem, or solving something, you should select "Problem" mode. This should be the most used mode, especially if the tutor is previously socratically solving a problem with the student
 
 ## Concept
 

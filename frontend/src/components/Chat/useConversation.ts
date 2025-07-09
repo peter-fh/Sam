@@ -352,10 +352,9 @@ const useConversation = () => {
       setQuestion(mode)
 
       const ask_start_time = performance.now()
-      const ai_message_promise = ask(fullConversation, mode)
+      const ai_message = await ask(fullConversation, mode)
       const ask_end_time = performance.now()
       Log(LogLevel.Always, `Question took ${(ask_end_time - ask_start_time) / 1000}`)
-      const ai_message = await ai_message_promise
 
       const display_ai_message: DisplayMessage = {
         sender: "assistant",

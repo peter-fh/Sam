@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 from flask import Flask, request, send_from_directory, stream_with_context, Response
 from flask_cors import CORS
@@ -81,6 +82,7 @@ def create_app(test_config=None):
 
     @app.route('/api/mode', methods=['POST'])
     def mode():
+        start = time.time()
         mode = request.headers["Mode"]
         prompt_type = None
         try:
@@ -91,6 +93,10 @@ def create_app(test_config=None):
         prompt_type = api.getMode(conversation, prompt_type)
         if prompt_type == None:
             return "Did not get type"
+
+        end = time.time()
+        duration = end - start
+        print("Get mode took %s seconds" % duration)
 
         return prompt_type.value
 

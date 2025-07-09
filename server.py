@@ -17,12 +17,18 @@ def create_app(test_config=None):
 
     load_dotenv(override=True)
 
+    mock = False
+    mock_env_key = os.getenv("MOCK_MODE")
+    if mock_env_key != None:
+        if mock_env_key.lower() == "true":
+            mock = True
+
     app.config.from_mapping(
         FLASK_ENV=os.getenv("FLASK_ENV", "production"),
         OPENAI_API_KEY=os.getenv("OPENAI_API_KEY"),
         SUPABASE_URL=os.getenv("SUPABASE_URL"),
         SUPABASE_KEY=os.getenv("SUPABASE_SERVICE_KEY"),
-        MOCK_MODE=False,
+        MOCK_MODE=mock
     )
 
     if test_config:

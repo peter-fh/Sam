@@ -227,7 +227,7 @@ class API:
 
     def getMode(self, question, type: Mode | None):
         if self.config.mock_mode:
-            time.sleep(1)
+            time.sleep(3)
             return Mode.PROBLEM
 
         instructions_path = self.getModePromptPath(type)

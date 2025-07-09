@@ -51,6 +51,8 @@ const useConversation = () => {
   const [toReview, setToReview] = useState(false)
   const [hasReviewed, setHasReviewed] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [thinking, setThinking] = useState(false)
+  const [selectingMode, setSelectingMode] = useState(false)
 
   const addMessage = (message: Message) => {
     setConversation((prevMessages) => [...prevMessages, message])
@@ -235,20 +237,10 @@ const useConversation = () => {
     })
 
 
-
-    var elapsedIntervals = 0
-    const intervalId = setInterval(() => {
-      const numberOfDots = elapsedIntervals % 4
-      const thinkingMessage = "Solving" + ".".repeat(numberOfDots)
-
-      if (elapsedIntervals != 0) {
-        setAiMessage("*" + thinkingMessage + "*")
-      }
-      elapsedIntervals++
-    }, 500)
+    setThinking(true)
     const response = await fetch(request)
+    setThinking(false)
 
-    clearInterval(intervalId);
     const reader = response.body!.getReader()
     const decoder = new TextDecoder('utf-8')
     var answer = ""
@@ -347,7 +339,9 @@ const useConversation = () => {
       const fullConversation = [...conversation, json_message]
 
       const mode_start_time = performance.now()
+      setSelectingMode(true)
       const mode = await getMode(fullConversation)
+      setSelectingMode(false)
       const mode_end_time = performance.now()
       Log(LogLevel.Always, `Mode fetch took ${(mode_end_time - mode_start_time) / 1000}`)
       setQuestion(mode)
@@ -471,6 +465,8 @@ const useConversation = () => {
     hasReviewed,
     loadConversation,
     loading,
+    thinking,
+    selectingMode,
   }
 }
 

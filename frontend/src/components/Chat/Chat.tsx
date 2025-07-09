@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './Chat.css'
 import MarkTeX from '../MarkTeX'
 import imageCompression from 'browser-image-compression'
 import useConversation from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
 import { Log, LogLevel } from '../../log'
+import { PulseLoader } from "react-spinners"
 
 
 interface ChatProps {
@@ -33,11 +34,16 @@ const Chat: React.FC<ChatProps> = ({id}) => {
     hasReviewed,
     loadConversation,
     loading,
+    thinking,
+    selectingMode,
+    setAiMessage,
   } = useConversation();
 
   const {
     sidebar,
   } = useChatSettings();
+
+  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
 
 
   const enterListener = (e: KeyboardEvent) => {
@@ -46,6 +52,24 @@ const Chat: React.FC<ChatProps> = ({id}) => {
       handleSendMessage()
     }
   }
+
+  useEffect(() => {
+    if (thinking) {
+      setAiMessage("*Thinking*")
+      var elapsedIntervals = 1
+      setIntervalId(setInterval(() => {
+        const numberOfDots = elapsedIntervals % 4
+        const thinkingMessage = "Thinking" + ".".repeat(numberOfDots)
+
+        if (elapsedIntervals != 0) {
+          setAiMessage("*" + thinkingMessage + "*")
+        }
+        elapsedIntervals++
+      }, 500))
+    } else {
+      clearInterval(intervalId!)
+    }
+  }, [thinking])
 
   useEffect(() => {
     document.addEventListener("keydown", enterListener, false)
@@ -150,6 +174,11 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
               <MarkTeX content={message.content}/>
             </span>
           ))}
+          {selectingMode && (
+            <span key={-1}className="spinner">
+              <PulseLoader color="#c0c0c0"/>
+            </span>
+          )}
           {aiMessage != '' && (
             <span key={-1}className="output">
               <MarkTeX content={aiMessage}/>

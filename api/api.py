@@ -55,6 +55,8 @@ class API:
             return self.config.concept_model
         elif prompt_type == Mode.OTHER:
             return self.config.study_model
+        else:
+            raise ValueError("Prompt type is invalid!")
 
     def getDeveloperRole(self, model):
         if model == ModelType.o3_mini or model == ModelType.o4_mini:

@@ -1,6 +1,5 @@
 import os
 import sys
-import time
 
 from flask import Flask, request, send_from_directory, stream_with_context, Response
 from flask_cors import CORS

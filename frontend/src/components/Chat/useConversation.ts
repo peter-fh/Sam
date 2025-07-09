@@ -235,7 +235,6 @@ const useConversation = () => {
 
 
 
-    const start_time = performance.now()
     var elapsedIntervals = 0
     const intervalId = setInterval(() => {
       const numberOfDots = elapsedIntervals % 4
@@ -266,8 +265,6 @@ const useConversation = () => {
     setAiMessage('')
     Log(LogLevel.Debug, answer)
 
-    const end_time = performance.now()
-    Log(LogLevel.Always, `Response took ${(end_time - start_time) / 1000}`)
     setToSummarize(true)
 
     return answer
@@ -348,10 +345,16 @@ const useConversation = () => {
       var json_message: any = newMessage(final_message, "user")
       const fullConversation = [...conversation, json_message]
 
+      const mode_start_time = performance.now()
       const mode = await getMode(fullConversation)
+      const mode_end_time = performance.now()
+      Log(LogLevel.Always, `Mode fetch took ${(mode_end_time - mode_start_time) / 1000}`)
       setQuestion(mode)
 
+      const ask_start_time = performance.now()
       const ai_message_promise = ask(fullConversation, mode)
+      const ask_end_time = performance.now()
+      Log(LogLevel.Always, `Question took ${(ask_end_time - ask_start_time) / 1000}`)
       const ai_message = await ai_message_promise
 
       const display_ai_message: DisplayMessage = {

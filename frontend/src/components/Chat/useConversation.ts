@@ -50,9 +50,8 @@ const useConversation = () => {
   const [toSummarize, setToSummarize] = useState(false)
   const [toReview, setToReview] = useState(false)
   const [hasReviewed, setHasReviewed] = useState(false)
+  const [loadingConversation, setLoadingConversation] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [thinking, setThinking] = useState(false)
-  const [selectingMode, setSelectingMode] = useState(false)
 
   const addMessage = (message: Message) => {
     setConversation((prevMessages) => [...prevMessages, message])
@@ -61,7 +60,7 @@ const useConversation = () => {
 
   async function loadConversation(id: number) {
     setLock(true)
-    setLoading(true)
+    setLoadingConversation(true)
     setConversationId(id)
 
     const summary = await DB.getSummary(id)
@@ -109,7 +108,7 @@ const useConversation = () => {
 
     setMessages(conversationDisplayMessages)
 
-    setLoading(false)
+    setLoadingConversation(false)
     setLock(false)
   }
   async function intro() {
@@ -237,9 +236,8 @@ const useConversation = () => {
     })
 
 
-    setThinking(true)
     const response = await fetch(request)
-    setThinking(false)
+    setLoading(false)
 
     const reader = response.body!.getReader()
     const decoder = new TextDecoder('utf-8')
@@ -339,9 +337,8 @@ const useConversation = () => {
       const fullConversation = [...conversation, json_message]
 
       const mode_start_time = performance.now()
-      setSelectingMode(true)
+      setLoading(true)
       const mode = await getMode(fullConversation)
-      setSelectingMode(false)
       const mode_end_time = performance.now()
       Log(LogLevel.Always, `Mode fetch took ${(mode_end_time - mode_start_time) / 1000}`)
       setQuestion(mode)
@@ -464,9 +461,8 @@ const useConversation = () => {
     toReview,
     hasReviewed,
     loadConversation,
+    loadingConversation,
     loading,
-    thinking,
-    selectingMode,
   }
 }
 

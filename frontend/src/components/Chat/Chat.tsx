@@ -33,17 +33,14 @@ const Chat: React.FC<ChatProps> = ({id}) => {
     review,
     hasReviewed,
     loadConversation,
+    loadingConversation,
     loading,
-    thinking,
-    selectingMode,
-    setAiMessage,
   } = useConversation();
 
   const {
     sidebar,
   } = useChatSettings();
 
-  const [intervalId, setIntervalId] = useState<NodeJS.Timeout | null>(null)
 
 
   const enterListener = (e: KeyboardEvent) => {
@@ -52,24 +49,6 @@ const Chat: React.FC<ChatProps> = ({id}) => {
       handleSendMessage()
     }
   }
-
-  useEffect(() => {
-    if (thinking) {
-      setAiMessage("*Thinking*")
-      var elapsedIntervals = 1
-      setIntervalId(setInterval(() => {
-        const numberOfDots = elapsedIntervals % 4
-        const thinkingMessage = "Thinking" + ".".repeat(numberOfDots)
-
-        if (elapsedIntervals != 0) {
-          setAiMessage("*" + thinkingMessage + "*")
-        }
-        elapsedIntervals++
-      }, 500))
-    } else {
-      clearInterval(intervalId!)
-    }
-  }, [thinking])
 
   useEffect(() => {
     document.addEventListener("keydown", enterListener, false)
@@ -161,7 +140,7 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     scrollIntoView()
-  }, [loading])
+  }, [loadingConversation])
 
   return (
     <>
@@ -174,7 +153,7 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
               <MarkTeX content={message.content}/>
             </span>
           ))}
-          {selectingMode && (
+          {loading && (
             <span key={-1}className="spinner">
               <PulseLoader color="#c0c0c0"/>
             </span>

@@ -1,7 +1,7 @@
 import './Sidebar.css'
 import { useEffect } from 'react'
 import { useChatSettings } from '../../context/useChatContext';
-import { Attribution, BrevitySelect, CourseSelect, QuestionTypeSelect, SidebarButtons } from './Buttons';
+import { Attribution, BrevitySelect, CourseSelect, SidebarButtons } from './Buttons';
 
 
 function Sidebar() {

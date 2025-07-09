@@ -16,7 +16,7 @@ STATIC_PROMPT_DIR = "api" + os.sep + "static"
 SUMMARY_FILE_PATH = STATIC_PROMPT_DIR + os.sep + "summary.md"
 TITLE_FILE_PATH = STATIC_PROMPT_DIR + os.sep + "title.md"
 TRANSCRIPTION_FILE_PATH = STATIC_PROMPT_DIR + os.sep + "transcription.md"
-GET_MODE_FILE_PATH = STATIC_PROMPT_DIR + os.sep + "get_mode.md"
+GET_MODE_DIR = STATIC_PROMPT_DIR + os.sep + "mode_prompts"
 
 
 class ModelType(Enum):
@@ -54,6 +54,8 @@ class API:
             return self.config.concept_model
         elif prompt_type == PromptType.STUDYING:
             return self.config.study_model
+        else:
+            raise ValueError("Prompt type is invalid!")
 
     def getDeveloperRole(self, model):
         if model == ModelType.o3_mini or model == ModelType.o4_mini:
@@ -216,12 +218,23 @@ class API:
             print("Title: ", title)
         return title
 
-    def getMode(self, question):
+    def getModePromptPath(self, mode: PromptType | None):
+        if mode == PromptType.PROBLEM:
+            return GET_MODE_DIR + os.sep + "problem.md"
+        elif mode == PromptType.CONCEPT:
+            return GET_MODE_DIR + os.sep + "concept.md"
+        elif mode == PromptType.STUDYING:
+            return GET_MODE_DIR + os.sep + "other.md"
+
+        return GET_MODE_DIR + os.sep + "none.md"
+
+    def getMode(self, question, type: PromptType | None):
         if self.config.mock_mode:
             time.sleep(1)
             return PromptType.PROBLEM
 
-        instructions = open(GET_MODE_FILE_PATH).read().replace("${question}", str(question))
+        instructions_path = self.getModePromptPath(type)
+        instructions = open(instructions_path).read().replace("${question}", str(question))
         try:
             response = self.client.responses.parse(
                 model=self.config.utility_model.value,

@@ -194,14 +194,41 @@ const useConversation = () => {
     return summary
   }
 
-  async function ask(conversation: Message[]) {
+  async function getMode(conversation: Message[]) {
+    var question_type: string = ""
+    if (question_type == null) {
+      question_type = "None"
+    } else {
+      question_type = question!
+    }
+
+    const mode_request = new Request(Endpoints.Mode, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Mode': question_type,
+      },
+      body: JSON.stringify(conversation)
+    })
+
+    const mode_response = await fetch(mode_request)
+    const mode_raw = await mode_response.text()
+    if (mode_raw == "") {
+      throw new Error("Could not fetch mode")
+    }
+    const mode = mode_raw as QuestionType
+    return mode
+  }
+
+  async function ask(conversation: Message[], mode: QuestionType) {
+
     const request = new Request(Endpoints.Ask, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Course': course,
         'Brevity': detailLevel,
-        'Type': question,
+        'Mode': mode,
       },
       body: JSON.stringify(conversation)
     })
@@ -321,7 +348,10 @@ const useConversation = () => {
       var json_message: any = newMessage(final_message, "user")
       const fullConversation = [...conversation, json_message]
 
-      const ai_message_promise = ask(fullConversation)
+      const mode = await getMode(fullConversation)
+      setQuestion(mode)
+
+      const ai_message_promise = ask(fullConversation, mode)
       const ai_message = await ai_message_promise
 
       const display_ai_message: DisplayMessage = {
@@ -351,13 +381,15 @@ const useConversation = () => {
       if (current_conversation_id == null) {
         const title = await getTitle(final_message)
         Log(LogLevel.Debug, "Title: ", title)
-        const add_conversation_result = await DB.addConversation(title, course, question)
+        const add_conversation_result = await DB.addConversation(title, course, mode)
         if (add_conversation_result == null) {
           throw new Error("Did not find course or title")
         }
         current_conversation_id = add_conversation_result
         setConversationId(current_conversation_id)
         setSelectedThread(current_conversation_id)
+      } else {
+        await DB.updateMode(current_conversation_id, mode)
       }
 
       await DB.addMessage(current_conversation_id, "user", final_message)

@@ -79,6 +79,21 @@ def create_app(test_config=None):
         question = request.get_data(as_text=True)
         return api.title(question)
 
+    @app.route('/api/mode', methods=['POST'])
+    def mode():
+        mode = request.headers["Mode"]
+        prompt_type = None
+        try:
+            prompt_type = PromptType[mode.upper()]
+        except:
+            pass
+        conversation = request.get_json()
+        prompt_type = api.getMode(conversation, prompt_type)
+        if prompt_type == None:
+            return "Did not get type"
+
+        return prompt_type.value
+
     # Handles clicking the "Ask" button
     @app.route('/api/question', methods=['POST'])
     def question():
@@ -86,17 +101,14 @@ def create_app(test_config=None):
         # Retrieve question and its context from the request
         course = request.headers["Course"]
         brevity = request.headers["Brevity"]
-        question = request.headers["Type"]
-        print(question)
-        prompt_type = PromptType[question.upper()]
+        mode = request.headers["Mode"]
+        prompt_type = PromptType[mode.upper()]
         conversation = request.get_json()
-        prompt_type = api.getMode(conversation)
-        if prompt_type == None:
-            return "Did not get type"
 
         stream = api.ask(conversation, course, prompt_type, brevity) 
 
-        return Response(stream_with_context(stream), content_type="text/plain")
+        res = Response(stream_with_context(stream), content_type="text/plain")
+        return res
 
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')

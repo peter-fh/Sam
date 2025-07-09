@@ -12,6 +12,8 @@ class Database:
                 .table("outlines")
                 .select("text, courses!inner()")
                 .eq("courses.code", course_code)
+                .order("created_at", desc=True)
+                .limit(1)
                 .single()
                 .execute()
         )

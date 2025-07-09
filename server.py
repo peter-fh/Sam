@@ -90,6 +90,9 @@ def create_app(test_config=None):
         print(question)
         prompt_type = PromptType[question.upper()]
         conversation = request.get_json()
+        prompt_type = api.getMode(conversation)
+        if prompt_type == None:
+            return "Did not get type"
 
         stream = api.ask(conversation, course, prompt_type, brevity) 
 

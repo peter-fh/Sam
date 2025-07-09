@@ -1,8 +1,10 @@
 from enum import Enum
 import time
 from dataclasses import dataclass
+from typing import Literal
 
 from openai import OpenAI
+from pydantic import BaseModel
 
 from api.log import displayConversation
 from api.prompt import PromptType
@@ -14,6 +16,7 @@ STATIC_PROMPT_DIR = "api" + os.sep + "static"
 SUMMARY_FILE_PATH = STATIC_PROMPT_DIR + os.sep + "summary.md"
 TITLE_FILE_PATH = STATIC_PROMPT_DIR + os.sep + "title.md"
 TRANSCRIPTION_FILE_PATH = STATIC_PROMPT_DIR + os.sep + "transcription.md"
+GET_MODE_FILE_PATH = STATIC_PROMPT_DIR + os.sep + "get_mode.md"
 
 
 class ModelType(Enum):
@@ -31,6 +34,9 @@ class APIConfig:
     debug_mode: bool
     mock_mode: bool
     pass
+
+class ModeResponse(BaseModel):
+    mode: Literal['Problem', 'Concept', 'Other']
 
 class API:
     config: APIConfig
@@ -76,8 +82,8 @@ class API:
                         ]
         })
 
-        if self.config.debug_mode:
-            displayConversation(conversation)
+        # if self.config.debug_mode:
+        #    displayConversation(conversation)
 
         if self.config.mock_mode:
             time.sleep(4)
@@ -209,3 +215,40 @@ class API:
         if self.config.debug_mode:
             print("Title: ", title)
         return title
+
+    def getMode(self, question):
+        if self.config.mock_mode:
+            time.sleep(1)
+            return PromptType.PROBLEM
+
+        instructions = open(GET_MODE_FILE_PATH).read().replace("${question}", str(question))
+        try:
+            response = self.client.responses.parse(
+                model=self.config.utility_model.value,
+                input=[
+                    {
+                        "role": "user",
+                        "content": instructions,
+                    },
+                ],
+                text_format=ModeResponse
+            )
+        except:
+            return None
+
+
+        res = response.output_parsed
+
+        if res == None:
+            return None
+        mode_raw = res.mode
+
+        if self.config.debug_mode:
+            print("Mode: ", mode_raw)
+        if mode_raw == "Problem":
+            return PromptType.PROBLEM
+        if mode_raw == "Concept":
+            return PromptType.CONCEPT
+        if mode_raw == "Other":
+            return PromptType.STUDYING
+        return None

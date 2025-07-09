@@ -235,19 +235,16 @@ class API:
 
         instructions_path = self.getModePromptPath(type)
         instructions = open(instructions_path).read().replace("${question}", str(question))
-        try:
-            response = self.client.responses.parse(
-                model=self.config.utility_model.value,
-                input=[
-                    {
-                        "role": "user",
-                        "content": instructions,
-                    },
-                ],
-                text_format=ModeResponse
-            )
-        except:
-            return None
+        response = self.client.responses.parse(
+            model=self.config.utility_model.value,
+            input=[
+                {
+                    "role": "user",
+                    "content": instructions,
+                },
+            ],
+            text_format=ModeResponse
+        )
 
 
         res = response.output_parsed

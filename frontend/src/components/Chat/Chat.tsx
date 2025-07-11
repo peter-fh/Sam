@@ -5,7 +5,7 @@ import imageCompression from 'browser-image-compression'
 import useConversation from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
 import { Log, LogLevel } from '../../log'
-import { PulseLoader } from "react-spinners"
+import { BeatLoader, PulseLoader } from "react-spinners"
 
 
 interface ChatProps {
@@ -155,7 +155,10 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
           ))}
           {loading && (
             <span key={-1}className="spinner">
-              <PulseLoader color="#c0c0c0"/>
+              <BeatLoader 
+                color="#c0c0c0"
+                speedMultiplier={0.8}
+              />
             </span>
           )}
           {aiMessage != '' && (

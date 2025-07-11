@@ -5,6 +5,7 @@ import imageCompression from 'browser-image-compression'
 import useConversation from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
 import { Log, LogLevel } from '../../log'
+import { BeatLoader, PulseLoader } from "react-spinners"
 
 
 interface ChatProps {
@@ -32,12 +33,14 @@ const Chat: React.FC<ChatProps> = ({id}) => {
     review,
     hasReviewed,
     loadConversation,
+    loadingConversation,
     loading,
   } = useConversation();
 
   const {
     sidebar,
   } = useChatSettings();
+
 
 
   const enterListener = (e: KeyboardEvent) => {
@@ -137,7 +140,7 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     scrollIntoView()
-  }, [loading])
+  }, [loadingConversation])
 
   return (
     <>
@@ -150,6 +153,14 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
               <MarkTeX content={message.content}/>
             </span>
           ))}
+          {loading && (
+            <span key={-1}className="spinner">
+              <BeatLoader 
+                color="#c0c0c0"
+                speedMultiplier={0.8}
+              />
+            </span>
+          )}
           {aiMessage != '' && (
             <span key={-1}className="output">
               <MarkTeX content={aiMessage}/>

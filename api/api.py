@@ -3,9 +3,9 @@ import time
 from dataclasses import dataclass
 
 from openai import OpenAI
+from pydantic import BaseModel
 
-from api.log import displayConversation
-from api.prompt import PromptType
+from api.prompt import Mode
 from db import Database
 import os
 
@@ -14,6 +14,7 @@ STATIC_PROMPT_DIR = "api" + os.sep + "static"
 SUMMARY_FILE_PATH = STATIC_PROMPT_DIR + os.sep + "summary.md"
 TITLE_FILE_PATH = STATIC_PROMPT_DIR + os.sep + "title.md"
 TRANSCRIPTION_FILE_PATH = STATIC_PROMPT_DIR + os.sep + "transcription.md"
+GET_MODE_DIR = STATIC_PROMPT_DIR + os.sep + "mode_prompts"
 
 
 class ModelType(Enum):
@@ -32,6 +33,10 @@ class APIConfig:
     mock_mode: bool
     pass
 
+
+class ModeResponse(BaseModel):
+    mode: Mode
+
 class API:
     config: APIConfig
     client: OpenAI
@@ -41,12 +46,12 @@ class API:
         self.client = client
         self.db = db
 
-    def getModel(self, prompt_type: PromptType):
-        if prompt_type == PromptType.PROBLEM:
+    def getModel(self, prompt_type: Mode):
+        if prompt_type == Mode.PROBLEM:
             return self.config.problem_model
-        elif prompt_type == PromptType.CONCEPT:
+        elif prompt_type == Mode.CONCEPT:
             return self.config.concept_model
-        elif prompt_type == PromptType.STUDYING:
+        elif prompt_type == Mode.OTHER:
             return self.config.study_model
 
     def getDeveloperRole(self, model):
@@ -55,7 +60,7 @@ class API:
         else:
             return "system"
 
-    def ask(self, conversation, course_code, prompt_type: PromptType, brevity):
+    def ask(self, conversation, course_code, prompt_type: Mode, brevity):
 
         model = self.getModel(prompt_type)
         print("===")
@@ -76,8 +81,8 @@ class API:
                         ]
         })
 
-        if self.config.debug_mode:
-            displayConversation(conversation)
+        # if self.config.debug_mode:
+        #    displayConversation(conversation)
 
         if self.config.mock_mode:
             time.sleep(4)
@@ -209,3 +214,47 @@ class API:
         if self.config.debug_mode:
             print("Title: ", title)
         return title
+
+    def getModePromptPath(self, mode: Mode | None):
+        if mode == Mode.PROBLEM:
+            return GET_MODE_DIR + os.sep + "problem.md"
+        elif mode == Mode.CONCEPT:
+            return GET_MODE_DIR + os.sep + "concept.md"
+        elif mode == Mode.OTHER:
+            return GET_MODE_DIR + os.sep + "other.md"
+
+        return GET_MODE_DIR + os.sep + "none.md"
+
+    def getMode(self, question, type: Mode | None):
+        if self.config.mock_mode:
+            time.sleep(3)
+            return Mode.PROBLEM
+
+        instructions_path = self.getModePromptPath(type)
+        instructions = open(instructions_path).read().replace("${question}", str(question))
+        print(instructions)
+        start_time = time.time()
+        response = self.client.responses.parse(
+            model=self.config.utility_model.value,
+            input=[
+                {
+                    "role": "user",
+                    "content": instructions,
+                },
+            ],
+            text_format=ModeResponse
+        )
+        end_time = time.time()
+        duration = end_time - start_time
+        print("Duration for only OpenAI API call: %s" % duration)
+
+
+        res = response.output_parsed
+
+        if res == None:
+            return None
+        mode_raw = res.mode
+
+        if self.config.debug_mode:
+            print("Mode: ", mode_raw)
+        return mode_raw

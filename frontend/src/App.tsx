@@ -7,7 +7,6 @@ import { Route, Routes, useParams } from 'react-router-dom'
 
 function ChatRouteWrapper() {
   const { id } = useParams<{ id: string }>();
-  console.log("Id inside wrapper: ", id)
 
   if (!id) {
     return (

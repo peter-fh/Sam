@@ -8,7 +8,7 @@ from db import Database
 class Mode(Enum):
     PROBLEM = "Problem"
     CONCEPT = "Concept"
-    STUDYING = "Studying"
+    OTHER = "Other"
 
 
 @dataclass

@@ -51,7 +51,7 @@ class API:
             return self.config.problem_model
         elif prompt_type == Mode.CONCEPT:
             return self.config.concept_model
-        elif prompt_type == Mode.STUDYING:
+        elif prompt_type == Mode.OTHER:
             return self.config.study_model
 
     def getDeveloperRole(self, model):
@@ -220,7 +220,7 @@ class API:
             return GET_MODE_DIR + os.sep + "problem.md"
         elif mode == Mode.CONCEPT:
             return GET_MODE_DIR + os.sep + "concept.md"
-        elif mode == Mode.STUDYING:
+        elif mode == Mode.OTHER:
             return GET_MODE_DIR + os.sep + "other.md"
 
         return GET_MODE_DIR + os.sep + "none.md"
@@ -232,6 +232,7 @@ class API:
 
         instructions_path = self.getModePromptPath(type)
         instructions = open(instructions_path).read().replace("${question}", str(question))
+        print(instructions)
         start_time = time.time()
         response = self.client.responses.parse(
             model=self.config.utility_model.value,

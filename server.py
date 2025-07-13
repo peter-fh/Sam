@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 
 from flask import Flask, request, send_from_directory, stream_with_context, Response
 from flask_cors import CORS
@@ -7,7 +8,7 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from supabase import Client, create_client
 
-from api.prompt import PromptType
+from api.prompt import Mode
 from api.api import API, APIConfig, ModelType
 from db import Database
 
@@ -16,12 +17,18 @@ def create_app(test_config=None):
 
     load_dotenv(override=True)
 
+    mock = False
+    mock_env_key = os.getenv("MOCK_MODE")
+    if mock_env_key != None:
+        if mock_env_key.lower() == "true":
+            mock = True
+
     app.config.from_mapping(
         FLASK_ENV=os.getenv("FLASK_ENV", "production"),
         OPENAI_API_KEY=os.getenv("OPENAI_API_KEY"),
         SUPABASE_URL=os.getenv("SUPABASE_URL"),
         SUPABASE_KEY=os.getenv("SUPABASE_SERVICE_KEY"),
-        MOCK_MODE=False,
+        MOCK_MODE=mock
     )
 
     if test_config:
@@ -79,6 +86,30 @@ def create_app(test_config=None):
         question = request.get_data(as_text=True)
         return api.title(question)
 
+    @app.route('/api/mode', methods=['POST'])
+    def mode():
+        total_start = time.time()
+        mode = request.headers["Mode"]
+        prompt_type = None
+        try:
+            prompt_type = Mode[mode.upper()]
+        except:
+            pass
+        conversation = request.get_json()
+        api_start = time.time()
+        prompt_type = api.getMode(conversation, prompt_type)
+        api_end = time.time()
+        if prompt_type == None:
+            return "Did not get type"
+
+        total_end = time.time()
+        total_duration = total_end - total_start
+        api_duration = api_end - api_start
+        print("Total get mode took %s seconds" % total_duration)
+        print("API get mode took %s seconds" % api_duration)
+
+        return prompt_type.value
+
     # Handles clicking the "Ask" button
     @app.route('/api/question', methods=['POST'])
     def question():
@@ -86,14 +117,18 @@ def create_app(test_config=None):
         # Retrieve question and its context from the request
         course = request.headers["Course"]
         brevity = request.headers["Brevity"]
-        question = request.headers["Type"]
-        print(question)
-        prompt_type = PromptType[question.upper()]
+        mode = request.headers["Mode"]
+        try:
+            prompt_type = Mode[mode.upper()]
+        except KeyError:
+            return "Could not get prompt type! Was given \"%s\"" % mode
+
         conversation = request.get_json()
 
         stream = api.ask(conversation, course, prompt_type, brevity) 
 
-        return Response(stream_with_context(stream), content_type="text/plain")
+        res = Response(stream_with_context(stream), content_type="text/plain")
+        return res
 
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')

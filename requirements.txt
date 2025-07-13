@@ -27,7 +27,7 @@ Jinja2==3.1.4
 jiter==0.6.1
 MarkupSafe==3.0.2
 multidict==6.4.3
-openai==1.52.2
+openai==1.93.2
 packaging==24.2
 pluggy==1.5.0
 postgrest==1.0.1

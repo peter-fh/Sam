@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { QuestionType, Course } from '../../types/options'
+import { Course } from '../../types/options'
 import './Modal.css'
 import { useChatSettings } from '../../context/useChatContext';
 import { useNavigate } from 'react-router-dom';
@@ -9,13 +9,11 @@ function Modal() {
   const {
   } = useChatSettings()
   const [showCourseSelect, setShowCourseSelect] = useState(true)
-  const [showTypeSelect] = useState(true)
 
   // TODO: Add "unspecified" option to course and don't allow closing the course modal
   // if unspecified is selected
   // This shouldn't be done until either more courses are added or rapid testing of the UI is not required anymore
   const { 
-    setQuestion, 
     setCourse,
     disclaimerAccepted, setDisclaimerAccepted
   } = useChatSettings();
@@ -44,6 +42,7 @@ function Modal() {
 	  </select>
 	  <button onClick={() => {
 	      setShowCourseSelect(false)
+	      navigate("/chat")
 	    }} className="interactive modal-close-button">Done</button>
 
 	</div>
@@ -51,30 +50,6 @@ function Modal() {
     </>
   )}
 
-  const typeSelectModal = () => {
-
-    return (
-    <>
-      <div id="TypeSelectModal" className="type-modal">
-	<div className="type-modal-content">
-	  <p className="modal-text">What type of question do you have?</p>
-	  <button onClick={() => {
-	      navigate("/chat")
-	      setQuestion(QuestionType.CONCEPT)
-	    }}className="interactive modal-close-button type-button">I have a question about a concept</button>
-	  <button onClick={() => {
-	      navigate("/chat")
-	      setQuestion(QuestionType.PROBLEM)
-	    }}className="interactive modal-close-button type-button">I have a question about a problem</button>
-	  <button onClick={() => {
-	      navigate("/chat")
-	      setQuestion(QuestionType.STRATEGY)
-	    }}className="interactive modal-close-button type-button">I have a question about study strategies</button>
-
-	</div>
-      </div>
-    </>
-  )}
 
   const disclaimerModal = () => {
     return (
@@ -121,7 +96,6 @@ By continuing to use this tool, you acknowledge that you are using it ethically 
 
   if (!disclaimerAccepted) return disclaimerModal()
   if (showCourseSelect) return courseSelectModal()
-  if (showTypeSelect) return typeSelectModal()
   
   return (<></>)
 }

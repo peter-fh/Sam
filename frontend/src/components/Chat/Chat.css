@@ -58,13 +58,12 @@
 	bottom: 0px;
 	height: 10%;
 	width: 60vw;
-	border-style: solid;
+	border-style: solid solid hidden solid;
 	border-color: light-dark(#888888, #555555);
 	background-color: var(--light-background);
-	padding: 0.5em 1em 0.5em 1em;
-	border-radius: 1em;
+	padding: 0.5em 1em 1em 1em;
+	border-radius: 0.5em 0.5em 0 0;
 	z-index: 11;
-	margin-bottom: 1em;
 }
 .input-block {
 	font-family: var(--font-primary);

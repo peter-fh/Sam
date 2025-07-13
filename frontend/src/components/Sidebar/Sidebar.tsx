@@ -1,7 +1,7 @@
 import './Sidebar.css'
 import { useEffect } from 'react'
 import { useChatSettings } from '../../context/useChatContext';
-import { Attribution, BrevitySelect, CourseSelect, SidebarButtons } from './Buttons';
+import { Attribution, BrevitySelect, CourseSelect, SidebarButtons, Threads } from './Elements';
 
 
 function Sidebar() {
@@ -38,10 +38,13 @@ function Sidebar() {
       { (sidebar) ?
         <div className="sidebar">
           <SidebarButtons/>
+          <hr className="sidebar-hr"/>
           <div className="options">
             <CourseSelect/>
-            <BrevitySelect/>
           </div>
+          <hr className="sidebar-hr"/>
+          <Threads/>
+          <hr className="sidebar-hr"/>
           <Attribution/>
         </div>
         : 

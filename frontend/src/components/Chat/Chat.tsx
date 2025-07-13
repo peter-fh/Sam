@@ -5,7 +5,8 @@ import imageCompression from 'browser-image-compression'
 import useConversation from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
 import { Log, LogLevel } from '../../log'
-import { BeatLoader, PulseLoader } from "react-spinners"
+import { BeatLoader } from "react-spinners"
+import { useThreadSelectionContext } from '../../context/useThreadContext'
 
 
 interface ChatProps {
@@ -41,6 +42,10 @@ const Chat: React.FC<ChatProps> = ({id}) => {
     sidebar,
   } = useChatSettings();
 
+  const {
+    setSelectedThread,
+  } = useThreadSelectionContext();
+
 
 
   const enterListener = (e: KeyboardEvent) => {
@@ -61,6 +66,8 @@ const Chat: React.FC<ChatProps> = ({id}) => {
   useEffect(() => {
     if (!id) {
       intro()
+    } else {
+      setSelectedThread(id)
     }
   }, [])
 
@@ -136,7 +143,7 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
       Log(LogLevel.Debug, "Loading conversation with ID ", id)
       loadConversation(id)
     }
-  }, [])
+  }, [id])
 
   useEffect(() => {
     scrollIntoView()

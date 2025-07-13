@@ -1,9 +1,11 @@
 import { Course, DetailLevel, QuestionType } from '../../types/options'
-import './Sidebar.css'
+import './Elements.css'
 import React from 'react'
 import { useChatSettings } from '../../context/useChatContext';
 import { useThreadSelectionContext } from '../../context/useThreadContext';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { DB } from "../../database/db"
+import { useEffect, useState } from "react"
 
 export function NewConversationButton() {
 
@@ -20,7 +22,7 @@ export function NewConversationButton() {
         setQuestion(null)
         navigate("/")
       }}
-    >
+   >
       {/* <i className="fa-solid fa-plus" /> */}
       <i className="fa-solid fa-pen-to-square" />
     </button>
@@ -97,7 +99,7 @@ export function SidebarButtons() {
         { sidebar ? 
           <>
             <SidebarButton/>
-            <OpenThreadsButton/>
+            <h1 className="sidebar-title">Sam</h1>
             <NewConversationButton/>
           </> :
           <>
@@ -123,7 +125,6 @@ export function CourseSelect() {
 
   return (
     <div className="option">
-      <h3 className="sidebar-input-header">Course</h3>
 
       <select
         className="interactive sidebar-select-box"
@@ -200,6 +201,113 @@ detailLevel === option ? "active" : ""
       </span>
     </div>
   );
+}
+
+interface ConversationItem {
+	title: string,
+	id: number,
+}
+export function Threads() {
+
+	const navigate = useNavigate()
+
+	const {
+    selectedThread,
+		setSelectedThread,
+	} = useThreadSelectionContext()
+
+	const {
+	} = useChatSettings()
+
+	const [conversations, setConversations] = useState<ConversationItem[]>([])
+	const [loading, setLoading] = useState<boolean>(true)
+
+	interface ClickableThreadProps {
+		id: number,
+		title: string,
+	}
+
+	function ClickableThread(props: ClickableThreadProps) {
+		const handleClick = () => {
+			navigate(`/chat/${props.id}`)
+			setSelectedThread(props.id)
+		}
+
+    const [classes, setClasses] = useState<string>("thread")
+    useEffect(() => {
+      if (props.id == selectedThread) {
+        setClasses("thread thread-selected")
+      } else {
+        setClasses("thread")
+      }
+    }, [selectedThread])
+
+		return (
+			<div className={classes} onClick={handleClick}>
+				<p>{props.title}</p>
+			</div>
+		)
+	}
+
+
+	async function updateConversations() {
+		const conversation_data = await DB.getConversations()
+		if (!conversation_data) {
+			setLoading(false)
+			return
+		}
+
+		const total_conversations = []
+		for (const conversation of conversation_data) {
+			const convo: ConversationItem = {
+				title: conversation.title!,
+				id: conversation.id!,
+			}
+			total_conversations.push(convo)
+		}
+		setConversations(total_conversations)
+		setLoading(false)
+	}
+
+	useEffect(() => {
+		updateConversations()
+	}, [])
+
+		if (loading) {
+			return (
+				<>
+					<div className="threads-list">
+						<i>
+							Loading Conversations...
+						</i>
+					</div>
+				</>
+			)
+		}
+
+		if (conversations.length == 0) {
+			return (
+				<>
+					<div className="threads-list">
+						<p>
+							No previous chats. Click "New Chat" to start a conversation.
+						</p>
+					</div>
+				</>
+			)
+		}
+		return (
+			<>
+				<div className="threads">
+					<ul className="threads-list">
+						{conversations.map((conversation) => (
+							<ClickableThread key={conversation.id} id={conversation.id} title={conversation.title}/>
+						))}
+					</ul>
+				</div>
+      </>
+    )
+
 }
 
 export function Attribution() {

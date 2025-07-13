@@ -22,7 +22,7 @@ export function NewConversationButton() {
         setQuestion(null)
         navigate("/")
       }}
-   >
+    >
       {/* <i className="fa-solid fa-plus" /> */}
       <i className="fa-solid fa-pen-to-square" />
     </button>
@@ -204,34 +204,34 @@ detailLevel === option ? "active" : ""
 }
 
 interface ConversationItem {
-	title: string,
-	id: number,
+  title: string,
+  id: number,
 }
 export function Threads() {
 
-	const navigate = useNavigate()
+  const navigate = useNavigate()
 
-	const {
+  const {
     selectedThread,
-		setSelectedThread,
-	} = useThreadSelectionContext()
+    setSelectedThread,
+  } = useThreadSelectionContext()
 
-	const {
-	} = useChatSettings()
+  const {
+  } = useChatSettings()
 
-	const [conversations, setConversations] = useState<ConversationItem[]>([])
-	const [loading, setLoading] = useState<boolean>(true)
+  const [conversations, setConversations] = useState<ConversationItem[]>([])
+  const [loading, setLoading] = useState<boolean>(true)
 
-	interface ClickableThreadProps {
-		id: number,
-		title: string,
-	}
+  interface ClickableThreadProps {
+    id: number,
+    title: string,
+  }
 
-	function ClickableThread(props: ClickableThreadProps) {
-		const handleClick = () => {
-			navigate(`/chat/${props.id}`)
-			setSelectedThread(props.id)
-		}
+  function ClickableThread(props: ClickableThreadProps) {
+    const handleClick = () => {
+      navigate(`/chat/${props.id}`)
+      setSelectedThread(props.id)
+    }
 
     const [classes, setClasses] = useState<string>("thread")
     useEffect(() => {
@@ -242,71 +242,71 @@ export function Threads() {
       }
     }, [selectedThread])
 
-		return (
-			<div className={classes} onClick={handleClick}>
-				<p>{props.title}</p>
-			</div>
-		)
-	}
+    return (
+      <div className={classes} onClick={handleClick}>
+        <p>{props.title}</p>
+      </div>
+    )
+  }
 
 
-	async function updateConversations() {
-		const conversation_data = await DB.getConversations()
-		if (!conversation_data) {
-			setLoading(false)
-			return
-		}
+  async function updateConversations() {
+    const conversation_data = await DB.getConversations()
+    if (!conversation_data) {
+      setLoading(false)
+      return
+    }
 
-		const total_conversations = []
-		for (const conversation of conversation_data) {
-			const convo: ConversationItem = {
-				title: conversation.title!,
-				id: conversation.id!,
-			}
-			total_conversations.push(convo)
-		}
-		setConversations(total_conversations)
-		setLoading(false)
-	}
+    const total_conversations = []
+    for (const conversation of conversation_data) {
+      const convo: ConversationItem = {
+        title: conversation.title!,
+        id: conversation.id!,
+      }
+      total_conversations.push(convo)
+    }
+    setConversations(total_conversations)
+    setLoading(false)
+  }
 
-	useEffect(() => {
-		updateConversations()
-	}, [])
+  useEffect(() => {
+    updateConversations()
+  }, [selectedThread])
 
-		if (loading) {
-			return (
-				<>
-					<div className="threads-list">
-						<i>
-							Loading Conversations...
-						</i>
-					</div>
-				</>
-			)
-		}
-
-		if (conversations.length == 0) {
-			return (
-				<>
-					<div className="threads-list">
-						<p>
-							No previous chats. Click "New Chat" to start a conversation.
-						</p>
-					</div>
-				</>
-			)
-		}
-		return (
-			<>
-				<div className="threads">
-					<ul className="threads-list">
-						{conversations.map((conversation) => (
-							<ClickableThread key={conversation.id} id={conversation.id} title={conversation.title}/>
-						))}
-					</ul>
-				</div>
+  if (loading) {
+    return (
+      <>
+        <div className="threads-list">
+          <i>
+            Loading Conversations...
+          </i>
+        </div>
       </>
     )
+  }
+
+  if (conversations.length == 0) {
+    return (
+      <>
+        <div className="threads-list">
+          <p>
+            No previous chats. Click "New Chat" to start a conversation.
+          </p>
+        </div>
+      </>
+    )
+  }
+  return (
+    <>
+      <div className="threads">
+        <ul className="threads-list">
+          {conversations.map((conversation) => (
+            <ClickableThread key={conversation.id} id={conversation.id} title={conversation.title}/>
+          ))}
+        </ul>
+      </div>
+    </>
+  )
 
 }
 

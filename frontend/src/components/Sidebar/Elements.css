@@ -19,6 +19,9 @@
 }
 
 .sidebar-buttons h1 {
+	display: flex;
+	justify-content: center;
+	align-items: center;
 	height: 1rem;
 	font-size: var(--font-size-2xl);
 	font-weight: bold;

@@ -1,0 +1,109 @@
+.option {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+
+.option > .sidebar-input-header {
+	font-size: var(--font-size-lg);
+	margin: 0;
+	padding: 0;
+}
+
+.sidebar-buttons {
+	width: 100%;
+	display: flex;
+	justify-content: space-evenly;
+	align-items: center
+}
+
+.sidebar-buttons h1 {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 1rem;
+	font-size: var(--font-size-2xl);
+	font-weight: bold;
+}
+
+.sidebar-button{
+	border: solid;
+	border-color: var(--outline-color);
+	border-radius: 18px;
+	background-color: light-dark(var(--light-background), var(--dark-background));
+	padding: 9px 12px 9px 12px;
+	margin: 1.3rem 5px 1rem 5px;
+	color: var(--text-color);
+	font-size: var(--font-size-base);
+}
+
+.invisible-button{
+	opacity: 0;
+	border: solid;
+	padding: 9px 12px 9px 12px;
+	margin: 0em 5px 0 5px;
+	font-size: var(--font-size-base);
+}
+
+.sidebar-title {
+	box-sizing: border-box;
+}
+
+.sidebar-select-box {
+	height: 2.5rem;
+	width: 8rem;
+	background-color: var(--dark-background);
+	color: var(--text-color);
+	border-radius: 0.3rem;
+	font-size: var(--font-size-base);
+	border-color: var(--outline-color);
+	padding: 5px 5px;
+	text-align-last: center;
+	font-family: var(--font-primary);
+	border-style: none;
+}
+
+.select-box-option.active {
+	background: var(--highlight-color);
+	border-radius: 0.3rem;
+	text-shadow:
+		0 0 3px light-dark(#404040, #a0a0a0)
+		0 0 6px var(--highlight-color);
+}
+
+.select-box-option {
+	margin: 0 0.1rem 0 0rem;
+	appearance: none;
+	background: none;
+	border: none;
+	color: inherit;
+	cursor: pointer; 
+	font-family: var(--font-primary);
+	font-size: 1rem;
+}
+
+.options {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-evenly;
+}
+
+.attribution {
+	margin-bottom: 1em;
+	margin-left: 1rem;
+	margin-right: 1rem;
+	color: inherit;
+	font-size: var(--font-size-base);
+	margin-top: auto;
+}
+
+.sidebar-button:hover {
+	border-color: var(--clicked-button);
+}
+.sidebar-button:active {
+	color: var(--text-color);
+	background-color: var(--dark-background);
+}
+

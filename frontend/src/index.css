@@ -1,6 +1,6 @@
 :root {
 	color-scheme: light;
-	--dark-background: #e3e3e3;
+	--dark-background: #f4f4f4;
 	--light-background: #ffffff;
 	--highlight-color: #77bbbb;
 	--clicked-button: gray;
@@ -18,8 +18,8 @@
 @media (prefers-color-scheme: dark) { 
 	:root {
 		color-scheme: dark;
-		--dark-background: #1d1d1d;
-		--light-background: #222222;
+		--dark-background: #1a1a1a;
+		--light-background: #202020;
 		--highlight-color: #114444;
 		--clicked-button: white;
 		--text-color: white;

@@ -50,6 +50,7 @@ const useConversation = () => {
   const [toSummarize, setToSummarize] = useState(false)
   const [toReview, setToReview] = useState(false)
   const [hasReviewed, setHasReviewed] = useState(false)
+  const [loadingConversation, setLoadingConversation] = useState(false)
   const [loading, setLoading] = useState(false)
 
   const addMessage = (message: Message) => {
@@ -59,7 +60,7 @@ const useConversation = () => {
 
   async function loadConversation(id: number) {
     setLock(true)
-    setLoading(true)
+    setLoadingConversation(true)
     setConversationId(id)
 
     const summary = await DB.getSummary(id)
@@ -107,7 +108,7 @@ const useConversation = () => {
 
     setMessages(conversationDisplayMessages)
 
-    setLoading(false)
+    setLoadingConversation(false)
     setLock(false)
   }
   async function intro() {
@@ -194,34 +195,50 @@ const useConversation = () => {
     return summary
   }
 
-  async function ask(conversation: Message[]) {
+  async function getMode(conversation: Message[]) {
+    var question_type: string = ""
+    if (question_type == null) {
+      question_type = "None"
+    } else {
+      question_type = question!
+    }
+
+    const mode_request = new Request(Endpoints.Mode, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Mode': question_type,
+      },
+      body: JSON.stringify(conversation)
+    })
+
+    const mode_response = await fetch(mode_request)
+    const mode_raw = await mode_response.text()
+    if (mode_raw == "") {
+      throw new Error("Could not fetch mode")
+    }
+    const mode = mode_raw as QuestionType
+    Log(LogLevel.Debug, mode)
+    return mode
+  }
+
+  async function ask(conversation: Message[], mode: QuestionType) {
+
     const request = new Request(Endpoints.Ask, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Course': course,
         'Brevity': detailLevel,
-        'Type': question,
+        'Mode': mode,
       },
       body: JSON.stringify(conversation)
     })
 
 
-
-    const start_time = performance.now()
-    var elapsedIntervals = 0
-    const intervalId = setInterval(() => {
-      const numberOfDots = elapsedIntervals % 4
-      const thinkingMessage = "Solving" + ".".repeat(numberOfDots)
-
-      if (elapsedIntervals != 0) {
-        setAiMessage("*" + thinkingMessage + "*")
-      }
-      elapsedIntervals++
-    }, 500)
     const response = await fetch(request)
+    setLoading(false)
 
-    clearInterval(intervalId);
     const reader = response.body!.getReader()
     const decoder = new TextDecoder('utf-8')
     var answer = ""
@@ -239,8 +256,6 @@ const useConversation = () => {
     setAiMessage('')
     Log(LogLevel.Debug, answer)
 
-    const end_time = performance.now()
-    Log(LogLevel.Always, `Response took ${(end_time - start_time) / 1000}`)
     setToSummarize(true)
 
     return answer
@@ -321,8 +336,17 @@ const useConversation = () => {
       var json_message: any = newMessage(final_message, "user")
       const fullConversation = [...conversation, json_message]
 
-      const ai_message_promise = ask(fullConversation)
-      const ai_message = await ai_message_promise
+      const mode_start_time = performance.now()
+      setLoading(true)
+      const mode = await getMode(fullConversation)
+      const mode_end_time = performance.now()
+      Log(LogLevel.Always, `Mode fetch took ${(mode_end_time - mode_start_time) / 1000}`)
+      setQuestion(mode)
+
+      const ask_start_time = performance.now()
+      const ai_message = await ask(fullConversation, mode)
+      const ask_end_time = performance.now()
+      Log(LogLevel.Always, `Question took ${(ask_end_time - ask_start_time) / 1000}`)
 
       const display_ai_message: DisplayMessage = {
         sender: "assistant",
@@ -351,13 +375,15 @@ const useConversation = () => {
       if (current_conversation_id == null) {
         const title = await getTitle(final_message)
         Log(LogLevel.Debug, "Title: ", title)
-        const add_conversation_result = await DB.addConversation(title, course, question)
+        const add_conversation_result = await DB.addConversation(title, course, mode)
         if (add_conversation_result == null) {
           throw new Error("Did not find course or title")
         }
         current_conversation_id = add_conversation_result
         setConversationId(current_conversation_id)
         setSelectedThread(current_conversation_id)
+      } else {
+        await DB.updateMode(current_conversation_id, mode)
       }
 
       await DB.addMessage(current_conversation_id, "user", final_message)
@@ -435,6 +461,7 @@ const useConversation = () => {
     toReview,
     hasReviewed,
     loadConversation,
+    loadingConversation,
     loading,
   }
 }

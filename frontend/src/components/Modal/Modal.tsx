@@ -1,26 +1,34 @@
 import { useState } from 'react'
-import { QuestionType, Course } from '../../types/options'
+import { Course } from '../../types/options'
 import './Modal.css'
 import { useChatSettings } from '../../context/useChatContext';
 import { useNavigate } from 'react-router-dom';
+import { useThreadSelectionContext } from '../../context/useThreadContext';
 
 function Modal() {
 
   const {
   } = useChatSettings()
   const [showCourseSelect, setShowCourseSelect] = useState(true)
-  const [showTypeSelect] = useState(true)
 
   // TODO: Add "unspecified" option to course and don't allow closing the course modal
   // if unspecified is selected
   // This shouldn't be done until either more courses are added or rapid testing of the UI is not required anymore
   const { 
-    setQuestion, 
     setCourse,
     disclaimerAccepted, setDisclaimerAccepted
   } = useChatSettings();
 
+  const {
+    setSelectedThread,
+  } = useThreadSelectionContext()
+
   const navigate = useNavigate()
+
+  const navigateToChat = () => {
+    navigate("/chat")
+    setSelectedThread(null)
+  }
 
 
   /* The course-select select box can be changed to its own function/component if the sidebar version
@@ -31,89 +39,66 @@ function Modal() {
     }
 
     return (
-    <>
-      <div className="course-modal">
-	<div className="course-modal-content">
-	  <p className="modal-text">Select the course you are taking</p>
-	  <select className="interactive select-box" onChange={onChange}> 
+      <>
+	<div className="course-modal">
+	  <div className="course-modal-content">
+	    <p className="modal-text">Select the course you are taking</p>
+	    <select className="interactive select-box" onChange={onChange}> 
 	      {Object.values(Course).map((option) => (
-	      <option key={option} value={option}>
-	      {option}
-	      </option>
+		<option key={option} value={option}>
+		  {option}
+		</option>
 	      ))}
-	  </select>
-	  <button onClick={() => {
+	    </select>
+	    <button onClick={() => {
 	      setShowCourseSelect(false)
+	      navigateToChat()
 	    }} className="interactive modal-close-button">Done</button>
 
+	  </div>
 	</div>
-      </div>
-    </>
-  )}
+      </>
+    )}
 
-  const typeSelectModal = () => {
-
-    return (
-    <>
-      <div id="TypeSelectModal" className="type-modal">
-	<div className="type-modal-content">
-	  <p className="modal-text">What type of question do you have?</p>
-	  <button onClick={() => {
-	      navigate("/chat")
-	      setQuestion(QuestionType.CONCEPT)
-	    }}className="interactive modal-close-button type-button">I have a question about a concept</button>
-	  <button onClick={() => {
-	      navigate("/chat")
-	      setQuestion(QuestionType.PROBLEM)
-	    }}className="interactive modal-close-button type-button">I have a question about a problem</button>
-	  <button onClick={() => {
-	      navigate("/chat")
-	      setQuestion(QuestionType.STRATEGY)
-	    }}className="interactive modal-close-button type-button">I have a question about study strategies</button>
-
-	</div>
-      </div>
-    </>
-  )}
 
   const disclaimerModal = () => {
     return (
       <>
-      <div id="DisclaimerModal" className="type-modal">
-	<div className="disclaimer-modal-content">
-	  <span className="modal-text">
+	<div id="DisclaimerModal" className="type-modal">
+	  <div className="disclaimer-modal-content">
+	    <span className="modal-text">
 	      <h2>
 		Disclaimer
 	      </h2>
 
 	      <p> 
-This bot is designed to assist Concordia University students in understanding basic Calculus concepts, solving problems, and enhancing their learning experience. This bot is not to replace lectures, classes, or group projects. 
+		This bot is designed to assist Concordia University students in understanding basic Calculus concepts, solving problems, and enhancing their learning experience. This bot is not to replace lectures, classes, or group projects. 
 	      </p>
 
 	      <p> 
-By using this tool, you agree to the following:
+		By using this tool, you agree to the following:
 	      </p>
 
 	      <ol>
 		<li>
-Accuracy: Gen AI can make mistakes. It is the student's responsibility to double check any answers they are given.
+		  Accuracy: Gen AI can make mistakes. It is the student's responsibility to double check any answers they are given.
 		</li>
 
 		<li>
-Academic Integrity: Plagiarism, including submitting work that is generated or assisted by AI tools as your own without proper understanding or citation, is a violation of academic integrity policies. Always adhere to your professor's guidelines as per how and to what extent Gen AI can be used in your studies.
+		  Academic Integrity: Plagiarism, including submitting work that is generated or assisted by AI tools as your own without proper understanding or citation, is a violation of academic integrity policies. Always adhere to your professor's guidelines as per how and to what extent Gen AI can be used in your studies.
 		</li>
 
 
-</ol>
-By continuing to use this tool, you acknowledge that you are using it ethically and responsibly to enhance your understanding of the material, while upholding academic honesty and integrity.
+	      </ol>
+	      By continuing to use this tool, you acknowledge that you are using it ethically and responsibly to enhance your understanding of the material, while upholding academic honesty and integrity.
 
 	    </span>
-	  <button onClick={() => {
+	    <button onClick={() => {
 	      setDisclaimerAccepted(true)
 	    }} className="interactive modal-close-button disclaimer-button">I Accept</button>
 
+	  </div>
 	</div>
-      </div>
       </>
     )
   }
@@ -121,8 +106,7 @@ By continuing to use this tool, you acknowledge that you are using it ethically 
 
   if (!disclaimerAccepted) return disclaimerModal()
   if (showCourseSelect) return courseSelectModal()
-  if (showTypeSelect) return typeSelectModal()
-  
+
   return (<></>)
 }
 

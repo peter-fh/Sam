@@ -9,16 +9,8 @@
 	background-color: var(--dark-background);
 	z-index: 12;
 	overflow-y: auto;
-	row-gap: 10%;
 }
 
-.options {
-	width: 100%;
-	height: 100vh;
-	display: flex;
-	flex-direction: column;
-	justify-content: space-evenly;
-}
 
 .hidden-sidebar {
 	display: flex;
@@ -37,87 +29,8 @@
 	overflow-y: auto;
 }
 
-
-.attribution {
-	margin-bottom: 1em;
-	margin-left: 1rem;
-	margin-right: 1rem;
-	color: inherit;
-	font-size: var(--font-size-base);
-	margin-top: auto;
+.sidebar-hr {
+	opacity: 40%;
+	width: 90%;
 }
 
-.sidebar-buttons {
-	width: 100%;
-	display: flex;
-	justify-content: space-evenly;
-}
-
-.sidebar-button{
-	border: solid;
-	border-color: var(--outline-color);
-	border-radius: 18px;
-	background-color: light-dark(var(--light-background), var(--dark-background));
-	padding: 9px 12px 9px 12px;
-	margin: 0.5em 5px 0 5px;
-	color: var(--text-color);
-	font-size: var(--font-size-base);
-}
-
-.invisible-button{
-	opacity: 0;
-	border: solid;
-	padding: 9px 12px 9px 12px;
-	margin: 0.5em 5px 0 5px;
-	font-size: var(--font-size-base);
-}
-
-.sidebar-button:hover {
-	border-color: var(--clicked-button);
-}
-.sidebar-button:active {
-	color: var(--text-color);
-	background-color: var(--dark-background);
-}
-.option {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-}
-
-
-.option > .sidebar-input-header {
-	font-size: var(--font-size-lg);
-}
-
-.sidebar-select-box {
-	height: 3.5rem;
-	width: 8rem;
-	background-color: var(--light-background);
-	color: var(--text-color);
-	border-radius: 0.3rem;
-	font-size: var(--font-size-base);
-	border-color: var(--outline-color);
-	padding: 5px 5px;
-	text-align-last: center;
-	font-family: var(--font-primary);
-}
-
-.select-box-option.active {
-	background: var(--highlight-color);
-	border-radius: 0.3rem;
-	text-shadow:
-		0 0 3px light-dark(#404040, #a0a0a0)
-		0 0 6px var(--highlight-color);
-}
-
-.select-box-option {
-	margin: 0 0.1rem 0 0rem;
-	appearance: none;
-	background: none;
-	border: none;
-	color: inherit;
-	cursor: pointer; 
-	font-family: var(--font-primary);
-	font-size: 1rem;
-}

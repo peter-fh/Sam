@@ -4,6 +4,7 @@ export const Endpoints = {
   Image: '/api/image',
   Summary: '/api/summary',
   Title: '/api/title',
+  Mode: '/api/mode',
 }
 
 export default Endpoints

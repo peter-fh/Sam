@@ -4,10 +4,11 @@ import Sidebar from './components/Sidebar'
 import Chat from './components/Chat'
 import Threads from './components/Threads'
 import { Route, Routes, useParams } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Log, LogLevel } from './log'
 
 function ChatRouteWrapper() {
   const { id } = useParams<{ id: string }>();
-  console.log("Id inside wrapper: ", id)
 
   if (!id) {
     return (
@@ -17,6 +18,10 @@ function ChatRouteWrapper() {
     )
   }
   const conversationId = parseInt(id)
+
+  useEffect(() => {
+    Log(LogLevel.Debug, "Updated conversationId: ", conversationId)
+  }, [conversationId])
 
   return (
   <>

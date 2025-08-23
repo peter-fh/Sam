@@ -47,10 +47,10 @@ def create_app(test_config=None):
     )
     db = Database(supabase)
     api_config = APIConfig(
-        concept_model=ModelType.gpt_4_1,
-        problem_model=ModelType.o3_mini,
-        study_model=ModelType.gpt_4_1_mini,
-        utility_model=ModelType.gpt_4_1_mini,
+        concept_model=ModelType.gpt_5,
+        problem_model=ModelType.gpt_5,
+        study_model=ModelType.gpt_5_mini,
+        utility_model=ModelType.gpt_5_mini,
         debug_mode=app.config["FLASK_ENV"] == "development",
         mock_mode=app.config["MOCK_MODE"],
     )

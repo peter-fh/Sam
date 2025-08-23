@@ -18,6 +18,8 @@ GET_MODE_DIR = STATIC_PROMPT_DIR + os.sep + "mode_prompts"
 
 
 class ModelType(Enum):
+    gpt_5 = "gpt-5"
+    gpt_5_mini = "gpt-5-mini"
     o3_mini = "o3-mini"
     o4_mini = "o4-mini"
     gpt_4_1 = "gpt-4.1"
@@ -71,15 +73,10 @@ class API:
         outline = self.db.getOutline(course_code)
         prompt = instructions + "\n" + outline
         prompt = prompt.replace("{$brevity}", brevity)
+        print("Conversation: ")
+        print(conversation)
+        print("End of conversation")
 
-        conversation.insert(0, {
-            "role": self.getDeveloperRole(model),
-            "content": [{
-                "type": "text",
-                "text": prompt
-            }
-                        ]
-        })
 
         # if self.config.debug_mode:
         #    displayConversation(conversation)
@@ -95,28 +92,24 @@ class API:
 
 
         try:
-            stream = self.client.chat.completions.create(
+            stream = self.client.responses.create(
                 model=model.value,
-                messages=conversation,
-                stream=True,
+                reasoning={"effort": "low"},
+                input=conversation,
+                instructions=prompt,
             )
         except Exception as e:
             print("Ask error: ", e)
             yield "This service is currently unavailable, sorry!"
             return
 
-        total_input_characters = 0
-        for message in conversation:
-            for line in message["content"][0]["text"]:
-                total_input_characters += len(line)
 
-
-        total_output_characters = 0
-        for chunk in stream:
-            content = chunk.choices[0].delta.content 
-            if content is not None:
-                total_output_characters += len(content)
-                yield content
+        print(stream.output_text)
+        yield stream.output_text
+        return
+        for event in stream:
+            print(event)
+            yield "hi" 
 
     def transcribe(self, image):
 
@@ -194,22 +187,21 @@ class API:
 
         instructions = open(TITLE_FILE_PATH).read().replace("${question}", question)
         try:
-            response = self.client.chat.completions.create(
+            response = self.client.responses.create(
                 model=self.config.utility_model.value,
-                messages=[
+                input=[
                     {
                         "role": "user",
-                        "content": instructions,
+                        "content": instructions
                     },
                 ],
-                max_tokens=40
             )
         except:
             print("Title error")
             return "Error Getting Title"
 
 
-        title = str(response.choices[0].message.content)
+        title = str(response.output_text)
 
         if self.config.debug_mode:
             print("Title: ", title)

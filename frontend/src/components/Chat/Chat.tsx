@@ -156,7 +156,7 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
       }}>
         <div className="messages" ref={messagesRef}>
           {messages && messages.map((message, index) => (
-            <span key={index}className={message.sender == "user" ? "question" : "output"}>
+            <span key={index}className={message.role == "user" ? "question" : "output"}>
               <MarkTeX content={message.content}/>
             </span>
           ))}

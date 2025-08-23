@@ -1,5 +1,5 @@
 import { useRef, useState } from "react";
-import { Message, newMessage } from "../../types/message";
+import { getMessageContent, Message, newMessage } from "../../types/message";
 import { useChatSettings } from "../../context/useChatContext";
 import Endpoints from "../../endpoints";
 import { DB } from "../../database/db";
@@ -21,7 +21,7 @@ function sleep(ms: number) {
 }
 
 type DisplayMessage = {
-  sender: "user" | "assistant"
+  role: "user" | "assistant"
   content: string
 }
 
@@ -78,14 +78,14 @@ const useConversation = () => {
 
     const conversationDisplayMessages: DisplayMessage[] = []
     const intro_message: DisplayMessage = {
-      sender: "assistant",
+      role: "assistant",
       content: INTRO_MESSAGE,
     }
     conversationDisplayMessages.push(intro_message)
     const formattedMessages: Message[] = []
     for (const conversation_message of conversationMessages) {
       const conversation_display_message: DisplayMessage = {
-        sender: conversation_message.role as "user" | "assistant",
+        role: conversation_message.role as "user" | "assistant",
         content: conversation_message.content!,
       }
       conversationDisplayMessages.push(conversation_display_message)
@@ -123,7 +123,7 @@ const useConversation = () => {
     }
 
     const introductionMessage: DisplayMessage = {
-      sender: "assistant",
+      role: "assistant",
       content: answer,
     }
 
@@ -279,7 +279,7 @@ const useConversation = () => {
     const answer = REVIEW_MESSAGE
 
     const display_ai_message: DisplayMessage = {
-      sender: "assistant",
+      role: "assistant",
       content: answer
     }
 
@@ -307,12 +307,12 @@ const useConversation = () => {
 
 
       const current_display_question: DisplayMessage = {
-        sender: "user",
+        role: "user",
         content: current_message
 
       }
       const image_info: DisplayMessage = {
-        sender: "user",
+        role: "user",
         content: ""
       }
       if (image) {
@@ -349,7 +349,7 @@ const useConversation = () => {
       Log(LogLevel.Always, `Question took ${(ask_end_time - ask_start_time) / 1000}`)
 
       const display_ai_message: DisplayMessage = {
-        sender: "assistant",
+        role: "assistant",
         content: ai_message
       }
 
@@ -409,7 +409,7 @@ const useConversation = () => {
     }
     var total_length = 0
     for (var i = 0; i < conversation.length-1; i++) {
-      total_length += conversation[i].content[0].text.length
+      total_length += getMessageContent(conversation[i]).length
     }
 
     if (estimateTokens(total_length) <= TOKEN_THRESHOLD) {

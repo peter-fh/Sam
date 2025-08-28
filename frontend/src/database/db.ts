@@ -1,175 +1,113 @@
-import { createClient } from '@supabase/supabase-js'
-import { Database } from './database.types'
-
-const supabase = createClient<Database>(
-  import.meta.env.VITE_SUPABASE_URL!,
-  import.meta.env.VITE_SUPABASE_ANON_KEY!,
-)
+const DatabaseEndpoints = {
+  Conversations: '/db/conversations',
+  Settings: '/db/conversations/settings',
+  Summary: '/db/conversations/summary',
+}
 
 export namespace DB {
 
   export async function getConversations() {
-    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
-      const { data } = await supabase
-        .from("conversations")
-        .select()
-        .order("updated_at", { ascending: false })
-      return data
+    const response = await fetch(DatabaseEndpoints.Conversations, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    if (response.ok) {
+      const response_json = await response.json()
+      console.log(response_json)
+      return response_json
     }
-
-    const { data } = await supabase
-      .from("conversations")
-      .select()
-      .or(`course_id.eq.1,course_id.is.null`)
-      .order("updated_at", { ascending: false })
-    return data
+    return null
   }
 
   export async function getSettings(id: number) {
-    const { data, error } = await supabase
-      .from("conversations")
-      .select(`
-        course:course_id (code), 
-        mode:mode_id (name)
-      `)
-      .eq("id", id)
-      .single()
 
-    if (error) {
-      console.error("Supabase error:", error.message, error.details)
-    } 
-
-    return data
+    const response = await fetch(DatabaseEndpoints.Settings + `/${id}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    if (response.ok) {
+      const response_json = await response.json()
+      console.log(response_json)
+      return response_json
+    }
+    return null
   }
 
   export async function getConversation(id: number) {
-    const { data, error }  = await supabase
-      .from("messages")
-      .select()
-      .eq("conversation_id", id)
-      .order("timestamp", { ascending: true })
-
-    if (error) {
-      console.error("Supabase error:", error.message, error.details)
-    } 
-
-    return data
+    const response = await fetch(DatabaseEndpoints.Conversations + `/${id}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    if (response.ok) {
+      const response_json = await response.json()
+      console.log(response_json)
+      return response_json
+    }
+    return null
   }
 
   export async function getSummary(id: number) {
-    const { data, error } = await supabase
-      .from("conversations")
-      .select("summary")
-      .eq("id", id)
-      .single()
-
-    if (error) {
-      console.error("Supabase error:", error.message, error.details)
-    } 
-
-    return data
+    const response = await fetch(DatabaseEndpoints.Summary + `/${id}`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+    if (response.ok) {
+      const response_json = await response.json()
+      console.log(response_json)
+      return response_json
+    }
+    return null
 
   }
 
   export async function addMessage(conversation_id: number, role: string, content: string) {
-    const { error } = await supabase
-      .from("messages")
-      .insert({
-        conversation_id: conversation_id,
+    await fetch(DatabaseEndpoints.Conversations + `/${conversation_id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         role: role,
         content: content,
       })
-
-    if (error) {
-      console.error("Supabase error:", error.message, error.details)
-    } 
+    })
+    return null
 
   }
 
-  export async function addConversation(title: string, course: string, type: string) {
-    const { data: modeData, error: modeError } = await supabase
-      .from("modes")
-      .select("id")
-      .eq("name", type)
-      .single()
-
-    if (modeError) {
-      console.error("Supabase error:", modeError.message, modeError.details)
-      return
-    } 
-
-    const mode_id = modeData!.id
-
-    const { data: courseData, error: courseError } = await supabase
-      .from("courses")
-      .select("id")
-      .eq("code", course)
-      .single()
-
-    if (courseError) {
-      console.error("Supabase error:", courseError.message, courseError.details)
-      return
-    } 
-
-    const course_id = courseData!.id
-
-
-    const { data, error } = await supabase
-      .from("conversations")
-      .insert({
+  export async function addConversation(title: string, course: string, mode: string) {
+    await fetch(DatabaseEndpoints.Conversations, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         title: title,
-        course_id: course_id,
-        mode_id: mode_id,
+        course: course,
+        mode: mode,
       })
-      .select()
-      .single()
-
-    if (error) {
-      console.error("Supabase error:", error.message, error.details);
-    } 
-
-    return data!.id
+    })
+    return null
 
   }
 
   export async function updateSummary(conversation_id: number, summary: string) {
-    const { error } = await supabase
-      .from("conversations")
-      .update({
+    await fetch(DatabaseEndpoints.Summary + `/${conversation_id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
         summary: summary,
       })
-      .eq('id', conversation_id)
-
-    if (error) {
-      console.error("Supabase error:", error.message, error.details)
-    } 
+    })
+    return null
 
   }
 
   export async function updateMode(conversation_id: number, mode: string) {
-    const { data: modeData, error: modeError } = await supabase
-      .from("modes")
-      .select("id")
-      .eq("name", mode)
-      .single()
-
-    if (modeError) {
-      console.error("Supabase error:", modeError.message, modeError.details)
-      return
-    } 
-
-    const mode_id = modeData!.id
-
-    const { error } = await supabase
-      .from("conversations")
-      .update({
-        mode_id: mode_id,
+    await fetch(DatabaseEndpoints.Settings + `/${conversation_id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        mode: mode,
       })
-      .eq('id', conversation_id)
-
-    if (error) {
-      console.error("Supabase error:", error.message, error.details)
-    } 
+    })
+    return null
   }
 
 }

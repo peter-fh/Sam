@@ -2,7 +2,7 @@ import os
 import sys
 import time
 
-from flask import Flask, request, send_from_directory, stream_with_context, Response
+from flask import Flask, jsonify, request, send_from_directory, stream_with_context, Response
 from flask_cors import CORS
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -25,9 +25,9 @@ def create_app(test_config=None):
 
     app.config.from_mapping(
         FLASK_ENV=os.getenv("FLASK_ENV", "production"),
-        OPENAI_API_KEY=os.getenv("OPENAI_API_KEY"),
         SUPABASE_URL=os.getenv("SUPABASE_URL"),
         SUPABASE_KEY=os.getenv("SUPABASE_SERVICE_KEY"),
+        OPENAI_API_KEY=os.getenv("OPENAI_API_KEY"),
         MOCK_MODE=mock
     )
 
@@ -130,6 +130,72 @@ def create_app(test_config=None):
         res = Response(stream_with_context(stream), content_type="text/plain")
         return res
 
+    @app.route('/db/conversations')
+    def get_conversations():
+        conversations = db.getConversations()
+        print("Getting conversations")
+        print(jsonify(conversations))
+        return jsonify(conversations)
+
+    @app.route('/db/conversations/<int:conversation_id>')
+    def get_conversation(conversation_id: int):
+        conversation = db.getConversation(conversation_id)
+        print(jsonify(conversation))
+        return jsonify(conversation)
+
+    @app.route('/db/conversations/settings/<int:conversation_id>')
+    def get_settings(conversation_id):
+        settings = db.getSettings(conversation_id)
+        print(jsonify(settings))
+        return jsonify(settings)
+
+    @app.route('/db/conversations/summary/<int:conversation_id>')
+    def get_summary(conversation_id):
+        summary = db.getSummary(conversation_id)
+        print(jsonify(summary))
+        return jsonify(summary)
+
+
+    @app.route('/db/conversations', methods=['POST'])
+    def add_conversation():
+        data = request.get_json()
+
+        title = data['title']
+        course = data['course']
+        mode = data['mode']
+
+        id = db.addConversation(title, course, mode)
+        return jsonify(id)
+
+    @app.route('/db/conversations/<int:conversation_id>', methods=['POST'])
+    def add_message(conversation_id):
+        data = request.get_json()
+
+        role = data['role']
+        content = data['content']
+
+        db.addMessage(conversation_id, role, content)
+
+        return '', 201
+
+    @app.route('/db/conversations/summary/<int:conversation_id>', methods=['POST'])
+    def update_summary(conversation_id):
+        data = request.get_json()
+
+        summary = data['summary']
+        db.updateSummary(conversation_id, summary)
+        return '', 201
+
+    @app.route('/db/conversations/settings/<int:conversation_id>', methods=['POST'])
+    def update_mode(conversation_id):
+        data = request.get_json()
+
+        mode = data['mode']
+
+        db.updateMode(conversation_id, mode)
+
+        return '', 201
+
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
     def index(path):
@@ -139,6 +205,7 @@ def create_app(test_config=None):
 
 
     return app
+
 
 app = create_app()
 

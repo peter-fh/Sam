@@ -110,4 +110,31 @@ export namespace DB {
     return null
   }
 
+
+  export async function updateMode(conversation_id: number, mode: string) {
+    const { data: modeData, error: modeError } = await supabase
+      .from("modes")
+      .select("id")
+      .eq("name", mode)
+      .single()
+
+    if (modeError) {
+      console.error("Supabase error:", modeError.message, modeError.details)
+      return
+    } 
+
+    const mode_id = modeData!.id
+
+    const { error } = await supabase
+      .from("conversations")
+      .update({
+        mode_id: mode_id,
+      })
+      .eq('id', conversation_id)
+
+    if (error) {
+      console.error("Supabase error:", error.message, error.details)
+    } 
+  }
+
 }

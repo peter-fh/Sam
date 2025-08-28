@@ -28,6 +28,7 @@ def create_app(test_config=None):
         SUPABASE_URL=os.getenv("SUPABASE_URL"),
         SUPABASE_KEY=os.getenv("SUPABASE_SERVICE_KEY"),
         OPENAI_API_KEY=os.getenv("OPENAI_API_KEY"),
+
         MOCK_MODE=mock
     )
 
@@ -195,6 +196,7 @@ def create_app(test_config=None):
         db.updateMode(conversation_id, mode)
 
         return '', 201
+
 
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')

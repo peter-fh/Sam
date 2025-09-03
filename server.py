@@ -83,8 +83,9 @@ def create_app(test_config=None):
                 if response.user.email is None:
                     return jsonify({'error': 'No email address linked to user'}), 401
 
-                domain = response.user.email.split("@")
+                domain = response.user.email.split("@")[-1]
                 if domain not in accepted_domains:
+                    print(domain)
                     return jsonify({'error': 'Email is not from a valid Concordia domain'}), 401
 
 

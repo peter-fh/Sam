@@ -221,6 +221,7 @@ export function Threads() {
 
   const [conversations, setConversations] = useState<ConversationItem[]>([])
   const [loading, setLoading] = useState<boolean>(true)
+  const [error, setError] = useState<boolean>(false)
 
   interface ClickableThreadProps {
     id: number,
@@ -251,22 +252,29 @@ export function Threads() {
 
 
   async function updateConversations() {
-    const conversation_data = await DB.getConversations()
-    if (!conversation_data) {
-      setLoading(false)
-      return
-    }
-
-    const total_conversations = []
-    for (const conversation of conversation_data) {
-      const convo: ConversationItem = {
-        title: conversation.title!,
-        id: conversation.id!,
+    setError(false)
+    try {
+      const conversation_data = await DB.getConversations()
+      if (!conversation_data) {
+        setLoading(false)
+        return
       }
-      total_conversations.push(convo)
+
+      const total_conversations = []
+      for (const conversation of conversation_data) {
+        const convo: ConversationItem = {
+          title: conversation.title!,
+          id: conversation.id!,
+        }
+        total_conversations.push(convo)
+      }
+      setConversations(total_conversations)
+    } catch (e) {
+      setError(true)
+    } finally {
+      setLoading(false)
     }
-    setConversations(total_conversations)
-    setLoading(false)
+    
   }
 
   useEffect(() => {
@@ -280,6 +288,18 @@ export function Threads() {
           <i>
             Loading Conversations...
           </i>
+        </div>
+      </>
+    )
+  }
+
+  if (error) {
+    return (
+      <>
+        <div className="threads-list">
+          <p>
+            There was an error fetching previous conversations. Try again later.
+          </p>
         </div>
       </>
     )

@@ -30,9 +30,6 @@ const Chat: React.FC<ChatProps> = ({id}) => {
     image,
     lock,
     messages,
-    toReview,
-    review,
-    hasReviewed,
     loadConversation,
     loadingConversation,
     loading,
@@ -78,11 +75,6 @@ const Chat: React.FC<ChatProps> = ({id}) => {
     }
   }, [conversation])
 
-  useEffect(() => {
-    if (toReview && !hasReviewed) {
-      review()
-    }
-  }, [conversation])
 
 const bottomMarkerRef = useRef<HTMLDivElement>(null);
   const scrollIntoView = () => {

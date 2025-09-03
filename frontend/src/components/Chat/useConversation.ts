@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { getMessageContent, Message, newMessage } from "../../types/message";
 import { useChatSettings } from "../../context/useChatContext";
 import Endpoints from "../../endpoints";

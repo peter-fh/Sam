@@ -74,9 +74,7 @@ def create_app(test_config=None):
             token = auth_header.split(' ')[1]
             
             try:
-                print("Attempting verification")
                 response = supabase.auth.get_user(token)
-                print("did get_user with token")
                 if response is None or response.user is None:
                     return jsonify({'error': 'Invalid token'}), 401
 
@@ -85,15 +83,12 @@ def create_app(test_config=None):
 
                 domain = response.user.email.split("@")[-1]
                 if domain not in accepted_domains:
-                    print(domain)
                     return jsonify({'error': 'Email is not from a valid Concordia domain'}), 401
 
 
                 g.user = response.user
                 g.user_id = response.user.id
 
-                print("Got response.user: ", response.user)
-                
                 return f(*args, **kwargs)
                 
             except Exception as e:
@@ -186,29 +181,24 @@ def create_app(test_config=None):
     @require_auth
     def get_conversations():
         conversations = db.getConversations(g.user_id)
-        print("Getting conversations")
-        print(jsonify(conversations))
         return jsonify(conversations)
 
     @app.route('/db/conversations/<int:conversation_id>')
     @require_auth
     def get_conversation(conversation_id: int):
         conversation = db.getConversation(g.user_id, conversation_id)
-        print(jsonify(conversation))
         return jsonify(conversation)
 
     @app.route('/db/conversations/settings/<int:conversation_id>')
     @require_auth
     def get_settings(conversation_id):
         settings = db.getSettings(g.user_id, conversation_id)
-        print(jsonify(settings))
         return jsonify(settings)
 
     @app.route('/db/conversations/summary/<int:conversation_id>')
     @require_auth
     def get_summary(conversation_id):
         summary = db.getSummary(g.user_id, conversation_id)
-        print(jsonify(summary))
         return jsonify(summary)
 
 

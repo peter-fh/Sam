@@ -73,27 +73,31 @@ def create_app(test_config=None):
             
             token = auth_header.split(' ')[1]
             
-            try:
-                response = supabase.auth.get_user(token)
-                if response is None or response.user is None:
-                    return jsonify({'error': 'Invalid token'}), 401
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    response = supabase.auth.get_user(token)
+                    if response is None or response.user is None:
+                        return jsonify({'error': 'Invalid token'}), 401
 
-                if response.user.email is None:
-                    return jsonify({'error': 'No email address linked to user'}), 401
+                    if response.user.email is None:
+                        return jsonify({'error': 'No email address linked to user'}), 401
 
-                domain = response.user.email.split("@")[-1]
-                if domain not in accepted_domains:
-                    return jsonify({'error': 'Email is not from a valid Concordia domain'}), 401
+                    domain = response.user.email.split("@")[-1]
+                    if domain not in accepted_domains:
+                        return jsonify({'error': 'Email is not from a valid Concordia domain'}), 401
 
 
-                g.user = response.user
-                g.user_id = response.user.id
+                    g.user = response.user
+                    g.user_id = response.user.id
 
-                return f(*args, **kwargs)
-                
-            except Exception as e:
-                print("Exception occurred: ", e)
-                return jsonify({'error': 'Token validation failed'}), 401
+                    return f(*args, **kwargs)
+
+                except Exception as e:
+                    print(f"Attempt {attempt + 1} failed: {e}")
+                    if attempt == max_retries - 1:
+                        return jsonify({'error': 'Authentication service temporarily unavailable'}), 503
+                    time.sleep(2 ** attempt)  # Exponential backoff
         
         return decorated_function
 

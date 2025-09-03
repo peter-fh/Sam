@@ -8,6 +8,9 @@ from openai import OpenAI
 from dotenv import load_dotenv
 from supabase import Client, create_client
 
+from supabase import create_client, Client
+
+from functools import wraps
 from api.prompt import Mode
 from api.api import API, APIConfig, ModelType
 from db import Database
@@ -56,6 +59,45 @@ def create_app(test_config=None):
         mock_mode=app.config["MOCK_MODE"],
     )
     api = API(api_config, openai_client, db)
+
+    def require_auth(f):
+        """Decorator to require authentication for routes"""
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            auth_header = request.headers.get('Authorization')
+
+            accepted_domains = ['concordia.ca', 'live.concordia.ca']
+            
+            if not auth_header or not auth_header.startswith('Bearer '):
+                return jsonify({'error': 'Authorization header required'}), 401
+            
+            token = auth_header.split(' ')[1]
+            
+            try:
+                print("Attempting verification")
+                response = supabase.auth.get_user(token)
+                print("did get_user with token")
+                if response is None or response.user is None:
+                    return jsonify({'error': 'Invalid token'}), 401
+
+                if response.user.email is None:
+                    return jsonify({'error': 'No email address linked to user'}), 401
+
+                domain = response.user.email.split("@")
+                if domain not in accepted_domains:
+                    return jsonify({'error': 'Email is not from a valid Concordia domain'}), 401
+
+
+                print("Got response.user: ", response.user)
+                
+                return f(*args, **kwargs)
+                
+            except Exception as e:
+                print("Exception occurred: ", e)
+                return jsonify({'error': 'Token validation failed'}), 401
+        
+        return decorated_function
+
 
     @app.route("/assets/<path:path>")
     def serve_assets(path):
@@ -132,6 +174,7 @@ def create_app(test_config=None):
         return res
 
     @app.route('/db/conversations')
+    @require_auth
     def get_conversations():
         conversations = db.getConversations()
         print("Getting conversations")

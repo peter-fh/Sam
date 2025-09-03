@@ -3,6 +3,7 @@ import time
 from dataclasses import dataclass
 
 from openai import OpenAI
+from openai.types.responses import ResponseTextDeltaEvent
 from pydantic import BaseModel
 
 from api.prompt import Mode
@@ -99,6 +100,7 @@ class API:
                 reasoning={"effort": "low"},
                 input=conversation,
                 instructions=prompt,
+                stream=True
             )
         except Exception as e:
             print("Ask error: ", e)
@@ -106,12 +108,12 @@ class API:
             return
 
 
-        print(stream.output_text)
-        yield stream.output_text
-        return
         for event in stream:
-            print(event)
-            yield "hi" 
+            if event.type == "response.output_text.delta":
+                yield event.delta
+            if event.type == "response.output_text.done":
+                return event.text
+
 
     def transcribe(self, image):
 

@@ -31,12 +31,23 @@ export namespace DB {
   }
 
   async function authorizedPost(endpoint: string, body: string) {
-    await fetch(endpoint, {
+    const { data: { session }, error } = await supabase.auth.getSession()
+    if (error || !session) {
+      throw new Error('Not authenticated')
+    }
+    const response = await fetch(endpoint, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session.access_token}`,
+      },
       body: body
     })
-    return null
+
+    if (!response.ok) {
+      throw new Error(`Http error: ${response.status}`)
+    }
+    return response.json()
   }
 
   export function getConversations() {

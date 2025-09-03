@@ -2,7 +2,7 @@ import os
 import sys
 import time
 
-from flask import Flask, jsonify, request, send_from_directory, stream_with_context, Response
+from flask import Flask, g, jsonify, request, send_from_directory, stream_with_context, Response
 from flask_cors import CORS
 from openai import OpenAI
 from dotenv import load_dotenv
@@ -89,6 +89,9 @@ def create_app(test_config=None):
                     return jsonify({'error': 'Email is not from a valid Concordia domain'}), 401
 
 
+                g.user = response.user
+                g.user_id = response.user.id
+
                 print("Got response.user: ", response.user)
                 
                 return f(*args, **kwargs)
@@ -115,22 +118,26 @@ def create_app(test_config=None):
 
 
     @app.route('/api/summary', methods=['POST'])
+    @require_auth
     def summary():
         conversation = request.get_json()
         return api.summarize(conversation)
 
 
     @app.route('/api/image', methods=['POST'])
+    @require_auth
     def image():
         image = request.get_data(as_text=True)
         return api.transcribe(image)
 
     @app.route('/api/title', methods=['POST'])
+    @require_auth
     def title():
         question = request.get_data(as_text=True)
         return api.title(question)
 
     @app.route('/api/mode', methods=['POST'])
+    @require_auth
     def mode():
         total_start = time.time()
         mode = request.headers["Mode"]
@@ -156,6 +163,7 @@ def create_app(test_config=None):
 
     # Handles clicking the "Ask" button
     @app.route('/api/question', methods=['POST'])
+    @require_auth
     def question():
 
         # Retrieve question and its context from the request
@@ -177,31 +185,35 @@ def create_app(test_config=None):
     @app.route('/db/conversations')
     @require_auth
     def get_conversations():
-        conversations = db.getConversations()
+        conversations = db.getConversations(g.user_id)
         print("Getting conversations")
         print(jsonify(conversations))
         return jsonify(conversations)
 
     @app.route('/db/conversations/<int:conversation_id>')
+    @require_auth
     def get_conversation(conversation_id: int):
-        conversation = db.getConversation(conversation_id)
+        conversation = db.getConversation(g.user_id, conversation_id)
         print(jsonify(conversation))
         return jsonify(conversation)
 
     @app.route('/db/conversations/settings/<int:conversation_id>')
+    @require_auth
     def get_settings(conversation_id):
-        settings = db.getSettings(conversation_id)
+        settings = db.getSettings(g.user_id, conversation_id)
         print(jsonify(settings))
         return jsonify(settings)
 
     @app.route('/db/conversations/summary/<int:conversation_id>')
+    @require_auth
     def get_summary(conversation_id):
-        summary = db.getSummary(conversation_id)
+        summary = db.getSummary(g.user_id, conversation_id)
         print(jsonify(summary))
         return jsonify(summary)
 
 
     @app.route('/db/conversations', methods=['POST'])
+    @require_auth
     def add_conversation():
         data = request.get_json()
 
@@ -209,10 +221,11 @@ def create_app(test_config=None):
         course = data['course']
         mode = data['mode']
 
-        id = db.addConversation(title, course, mode)
+        id = db.addConversation(g.user_id, title, course, mode)
         return jsonify(id)
 
     @app.route('/db/conversations/<int:conversation_id>', methods=['POST'])
+    @require_auth
     def add_message(conversation_id):
         data = request.get_json()
 
@@ -221,17 +234,19 @@ def create_app(test_config=None):
 
         db.addMessage(conversation_id, role, content)
 
-        return '', 201
+        return jsonify(''), 201
 
     @app.route('/db/conversations/summary/<int:conversation_id>', methods=['POST'])
+    @require_auth
     def update_summary(conversation_id):
         data = request.get_json()
 
         summary = data['summary']
         db.updateSummary(conversation_id, summary)
-        return '', 201
+        return jsonify(''), 201
 
     @app.route('/db/conversations/settings/<int:conversation_id>', methods=['POST'])
+    @require_auth
     def update_mode(conversation_id):
         data = request.get_json()
 
@@ -239,7 +254,7 @@ def create_app(test_config=None):
 
         db.updateMode(conversation_id, mode)
 
-        return '', 201
+        return jsonify(''), 201
 
 
     @app.route('/', defaults={'path': ''})

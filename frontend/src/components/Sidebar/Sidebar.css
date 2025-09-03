@@ -29,8 +29,17 @@
 	overflow-y: auto;
 }
 
+
 .sidebar-hr {
 	opacity: 40%;
 	width: 90%;
+}
+
+.thread-top {
+	margin-bottom: 0;
+}
+
+.thread-bottom {
+	margin-top: 0;
 }
 

@@ -2,7 +2,6 @@ import './App.css'
 import Modal from './components/Modal'
 import Sidebar from './components/Sidebar'
 import Chat from './components/Chat'
-import Threads from './components/Threads'
 import { Route, Routes, useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { Log, LogLevel } from './log'
@@ -68,12 +67,6 @@ function App() {
             <>
               <Sidebar/>
               <ChatRouteWrapper/>
-            </>
-          }/>
-          <Route path="/threads" element={
-            <>
-              <Sidebar/>
-              <Threads/>
             </>
           }/>
         </Routes>

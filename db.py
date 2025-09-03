@@ -88,18 +88,19 @@ class Database:
         data = response.data[0]
         return data
 
-    def getConversations(self):
+    def getConversations(self, user_id):
         response = (
             self.client
                 .table("conversations")
                 .select()
                 .order("created_at", desc=True)
+                .eq("user_id", user_id)
                 .execute()
         )
         data = response.data
         return data
 
-    def getSettings(self, id: int):
+    def getSettings(self, user_id, id: int):
         response = (
             self.client
                 .table("conversations")
@@ -108,13 +109,14 @@ class Database:
                     mode:mode_id (name)
                 """)
                 .eq("id", id)
+                .eq("user_id", user_id)
                 .single()
                 .execute()
         )
         data = response.data
         return data
 
-    def getConversation(self, id: int):
+    def getConversation(self, user_id, id: int):
         response = (
             self.client
                 .table("messages")
@@ -126,12 +128,13 @@ class Database:
         data = response.data
         return data
 
-    def getSummary(self, id: int):
+    def getSummary(self, user_id, id: int):
         response = (
             self.client
             .table("conversations")
             .select("summary")
             .eq("id", id)
+            .eq("user_id", user_id)
             .single()
             .execute()
         )
@@ -174,7 +177,7 @@ class Database:
         return response.data["id"]
 
 
-    def addConversation(self, title: str, course: str, mode: str):
+    def addConversation(self, user_id, title: str, course: str, mode: str):
         course_id = self.getCourseId(course)
         mode_id = self.getModeId(mode)
         response = (
@@ -184,6 +187,7 @@ class Database:
                 "title": title,
                 "course_id": course_id,
                 "mode_id": mode_id,
+                "user_id": user_id,
                 })
             .execute()
         )

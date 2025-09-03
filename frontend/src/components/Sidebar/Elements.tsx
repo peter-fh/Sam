@@ -6,6 +6,7 @@ import { useThreadSelectionContext } from '../../context/useThreadContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { DB } from "../../database/db"
 import { useEffect, useState } from "react"
+import supabase from '../../supabase.ts'
 
 export function NewConversationButton() {
 
@@ -79,6 +80,53 @@ export function SidebarButton() {
   )
 }
 
+export function LogoutButton() {
+  return (
+    <button
+      title='Toggle Sidebar'
+      className="interactive sidebar-button"
+      onClick={ () => supabase.auth.signOut() }
+    >
+      <i className="fa-solid fa-right-from-bracket"></i>
+    </button>
+  )
+}
+
+
+export function LogoutText() {
+  return (
+    <button
+      title='Toggle Sidebar'
+      className="interactive sidebar-text-button"
+      onClick={ () => supabase.auth.signOut() }
+    >
+      <i className="fa-solid fa-right-from-bracket"></i>
+      <p>Logout</p>
+    </button>
+  )
+}
+
+export function NewConversationText() {
+  const { 
+    setQuestion 
+  } = useChatSettings()
+
+  const navigate = useNavigate()
+  return (
+    <button
+      title="New Chat"
+      className="interactive sidebar-text-button"
+      onClick={() => {
+        setQuestion(null)
+        navigate("/")
+      }}
+    >
+      <i className="fa-solid fa-plus" />
+      <p>New Conversation</p>
+    </button>
+  );
+}
+
 
 export function InvisibleButton() {
   return (
@@ -87,6 +135,7 @@ export function InvisibleButton() {
     </button>
   )
 }
+
 
 export function SidebarButtons() {
   const {
@@ -100,10 +149,12 @@ export function SidebarButtons() {
           <>
             <SidebarButton/>
             <h1 className="sidebar-title">Sam</h1>
-            <NewConversationButton/>
+            <InvisibleButton/>
+            <InvisibleButton/>
           </> :
           <>
             <SidebarButton/>
+            <InvisibleButton/>
             <InvisibleButton/>
             <InvisibleButton/>
           </>
@@ -112,6 +163,7 @@ export function SidebarButtons() {
     </>
   )
 }
+
 
 export function CourseSelect() {
   const {
@@ -169,6 +221,29 @@ question === option ? "active" : ""
           </React.Fragment>
         ))}
       </span>
+    </div>
+  );
+}
+
+export function NewConversation() {
+  const { 
+    setQuestion 
+  } = useChatSettings()
+
+  const navigate = useNavigate()
+  return (
+    <div className="option">
+    <button
+      title="New Chat"
+      className="interactive new-conversation-button"
+      onClick={() => {
+        setQuestion(null)
+        navigate("/")
+      }}
+    >
+      {/* <i className="fa-solid fa-plus" /> */}
+        <p>New Conversation</p>
+    </button>
     </div>
   );
 }
@@ -233,18 +308,25 @@ export function Threads() {
       navigate(`/chat/${props.id}`)
       setSelectedThread(props.id)
     }
+    let current_classes = ""
+    const thread_classes = "thread thread-list-item"
+    const selected_thread_classes = "thread thread-list-item thread-selected"
+    if (props.id == selectedThread) {
+      current_classes = selected_thread_classes
+    } else {
+      current_classes = thread_classes
+    }
 
-    const [classes, setClasses] = useState<string>("thread")
     useEffect(() => {
       if (props.id == selectedThread) {
-        setClasses("thread thread-selected")
+        current_classes = selected_thread_classes
       } else {
-        setClasses("thread")
+        current_classes = thread_classes
       }
     }, [selectedThread])
 
     return (
-      <div className={classes} onClick={handleClick}>
+      <div className={current_classes} onClick={handleClick}>
         <p>{props.title}</p>
       </div>
     )
@@ -320,6 +402,7 @@ export function Threads() {
     <>
       <div className="threads">
         <ul className="threads-list">
+          <p className="thread-list-item thread-title">Chats</p>
           {conversations.map((conversation) => (
             <ClickableThread key={conversation.id} id={conversation.id} title={conversation.title}/>
           ))}

@@ -30,9 +30,6 @@ const Chat: React.FC<ChatProps> = ({id}) => {
     image,
     lock,
     messages,
-    toReview,
-    review,
-    hasReviewed,
     loadConversation,
     loadingConversation,
     loading,
@@ -78,11 +75,6 @@ const Chat: React.FC<ChatProps> = ({id}) => {
     }
   }, [conversation])
 
-  useEffect(() => {
-    if (toReview && !hasReviewed) {
-      review()
-    }
-  }, [conversation])
 
 const bottomMarkerRef = useRef<HTMLDivElement>(null);
   const scrollIntoView = () => {
@@ -156,7 +148,7 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
       }}>
         <div className="messages" ref={messagesRef}>
           {messages && messages.map((message, index) => (
-            <span key={index}className={message.sender == "user" ? "question" : "output"}>
+            <span key={index}className={message.role == "user" ? "question" : "output"}>
               <MarkTeX content={message.content}/>
             </span>
           ))}

@@ -1,15 +1,15 @@
-import { useRef, useState } from "react";
-import { Message, newMessage } from "../../types/message";
+import { useState } from "react";
+import { getMessageContent, Message, newMessage } from "../../types/message";
 import { useChatSettings } from "../../context/useChatContext";
 import Endpoints from "../../endpoints";
 import { DB } from "../../database/db";
 import { useThreadSelectionContext } from "../../context/useThreadContext";
 import { Log, LogLevel } from "../../log";
 import { Course, QuestionType } from "../../types/options";
+import supabase from "../../supabase";
 
 
 const TOKEN_THRESHOLD = 1024
-const REVIEW_MESSAGE = "You've reached the end of the conversation! If you have any follow up questions, please feel free to ask here. If you have a new problem to work on, please start a new conversation. Consider [booking a tutoring session](https://www.concordia.ca/students/success/learning-support/math-help.html#tutoring) to help with these concepts. Keep practicing these problems, and it will help solidify you understanding!"
 const INTRO_MESSAGE = "Hello! I'm Sam, an AI chatbot powered by Chat-GPT. I use context specific to Concordia to provide better explanations. AI makes mistakes, so please double check any answers you are given."
 
 const estimateTokens = (characterCount: number) => {
@@ -17,11 +17,11 @@ const estimateTokens = (characterCount: number) => {
 }
 
 function sleep(ms: number) {
-    return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 type DisplayMessage = {
-  sender: "user" | "assistant"
+  role: "user" | "assistant"
   content: string
 }
 
@@ -39,17 +39,14 @@ const useConversation = () => {
 
   const [conversation, setConversation] = useState<Message[]>([]);
   const [conversationId, setConversationId] = useState<number | null>(null);
-  const [_, setTotalConversation] = useState<Message[]>([]);
+  //const [_, setTotalConversation] = useState<Message[]>([]);
   const [message, setMessage] = useState('')
   const [messages, setMessages] = useState<DisplayMessage[]>([])
   const [aiMessage, setAiMessage] = useState('')
   const [lock, setLock] = useState(false)
-  const resolveLockRef = useRef<(() => void) | null>(null);
   const [file, setFile] = useState('')
   const [image, setImage] = useState('')
   const [toSummarize, setToSummarize] = useState(false)
-  const [toReview, setToReview] = useState(false)
-  const [hasReviewed, setHasReviewed] = useState(false)
   const [loadingConversation, setLoadingConversation] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -78,14 +75,14 @@ const useConversation = () => {
 
     const conversationDisplayMessages: DisplayMessage[] = []
     const intro_message: DisplayMessage = {
-      sender: "assistant",
+      role: "assistant",
       content: INTRO_MESSAGE,
     }
     conversationDisplayMessages.push(intro_message)
     const formattedMessages: Message[] = []
     for (const conversation_message of conversationMessages) {
       const conversation_display_message: DisplayMessage = {
-        sender: conversation_message.role as "user" | "assistant",
+        role: conversation_message.role as "user" | "assistant",
         content: conversation_message.content!,
       }
       conversationDisplayMessages.push(conversation_display_message)
@@ -112,7 +109,6 @@ const useConversation = () => {
     setLock(false)
   }
   async function intro() {
-    setHasReviewed(false)
     setLock(true)
     setMessages([])
     var answer = ""
@@ -123,7 +119,7 @@ const useConversation = () => {
     }
 
     const introductionMessage: DisplayMessage = {
-      sender: "assistant",
+      role: "assistant",
       content: answer,
     }
 
@@ -133,15 +129,32 @@ const useConversation = () => {
     setLock(false)
   }
 
-  async function getTitle(question: string) {
-    const request = new Request(Endpoints.Title, {
+
+  async function fetchWithAuth(endpoint: string, headers: any, body: string) {
+    const { data: { session }, error } = await supabase.auth.getSession()
+    if (error || !session) {
+      throw new Error('Not authenticated')
+    }
+    const request = new Request(endpoint, {
       method: 'POST',
       headers: {
-        'Content-Type': 'text/plain',
+        'Authorization': `Bearer ${session.access_token}`,
+        ...headers
       },
-      body: String(question),
+      body: body,
     })
     const response = await fetch(request)
+    return response
+
+  }
+
+  async function getTitle(question: string) {
+
+    const response = await fetchWithAuth(Endpoints.Title, {
+      'Content-Type': 'text/plain'
+    }, 
+      String(question)
+    )
     const reader = response.body!.getReader()
     const decoder = new TextDecoder('utf-8')
 
@@ -153,15 +166,10 @@ const useConversation = () => {
   }
 
   async function readImage(image: string) {
+    const response = await fetchWithAuth(Endpoints.Image, {
+      'Content-Type': 'text/plain',
+    }, String(image))
 
-    const request = new Request(Endpoints.Image, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'text/plain',
-      },
-      body: String(image),
-    })
-    const response = await fetch(request)
     const reader = response.body!.getReader()
     const decoder = new TextDecoder('utf-8')
 
@@ -174,15 +182,10 @@ const useConversation = () => {
   }
 
   async function getSummary(conversation: Message[]) {
-    const request = new Request(Endpoints.Summary, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(conversation)
-    })
+    const response = await fetchWithAuth(Endpoints.Summary, {
+      'Content-Type': 'application/json',
+    }, JSON.stringify(conversation))
 
-    const response = await fetch(request)
     const reader = response.body!.getReader()
     const decoder = new TextDecoder('utf-8')
 
@@ -203,16 +206,11 @@ const useConversation = () => {
       question_type = question!
     }
 
-    const mode_request = new Request(Endpoints.Mode, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Mode': question_type,
-      },
-      body: JSON.stringify(conversation)
-    })
+    const mode_response = await fetchWithAuth(Endpoints.Mode, {
+      'Content-Type': 'application/json',
+      'Mode': question_type,
+    }, JSON.stringify(conversation))
 
-    const mode_response = await fetch(mode_request)
     const mode_raw = await mode_response.text()
     if (mode_raw == "") {
       throw new Error("Could not fetch mode")
@@ -224,19 +222,12 @@ const useConversation = () => {
 
   async function ask(conversation: Message[], mode: QuestionType) {
 
-    const request = new Request(Endpoints.Ask, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Course': course,
-        'Brevity': detailLevel,
-        'Mode': mode,
-      },
-      body: JSON.stringify(conversation)
-    })
-
-
-    const response = await fetch(request)
+    const response = await fetchWithAuth(Endpoints.Ask, {
+      'Content-Type': 'application/json',
+      'Course': course,
+      'Brevity': detailLevel,
+      'Mode': mode,
+    }, JSON.stringify(conversation))
     setLoading(false)
 
     const reader = response.body!.getReader()
@@ -261,6 +252,7 @@ const useConversation = () => {
     return answer
   }
 
+  /*
   const waitForUnlock = (): Promise<void> => {
     if (!lock) {
       return Promise.resolve();
@@ -269,35 +261,115 @@ const useConversation = () => {
       resolveLockRef.current = resolve;
     });
   };
+  */
 
-  async function review() {
-    setToReview(false)
-    setHasReviewed(true)
-    await waitForUnlock()
-    setLock(true)
+  const imageTranscription = async (filename: string) => {
+    let transcription = ""
 
-    const answer = REVIEW_MESSAGE
+    transcription = `\n\n*[transcribing ${filename}...]*`
+    displayNewMessage(transcription, 'user')
+    setMessage("")
 
-    const display_ai_message: DisplayMessage = {
-      sender: "assistant",
-      content: answer
+    var final_message = message
+
+    transcription = await readImage(image)
+    transcription = `\n\n*Image Transcription:*\n\n${transcription}` 
+    displayNewMessage(transcription, 'user')
+    final_message += "The following is a transcription of an image sent by the user:\n\n" + transcription
+    return final_message
+
+  }
+
+  function displayNewMessage(new_message: string, role: 'user' | 'assistant') {
+    const display_message : DisplayMessage = {
+      role: role,
+      content: new_message,
+    }
+    setMessages(prevMessages => [...prevMessages!, display_message])
+  }
+  const handleSendMessage = async () => {
+    if (lock) {
+      return
     }
 
-    setMessages([...messages!, display_ai_message])
+    if (!message && !image) {
+      setMessage('')
+      return
+    }
+
+    setLock(true)
+    const user_message = message
+    setMessage('')
+
+    const filename = file
+    setFile('')
+
+    displayNewMessage(user_message, 'user')
+    let final_message = user_message
+    if (image) {
+      final_message = await imageTranscription(filename)
+    }
+
+
+    var json_message: any = newMessage(final_message, "user")
+    const fullConversation = [...conversation, json_message]
+
+    const mode_start_time = performance.now()
+    setLoading(true)
+    const mode = await getMode(fullConversation)
+    const mode_end_time = performance.now()
+    Log(LogLevel.Always, `Mode fetch took ${(mode_end_time - mode_start_time) / 1000}`)
+    setQuestion(mode)
+
+    let current_conversation_id = conversationId
+    var conversation_id_promise 
+
+    if (current_conversation_id == null) {
+      conversation_id_promise = getTitle(final_message)
+        .then(title => DB.addConversation(title, course, mode))
+        .then(add_conversation_result => {
+
+          if (add_conversation_result == null) {
+            throw new Error("Did not find course or title")
+          }
+          const new_conversation_id = add_conversation_result
+          setConversationId(new_conversation_id)
+          setSelectedThread(new_conversation_id)
+          return new_conversation_id
+        })
+        .then(new_conversation_id => {
+          console.log("New conversation id: ", new_conversation_id)
+          DB.addMessage(new_conversation_id, 'user', final_message)
+          return new_conversation_id
+        })
+    } else {
+      DB.updateMode(current_conversation_id, mode)
+    }
+
+    const ask_start_time = performance.now()
+    const ai_message = await ask(fullConversation, mode)
+    const ask_end_time = performance.now()
+    Log(LogLevel.Always, `Question took ${(ask_end_time - ask_start_time) / 1000}`)
+
+    displayNewMessage(ai_message, 'assistant')
+    if (current_conversation_id == null) {
+      current_conversation_id = await conversation_id_promise
+    }
+    DB.addMessage(current_conversation_id!, 'assistant', ai_message)
 
     setConversation([
       ...conversation, 
-      newMessage(answer, 'assistant'),
+      newMessage(final_message, 'user'), 
+      newMessage(ai_message, 'assistant'),
     ])
 
-    setTotalConversation([
-      ...conversation, 
-      newMessage(answer, 'assistant'),
-    ])
+    setImage('')
     setLock(false)
+
   }
 
-  const handleSendMessage = async () => {
+  /*
+  const oldHandleSendMessage = async () => {
     if (!lock && (message || image)) {
       setLock(true)
       const fileName = file
@@ -307,14 +379,15 @@ const useConversation = () => {
 
 
       const current_display_question: DisplayMessage = {
-        sender: "user",
+        role: "user",
         content: current_message
 
       }
       const image_info: DisplayMessage = {
-        sender: "user",
+        role: "user",
         content: ""
       }
+
       if (image) {
         image_info.content = `\n\n*[transcribing ${fileName}...]*`
         setMessages([...messages!, current_display_question, image_info])
@@ -349,7 +422,7 @@ const useConversation = () => {
       Log(LogLevel.Always, `Question took ${(ask_end_time - ask_start_time) / 1000}`)
 
       const display_ai_message: DisplayMessage = {
-        sender: "assistant",
+        role: "assistant",
         content: ai_message
       }
 
@@ -397,6 +470,7 @@ const useConversation = () => {
     }
 
   }
+*/
 
   async function summarize() {
     setToSummarize(false)
@@ -409,7 +483,7 @@ const useConversation = () => {
     }
     var total_length = 0
     for (var i = 0; i < conversation.length-1; i++) {
-      total_length += conversation[i].content[0].text.length
+      total_length += getMessageContent(conversation[i]).length
     }
 
     if (estimateTokens(total_length) <= TOKEN_THRESHOLD) {
@@ -457,9 +531,6 @@ const useConversation = () => {
     intro,
     handleSendMessage,
     summarize,
-    review,
-    toReview,
-    hasReviewed,
     loadConversation,
     loadingConversation,
     loading,

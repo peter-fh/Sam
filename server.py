@@ -2,12 +2,15 @@ import os
 import sys
 import time
 
-from flask import Flask, request, send_from_directory, stream_with_context, Response
+from flask import Flask, g, jsonify, request, send_from_directory, stream_with_context, Response
 from flask_cors import CORS
 from openai import OpenAI
 from dotenv import load_dotenv
 from supabase import Client, create_client
 
+from supabase import create_client, Client
+
+from functools import wraps
 from api.prompt import Mode
 from api.api import API, APIConfig, ModelType
 from db import Database
@@ -25,9 +28,10 @@ def create_app(test_config=None):
 
     app.config.from_mapping(
         FLASK_ENV=os.getenv("FLASK_ENV", "production"),
-        OPENAI_API_KEY=os.getenv("OPENAI_API_KEY"),
         SUPABASE_URL=os.getenv("SUPABASE_URL"),
         SUPABASE_KEY=os.getenv("SUPABASE_SERVICE_KEY"),
+        OPENAI_API_KEY=os.getenv("OPENAI_API_KEY"),
+
         MOCK_MODE=mock
     )
 
@@ -47,14 +51,56 @@ def create_app(test_config=None):
     )
     db = Database(supabase)
     api_config = APIConfig(
-        concept_model=ModelType.gpt_4_1,
-        problem_model=ModelType.o3_mini,
-        study_model=ModelType.gpt_4_1_mini,
-        utility_model=ModelType.gpt_4_1_mini,
+        concept_model=ModelType.gpt_5,
+        problem_model=ModelType.gpt_5,
+        study_model=ModelType.gpt_5_mini,
+        utility_model=ModelType.gpt_5_mini,
         debug_mode=app.config["FLASK_ENV"] == "development",
         mock_mode=app.config["MOCK_MODE"],
     )
     api = API(api_config, openai_client, db)
+
+    def require_auth(f):
+        """Decorator to require authentication for routes"""
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            auth_header = request.headers.get('Authorization')
+
+            accepted_domains = ['concordia.ca', 'live.concordia.ca']
+            
+            if not auth_header or not auth_header.startswith('Bearer '):
+                return jsonify({'error': 'Authorization header required'}), 401
+            
+            token = auth_header.split(' ')[1]
+            
+            max_retries = 3
+            for attempt in range(max_retries):
+                try:
+                    response = supabase.auth.get_user(token)
+                    if response is None or response.user is None:
+                        return jsonify({'error': 'Invalid token'}), 401
+
+                    if response.user.email is None:
+                        return jsonify({'error': 'No email address linked to user'}), 401
+
+                    domain = response.user.email.split("@")[-1]
+                    if domain not in accepted_domains:
+                        return jsonify({'error': 'Email is not from a valid Concordia domain'}), 401
+
+
+                    g.user = response.user
+                    g.user_id = response.user.id
+
+                    return f(*args, **kwargs)
+
+                except Exception as e:
+                    print(f"Attempt {attempt + 1} failed: {e}")
+                    if attempt == max_retries - 1:
+                        return jsonify({'error': 'Authentication service temporarily unavailable'}), 503
+                    time.sleep(2 ** attempt)  # Exponential backoff
+        
+        return decorated_function
+
 
     @app.route("/assets/<path:path>")
     def serve_assets(path):
@@ -71,22 +117,26 @@ def create_app(test_config=None):
 
 
     @app.route('/api/summary', methods=['POST'])
+    @require_auth
     def summary():
         conversation = request.get_json()
         return api.summarize(conversation)
 
 
     @app.route('/api/image', methods=['POST'])
+    @require_auth
     def image():
         image = request.get_data(as_text=True)
         return api.transcribe(image)
 
     @app.route('/api/title', methods=['POST'])
+    @require_auth
     def title():
         question = request.get_data(as_text=True)
         return api.title(question)
 
     @app.route('/api/mode', methods=['POST'])
+    @require_auth
     def mode():
         total_start = time.time()
         mode = request.headers["Mode"]
@@ -112,6 +162,7 @@ def create_app(test_config=None):
 
     # Handles clicking the "Ask" button
     @app.route('/api/question', methods=['POST'])
+    @require_auth
     def question():
 
         # Retrieve question and its context from the request
@@ -130,6 +181,76 @@ def create_app(test_config=None):
         res = Response(stream_with_context(stream), content_type="text/plain")
         return res
 
+    @app.route('/db/conversations')
+    @require_auth
+    def get_conversations():
+        conversations = db.getConversations(g.user_id)
+        return jsonify(conversations)
+
+    @app.route('/db/conversations/<int:conversation_id>')
+    @require_auth
+    def get_conversation(conversation_id: int):
+        conversation = db.getConversation(g.user_id, conversation_id)
+        return jsonify(conversation)
+
+    @app.route('/db/conversations/settings/<int:conversation_id>')
+    @require_auth
+    def get_settings(conversation_id):
+        settings = db.getSettings(g.user_id, conversation_id)
+        return jsonify(settings)
+
+    @app.route('/db/conversations/summary/<int:conversation_id>')
+    @require_auth
+    def get_summary(conversation_id):
+        summary = db.getSummary(g.user_id, conversation_id)
+        return jsonify(summary)
+
+
+    @app.route('/db/conversations', methods=['POST'])
+    @require_auth
+    def add_conversation():
+        data = request.get_json()
+
+        title = data['title']
+        course = data['course']
+        mode = data['mode']
+
+        id = db.addConversation(g.user_id, title, course, mode)
+        return jsonify(id)
+
+    @app.route('/db/conversations/<int:conversation_id>', methods=['POST'])
+    @require_auth
+    def add_message(conversation_id):
+        data = request.get_json()
+
+        role = data['role']
+        content = data['content']
+
+        db.addMessage(conversation_id, role, content)
+
+        return jsonify(''), 201
+
+    @app.route('/db/conversations/summary/<int:conversation_id>', methods=['POST'])
+    @require_auth
+    def update_summary(conversation_id):
+        data = request.get_json()
+
+        summary = data['summary']
+        db.updateSummary(conversation_id, summary)
+        return jsonify(''), 201
+
+    @app.route('/db/conversations/settings/<int:conversation_id>', methods=['POST'])
+    @require_auth
+    def update_mode(conversation_id):
+        data = request.get_json()
+
+        mode = data['mode']
+
+        db.updateMode(conversation_id, mode)
+
+        return jsonify(''), 201
+
+
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
     def index(path):
@@ -139,6 +260,7 @@ def create_app(test_config=None):
 
 
     return app
+
 
 app = create_app()
 

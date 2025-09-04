@@ -7,6 +7,8 @@
 	--text-color: black;
 	--outline-color: #303030;
 	--font-primary: "Open Sans", sans-serif;
+	--font-size-sm: clamp(0.75rem, 0.6786rem + 0.2857vw, 1rem);
+
 	--font-size-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
 	--font-size-lg: clamp(1rem, 0.95rem + 0.25vw, 1.15rem);
 	--font-size-xl: clamp(1.1rem, 1.05rem + 0.25vw, 1.35rem);

@@ -5,7 +5,7 @@ import imageCompression from 'browser-image-compression'
 import useConversation from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
 import { Log, LogLevel } from '../../log'
-import { BeatLoader } from "react-spinners"
+import { BeatLoader, PropagateLoader } from "react-spinners"
 import { useThreadSelectionContext } from '../../context/useThreadContext'
 
 
@@ -141,19 +141,29 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
     scrollIntoView()
   }, [loadingConversation])
 
-  return (
-    <>
-      <div className="chat" onDrop={handleDrop} style={{
-        marginLeft: sidebar ? '15em' : 0
-      }}>
-        <div className="messages" ref={messagesRef}>
+  const MessageContent = () => {
+    if (loadingConversation) {
+      return (
+      <>
+            <span key={-1}className="conversation-spinner">
+              <PropagateLoader 
+                color="#c0c0c0"
+                speedMultiplier={1.5}
+              />
+            </span>
+      </>
+      )
+    }
+
+    return (
+      <>
           {messages && messages.map((message, index) => (
             <span key={index}className={message.role == "user" ? "question" : "output"}>
               <MarkTeX content={message.content}/>
             </span>
           ))}
           {loading && (
-            <span key={-1}className="spinner">
+            <span key={-1}className="answer-spinner">
               <BeatLoader 
                 color="#c0c0c0"
                 speedMultiplier={0.8}
@@ -165,6 +175,17 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
               <MarkTeX content={aiMessage}/>
             </span>
           )}
+          </>
+    )
+  }
+
+  return (
+    <>
+      <div className="chat" onDrop={handleDrop} style={{
+        marginLeft: sidebar ? '15em' : 0
+      }}>
+        <div className="messages" ref={messagesRef}>
+          <MessageContent/>
           <div ref={bottomMarkerRef} style={{ height: 0, margin: 0, padding: 0, border: 'none', lineHeight: 0 }} />
         </div>
 

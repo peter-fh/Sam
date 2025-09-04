@@ -58,6 +58,7 @@ const useConversation = () => {
   async function loadConversation(id: number) {
     setLock(true)
     setLoadingConversation(true)
+    setMessages([])
     setConversationId(id)
 
     const summary = await DB.getSummary(id)

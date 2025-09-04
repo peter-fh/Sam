@@ -344,6 +344,7 @@ const useConversation = () => {
         })
     } else {
       DB.updateMode(current_conversation_id, mode)
+      DB.addMessage(current_conversation_id, 'user', final_message)
     }
 
     const ask_start_time = performance.now()

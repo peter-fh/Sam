@@ -25,7 +25,6 @@ export namespace DB {
       throw new Error(`Http error: ${response.status}`)
     }
     const response_json = await response.json()
-    console.log(response_json)
     return response_json
 
   }

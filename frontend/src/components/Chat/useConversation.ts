@@ -49,6 +49,7 @@ const useConversation = () => {
   const [toSummarize, setToSummarize] = useState(false)
   const [loadingConversation, setLoadingConversation] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [thinking, setThinking] = useState(false)
 
   const addMessage = (message: Message) => {
     setConversation((prevMessages) => [...prevMessages, message])
@@ -230,6 +231,7 @@ const useConversation = () => {
       'Mode': mode,
     }, JSON.stringify(conversation))
     setLoading(false)
+    setThinking(false)
 
     const reader = response.body!.getReader()
     const decoder = new TextDecoder('utf-8')
@@ -246,7 +248,7 @@ const useConversation = () => {
       setAiMessage(answer)
     }
     setAiMessage('')
-    Log(LogLevel.Debug, answer)
+    //Log(LogLevel.Debug, answer)
 
     setToSummarize(true)
 
@@ -339,7 +341,6 @@ const useConversation = () => {
           return new_conversation_id
         })
         .then(new_conversation_id => {
-          console.log("New conversation id: ", new_conversation_id)
           DB.addMessage(new_conversation_id, 'user', final_message)
           return new_conversation_id
         })
@@ -348,6 +349,7 @@ const useConversation = () => {
       DB.addMessage(current_conversation_id, 'user', final_message)
     }
 
+    setThinking(true)
     const ask_start_time = performance.now()
     const ai_message = await ask(fullConversation, mode)
     const ask_end_time = performance.now()
@@ -536,6 +538,7 @@ const useConversation = () => {
     loadConversation,
     loadingConversation,
     loading,
+    thinking,
   }
 }
 

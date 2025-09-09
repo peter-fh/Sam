@@ -50,6 +50,20 @@
 	overflow-y: auto;
 }
 
+.thinking-spinner {
+	text-align: left;
+	width: 100%;
+	padding: 1em 1em .5em 1em;
+	margin: 0em 0em 1em 0em;
+	border-radius: 1.5em;
+	border-radius: 1em 1em 1em 0em;
+	overflow-y: auto;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	column-gap: 1.5rem;
+}
+
 .output {
 	text-align: left;
 	width: 100%;

@@ -30,7 +30,10 @@ In concept mode, Sam will respond with long, detailed explanations. Most of the 
 
 In problem mode, Sam will respond socratically. This is the main, most impressive mode of Sam. It will allow students to work through problems without giving away answers.
 
-### Studying
+### Other
 
-The "Studying" mode is a catch-all mode for all types of questions that don't require problem solving for Sam to answer, i.e. "what's on the midterm" or other questions not directly related to problems or concepts.
+The "Other" mode is a catch-all mode for all types of questions that don't require problem solving for Sam to answer, i.e. "what's on the midterm" or other questions not directly related to problems or concepts.
 
+### Switching Modes
+
+The process for switching between each mode is automatic. It uses a cheap AI model to classify the first message between one of the three modes, then for each subsequent message, read the conversation and most recent message then decide whether to switch modes or not.

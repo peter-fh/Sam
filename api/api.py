@@ -232,13 +232,15 @@ class API:
         start_time = time.time()
         response = self.client.responses.parse(
             model=self.config.utility_model.value,
+            service_tier="priority",
+            reasoning=None,
             input=[
                 {
                     "role": "user",
                     "content": instructions,
                 },
             ],
-            text_format=ModeResponse
+            text_format=ModeResponse,
         )
         end_time = time.time()
         duration = end_time - start_time

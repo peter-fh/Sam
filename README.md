@@ -8,7 +8,7 @@ See [docs/prompt.md](docs/prompt.md) for information on Sam's behaviour and how 
 
 ## API
 
-Backend is written in Flask. For information about the backend and API, see [docs/api.md](docs/api.md)
+Backend is written in Flask. For information about the backend, API, and Auth, see [docs/api.md](docs/api.md)
 
 ## Frontend
 

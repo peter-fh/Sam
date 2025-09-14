@@ -23,10 +23,6 @@ Main chat page with sidebar on the left
 
 If a previous chat is selected, they are directed to chat:id where id is the conversation id stored in the database. This allows linking to specific conversations via URL. Equivalent to /chat except for the content of the conversation
 
-### /threads
-
-Shows list of previous conversations with sidebar on the left
-
 
 ## Latex + Markdown rendering
 

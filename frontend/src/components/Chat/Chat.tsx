@@ -5,7 +5,7 @@ import imageCompression from 'browser-image-compression'
 import useConversation from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
 import { Log, LogLevel } from '../../log'
-import { BeatLoader, ClipLoader, MoonLoader, PropagateLoader, PulseLoader, RotateLoader, ScaleLoader } from "react-spinners"
+import { BeatLoader, PropagateLoader, } from "react-spinners"
 import { useThreadSelectionContext } from '../../context/useThreadContext'
 
 

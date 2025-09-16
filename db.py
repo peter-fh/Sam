@@ -21,8 +21,9 @@ class Database:
         prompt = data["text"]
         return prompt
 
+
     def getPrompt(self, mode, model):
-        print("Getting prompt for: ", mode, " ", model)
+        print(f'Getting prompt for mode "{mode}" model "{model}"')
         response = (
             self.client
                 .table("prompts")

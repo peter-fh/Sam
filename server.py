@@ -30,34 +30,40 @@ def create_app(test_config=None):
         FLASK_ENV=os.getenv("FLASK_ENV", "production"),
         SUPABASE_URL=os.getenv("SUPABASE_URL"),
         SUPABASE_KEY=os.getenv("SUPABASE_SERVICE_KEY"),
-        OPENAI_API_KEY=os.getenv("OPENAI_API_KEY"),
-
+        OPENROUTER_API_KEY=os.getenv("OPENROUTER_API_KEY"),
         MOCK_MODE=mock
     )
 
     if test_config:
             app.config.update(test_config)
 
-    if not app.config["OPENAI_API_KEY"]:
-        print("OPENAI_API_KEY not found, defaulting to mock mode")
+    if not app.config["OPENROUTER_API_KEY"]:
+        print("OPENROUTER_API_KEY not found, defaulting to mock mode")
         app.config["MOCK_MODE"] = True
 
     if app.config["FLASK_ENV"] == "development":
             CORS(app)
 
-    openai_client = OpenAI(api_key=app.config["OPENAI_API_KEY"])
+    openai_client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=app.config["OPENROUTER_API_KEY"]
+    )
+
     supabase: Client = create_client(
         app.config["SUPABASE_URL"], app.config["SUPABASE_KEY"]
     )
+
     db = Database(supabase)
     api_config = APIConfig(
-        concept_model=ModelType.gpt_5,
-        problem_model=ModelType.gpt_5,
-        study_model=ModelType.gpt_5_mini,
-        utility_model=ModelType.gpt_5_mini,
+        concept_model=ModelType.gemini_2_5_flash,
+        problem_model=ModelType.gemini_2_5_flash,
+        study_model=ModelType.gemini_2_5_flash,
+        utility_model=ModelType.gemini_2_0_flash_lite,
+        mode_model=ModelType.gemini_2_0_flash_lite,
         debug_mode=app.config["FLASK_ENV"] == "development",
         mock_mode=app.config["MOCK_MODE"],
     )
+
     api = API(api_config, openai_client, db)
 
     def require_auth(f):
@@ -158,7 +164,7 @@ def create_app(test_config=None):
         print("Total get mode took %s seconds" % total_duration)
         print("API get mode took %s seconds" % api_duration)
 
-        return prompt_type.value
+        return prompt_type
 
     # Handles clicking the "Ask" button
     @app.route('/api/question', methods=['POST'])

@@ -5,7 +5,7 @@ import imageCompression from 'browser-image-compression'
 import useConversation from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
 import { Log, LogLevel } from '../../log'
-import { BeatLoader, PropagateLoader } from "react-spinners"
+import { BeatLoader, PropagateLoader, } from "react-spinners"
 import { useThreadSelectionContext } from '../../context/useThreadContext'
 
 
@@ -33,6 +33,7 @@ const Chat: React.FC<ChatProps> = ({id}) => {
     loadConversation,
     loadingConversation,
     loading,
+    thinking,
   } = useConversation();
 
   const {
@@ -137,6 +138,7 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
     }
   }, [id])
 
+
   useEffect(() => {
     scrollIntoView()
   }, [loadingConversation])
@@ -144,14 +146,35 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
   const MessageContent = () => {
     if (loadingConversation) {
       return (
-      <>
-            <span key={-1}className="conversation-spinner">
-              <PropagateLoader 
-                color="#c0c0c0"
-                speedMultiplier={1.5}
-              />
+        <>
+          <span key={-1}className="conversation-spinner">
+            <PropagateLoader 
+              color="#c0c0c0"
+              speedMultiplier={1.5}
+            />
+          </span>
+        </>
+      )
+    }
+    if (thinking) {
+      return (
+        <>
+          {messages && messages.map((message, index) => (
+            <span key={index}className={message.role == "user" ? "question" : "output"}>
+              <MarkTeX content={message.content}/>
             </span>
-      </>
+          ))}
+          {
+          <span key={-1}className="thinking-spinner">
+            <BeatLoader 
+                color="#c0c0c0"
+                speedMultiplier={0.8}
+            />
+            <b>Thinking </b>
+          </span>
+          }
+
+        </>
       )
     }
 

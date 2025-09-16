@@ -1,6 +1,6 @@
 import supabase from "../supabase.ts"
 
-const DatabaseEndpoints = {
+const Endpoints = {
   Conversations: '/db/conversations',
   Settings: '/db/conversations/settings',
   Summary: '/db/conversations/summary',
@@ -50,19 +50,19 @@ export namespace DB {
   }
 
   export function getConversations() {
-    return authorizedGet(DatabaseEndpoints.Conversations)
+    return authorizedGet(Endpoints.Conversations)
   }
 
   export async function getSettings(id: number) {
-    return authorizedGet(DatabaseEndpoints.Settings + `/${id}`)
+    return authorizedGet(Endpoints.Settings + `/${id}`)
   }
 
   export async function getConversation(id: number) {
-    return authorizedGet(DatabaseEndpoints.Conversations + `/${id}`)
+    return authorizedGet(Endpoints.Conversations + `/${id}`)
   }
 
   export async function getSummary(id: number) {
-    return authorizedGet(DatabaseEndpoints.Summary + `/${id}`)
+    return authorizedGet(Endpoints.Summary + `/${id}`)
   }
 
   export async function addMessage(conversation_id: number, role: string, content: string) {
@@ -71,7 +71,7 @@ export namespace DB {
         content: content,
       })
 
-    return authorizedPost(DatabaseEndpoints.Conversations + `/${conversation_id}`, body)
+    return authorizedPost(Endpoints.Conversations + `/${conversation_id}`, body)
 
   }
 
@@ -81,7 +81,7 @@ export namespace DB {
       course: course,
       mode: mode,
     })
-    return authorizedPost(DatabaseEndpoints.Conversations, body)
+    return authorizedPost(Endpoints.Conversations, body)
 
   }
 
@@ -90,7 +90,7 @@ export namespace DB {
     const body = JSON.stringify({
       summary: summary,
     })
-    return authorizedPost(DatabaseEndpoints.Summary + `/${conversation_id}`, body)
+    return authorizedPost(Endpoints.Summary + `/${conversation_id}`, body)
 
   }
 
@@ -98,7 +98,7 @@ export namespace DB {
     const body = JSON.stringify({
       mode: mode,
     })
-    return authorizedPost(DatabaseEndpoints.Settings + `/${conversation_id}`, body)
+    return authorizedPost(Endpoints.Settings + `/${conversation_id}`, body)
   }
 
 }

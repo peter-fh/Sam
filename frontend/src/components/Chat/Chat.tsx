@@ -17,23 +17,11 @@ const Chat: React.FC<ChatProps> = ({id}) => {
 
   const {
     handleSendMessage,
-    toSummarize,
-    summarize,
-    conversation,
-    setFile,
-    setImage,
     intro,
-    file,
-    aiMessage,
-    setMessage,
-    message,
-    image,
-    lock,
-    messages,
     loadConversation,
-    loadingConversation,
-    loading,
-    thinking,
+    chatState,
+    setChatState,
+    uiState,
   } = useConversation();
 
   const {
@@ -69,13 +57,6 @@ const Chat: React.FC<ChatProps> = ({id}) => {
     }
   }, [])
 
-  useEffect(() => {
-    if (toSummarize) {
-      Log(LogLevel.Debug, "useEffect on toSummarize")
-      summarize()
-    }
-  }, [conversation])
-
 
 const bottomMarkerRef = useRef<HTMLDivElement>(null);
   const scrollIntoView = () => {
@@ -109,7 +90,7 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
   }
 
   const updateImage = async (img: File) => {
-    setFile(img.name)
+
     const options = {
       maxSizeMB: 1,
       maxWidthOrHeight: 2048,
@@ -120,12 +101,17 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
     Log(LogLevel.Always, `Transcribing ${compressedFile.size / 1024 / 1024}MB file`);
     const reader = new FileReader()
     reader.onloadend = () => {
-      setImage(reader!.result!.toString())
+      const image_string = reader!.result!.toString()
+      setChatState(prev => ({
+        ...prev,
+        image: image_string,
+        file: img.name
+      }))
     }
     reader.readAsDataURL(compressedFile)
   }
 
-  const buttonClass = file !== "" ? "chat-button interactive file-present" : "chat-button interactive"
+  const buttonClass = chatState.file !== "" ? "chat-button interactive file-present" : "chat-button interactive"
 
   const messagesRef = useRef<HTMLDivElement>(null)
 
@@ -141,10 +127,11 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     scrollIntoView()
-  }, [loadingConversation])
+  }, [uiState.initialLoading])
 
   const MessageContent = () => {
-    if (loadingConversation) {
+    const messages = chatState.conversation
+    if (uiState.initialLoading) {
       return (
         <>
           <span key={-1}className="conversation-spinner">
@@ -156,7 +143,7 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
         </>
       )
     }
-    if (thinking) {
+    if (uiState.thinking) {
       return (
         <>
           {messages && messages.map((message, index) => (
@@ -185,7 +172,7 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
               <MarkTeX content={message.content}/>
             </span>
           ))}
-          {loading && (
+          {uiState.aiLoading && (
             <span key={-1}className="answer-spinner">
               <BeatLoader 
                 color="#c0c0c0"
@@ -193,9 +180,9 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
               />
             </span>
           )}
-          {aiMessage != '' && (
+          {chatState.aiMessage != '' && (
             <span key={-1}className="output">
-              <MarkTeX content={aiMessage}/>
+              <MarkTeX content={chatState.aiMessage}/>
             </span>
           )}
           </>
@@ -215,9 +202,12 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
         <div className="input">
           <textarea
             onChange={(event) => {
-              setMessage(event.target.value);
+              setChatState(prev => ({
+                ...prev,
+                message: event.target.value
+              }))
             }}
-            value={message}
+            value={chatState.message}
             rows={4} 
             cols={50} 
             placeholder="Enter your message here..."
@@ -228,7 +218,7 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
             ref={fileInputRef}
             style={{ display: "none" }}
             accept=".png,.jpg,.jpeg,.gif"
-            key={image}
+            key={chatState.image}
             onChange={handleFileChange}
           />
           <div className="button-container">
@@ -242,7 +232,7 @@ const bottomMarkerRef = useRef<HTMLDivElement>(null);
               className="chat-button interactive" 
               onClick={handleSendMessage}
             >
-              {lock ? <i className="fa-solid fa-xmark"/>:<i className="fa-solid fa-arrow-up"/>}
+              {uiState.sendLock ? <i className="fa-solid fa-xmark"/>:<i className="fa-solid fa-arrow-up"/>}
             </button>
           </div>
         </div>

@@ -1,15 +1,14 @@
 import { useState } from "react";
-import { getMessageContent, Message, newMessage } from "../../types/message";
+import { getMessageContent, Message } from "../../api/message";
 import { useChatSettings } from "../../context/useChatContext";
-import Endpoints from "../../endpoints";
 import { DB } from "../../database/db";
 import { useThreadSelectionContext } from "../../context/useThreadContext";
 import { Log, LogLevel } from "../../log";
 import { Course, QuestionType } from "../../types/options";
-import supabase from "../../supabase";
+import { API } from "../../api/api";
 
 
-const TOKEN_THRESHOLD = 1024
+const TOKEN_THRESHOLD = 0
 const INTRO_MESSAGE = "Hello! I'm Sam, an AI chatbot powered by Chat-GPT. I use context specific to Concordia to provide better explanations. AI makes mistakes, so please double check any answers you are given."
 
 const estimateTokens = (characterCount: number) => {
@@ -20,470 +19,367 @@ function sleep(ms: number) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-type DisplayMessage = {
-  role: "user" | "assistant"
-  content: string
+interface ChatState {
+  message: string,
+  file: string,
+  image: string,
+
+  aiMessage: string,
+
+  conversation: Message[],
+  summary: string,
+  id: number | null,
 }
+
+interface UIState {
+  sendLock: boolean,
+  initialLoading: boolean,
+  aiLoading: boolean,
+  thinking: boolean,
+}
+
 
 const useConversation = () => {
 
   const {
     question, setQuestion,
     course, setCourse,
-    detailLevel,
   } = useChatSettings()
 
   const {
     setSelectedThread
   } = useThreadSelectionContext()
 
-  const [conversation, setConversation] = useState<Message[]>([]);
-  const [conversationId, setConversationId] = useState<number | null>(null);
-  //const [_, setTotalConversation] = useState<Message[]>([]);
-  const [message, setMessage] = useState('')
-  const [messages, setMessages] = useState<DisplayMessage[]>([])
-  const [aiMessage, setAiMessage] = useState('')
-  const [lock, setLock] = useState(false)
-  const [file, setFile] = useState('')
-  const [image, setImage] = useState('')
-  const [toSummarize, setToSummarize] = useState(false)
-  const [loadingConversation, setLoadingConversation] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [thinking, setThinking] = useState(false)
+  const [chatState, setChatState] = useState<ChatState>({
+    message: '',
+    file: '',
+    image: '',
+    aiMessage: '',
+    conversation: [],
+    summary: '',
+    id: null,
+  })
 
-  const addMessage = (message: Message) => {
-    setConversation((prevMessages) => [...prevMessages, message])
+  const [uiState, setUIState] = useState<UIState>({
+    sendLock: false,
+    initialLoading: false,
+    aiLoading: false,
+    thinking: false,
+  })
+
+  const lock = () => {
+    setUIState(prev => ({
+      ...prev,
+      sendLock: true,
+    }))
+  }
+
+  const unlock = () => {
+    setUIState(prev => ({
+      ...prev,
+      sendLock: false,
+    }))
   }
 
 
   async function loadConversation(id: number) {
-    setLock(true)
-    setLoadingConversation(true)
-    setMessages([])
-    setConversationId(id)
+    setUIState(prev => ({
+      ...prev, 
+      sendLock: true, 
+      initialLoading: true
+    }))
 
-    const summary = await DB.getSummary(id)
+    const summaryResult = await DB.getSummary(id)
 
-    const conversationMessages = await DB.getConversation(id)
-    if (conversationMessages == null) {
+    const messagesResult = await DB.getConversation(id)
+    if (messagesResult == null) {
       return
     }
 
-    const conversationSettings = await DB.getSettings(id)
-    if (conversationSettings && conversationSettings.course && conversationSettings.mode) {
-      setCourse(conversationSettings.course.code as Course)
-      setQuestion(conversationSettings.mode.name as QuestionType)
+    const settingsResult = await DB.getSettings(id)
+    if (settingsResult && settingsResult.course && settingsResult.mode) {
+      setCourse(settingsResult.course.code as Course)
+      setQuestion(settingsResult.mode.name as QuestionType)
     }
 
-    const conversationDisplayMessages: DisplayMessage[] = []
-    const intro_message: DisplayMessage = {
+    const conversation: Message[] = []
+
+    const intro_message: Message = {
       role: "assistant",
       content: INTRO_MESSAGE,
     }
-    conversationDisplayMessages.push(intro_message)
-    const formattedMessages: Message[] = []
-    for (const conversation_message of conversationMessages) {
-      const conversation_display_message: DisplayMessage = {
-        role: conversation_message.role as "user" | "assistant",
-        content: conversation_message.content!,
+
+    conversation.push(intro_message)
+
+    for (const raw_message of messagesResult) {
+      const message: Message = {
+        role: raw_message.role as "user" | "assistant",
+        content: raw_message.content!,
       }
-      conversationDisplayMessages.push(conversation_display_message)
-
-      const formatted_message = newMessage(conversation_message.content!, conversation_message.role!)
-      formattedMessages.push(formatted_message)
+      conversation.push(message)
     }
 
-    if (summary && summary.summary) {
-      const formatted_summary = newMessage(summary.summary, 'user')
-      setConversation([
-        formatted_summary,
-        ...formattedMessages.slice(1).slice(-4),
-      ])
-    } else {
-      setConversation([
-        ...formattedMessages
-      ])
+    var summary = ''
+    if (summaryResult && summaryResult.summary) {
+      summary = summaryResult.summary
     }
 
-    setMessages(conversationDisplayMessages)
 
-    setLoadingConversation(false)
-    setLock(false)
+
+    setChatState(prev => ({
+      ...prev,
+      summary: summary,
+      conversation: conversation,
+      id: id,
+    }))
+
+    setUIState(prev => ({
+      ...prev,
+      initialLoad: false,
+      sendLock: false,
+    }))
   }
+
+
   async function intro() {
-    setLock(true)
-    setMessages([])
+    setUIState(prev => ({
+      ...prev,
+      sendLock: false,
+    }))
     var answer = ""
     for (const word of INTRO_MESSAGE.split(" ")) {
       await sleep(30)
       answer += word + " "
-      setAiMessage(answer)
+      setChatState(prev => ({
+        ...prev,
+        aiMessage: answer,
+      }))
     }
 
-    const introductionMessage: DisplayMessage = {
+    const introductionMessage: Message = {
       role: "assistant",
       content: answer,
     }
 
-    setMessages([introductionMessage])
-    setAiMessage('')
+    setChatState(prev => ({
+      ...prev,
+      aiMessage: '',
+      conversation: [introductionMessage],
+    }))
 
-    setLock(false)
+    setUIState(prev => ({
+      ...prev,
+      sendLock: false,
+    }))
   }
 
-
-  async function fetchWithAuth(endpoint: string, headers: any, body: string) {
-    const { data: { session }, error } = await supabase.auth.getSession()
-    if (error || !session) {
-      throw new Error('Not authenticated')
-    }
-    const request = new Request(endpoint, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${session.access_token}`,
-        ...headers
-      },
-      body: body,
-    })
-    const response = await fetch(request)
-    return response
-
-  }
-
-  async function getTitle(question: string) {
-
-    const response = await fetchWithAuth(Endpoints.Title, {
-      'Content-Type': 'text/plain'
-    }, 
-      String(question)
-    )
-    const reader = response.body!.getReader()
-    const decoder = new TextDecoder('utf-8')
-
-    const {value} = await reader.read()
-
-    const title = decoder.decode(value, { stream: true})
-
-    return title
-  }
-
-  async function readImage(image: string) {
-    const response = await fetchWithAuth(Endpoints.Image, {
-      'Content-Type': 'text/plain',
-    }, String(image))
-
-    const reader = response.body!.getReader()
-    const decoder = new TextDecoder('utf-8')
-
-    const {value} = await reader.read()
-
-    const transcription = decoder.decode(value, { stream: true})
-
-    Log(LogLevel.Debug, "Image transcription:\n", transcription)
-    return transcription
-  }
-
-  async function getSummary(conversation: Message[]) {
-    const response = await fetchWithAuth(Endpoints.Summary, {
-      'Content-Type': 'application/json',
-    }, JSON.stringify(conversation))
-
-    const reader = response.body!.getReader()
-    const decoder = new TextDecoder('utf-8')
-
-    const {value} = await reader.read()
-
-    const summary = decoder.decode(value, { stream: true})
-
-    Log(LogLevel.Debug, "Summarized conversation:\n", summary)
-
-    return summary
-  }
-
-  async function getMode(conversation: Message[]) {
-    var question_type: string = ""
-    if (question_type == null) {
-      question_type = "None"
-    } else {
-      question_type = question!
-    }
-
-    const mode_response = await fetchWithAuth(Endpoints.Mode, {
-      'Content-Type': 'application/json',
-      'Mode': question_type,
-    }, JSON.stringify(conversation))
-
-    const mode_raw = await mode_response.text()
-    if (mode_raw == "") {
-      throw new Error("Could not fetch mode")
-    }
-    const mode = mode_raw as QuestionType
-    Log(LogLevel.Debug, mode)
-    return mode
-  }
-
-  async function ask(conversation: Message[], mode: QuestionType) {
-
-    const response = await fetchWithAuth(Endpoints.Ask, {
-      'Content-Type': 'application/json',
-      'Course': course,
-      'Brevity': detailLevel,
-      'Mode': mode,
-    }, JSON.stringify(conversation))
-    setLoading(false)
-    setThinking(false)
-
-    const reader = response.body!.getReader()
-    const decoder = new TextDecoder('utf-8')
-    var answer = ""
-
-    while (true) {
-      const {value, done} = await reader.read()
-      if (done) {
-        break
-      }
-
-      const chunk = decoder.decode(value, { stream: true})
-      answer += chunk
-      setAiMessage(answer)
-    }
-    setAiMessage('')
-    //Log(LogLevel.Debug, answer)
-
-    setToSummarize(true)
-
-    return answer
-  }
-
-  /*
-  const waitForUnlock = (): Promise<void> => {
-    if (!lock) {
-      return Promise.resolve();
-    }
-    return new Promise((resolve: () => void) => {
-      resolveLockRef.current = resolve;
-    });
-  };
-  */
 
   const imageTranscription = async (filename: string) => {
     let transcription = ""
 
     transcription = `\n\n*[transcribing ${filename}...]*`
-    displayNewMessage(transcription, 'user')
-    setMessage("")
+    appendMessage(transcription, 'user')
+    setChatState(prev => ({
+      ...prev,
+      message: "",
+    }))
 
-    var final_message = message
+    var final_message = chatState.message
 
-    transcription = await readImage(image)
+    transcription = await API.readImage(chatState.image)
     transcription = `\n\n*Image Transcription:*\n\n${transcription}` 
-    displayNewMessage(transcription, 'user')
+    appendMessage(transcription, 'user')
     final_message += "The following is a transcription of an image sent by the user:\n\n" + transcription
     return final_message
 
   }
 
-  function displayNewMessage(new_message: string, role: 'user' | 'assistant') {
-    const display_message : DisplayMessage = {
+  function appendMessage(new_message: string, role: 'user' | 'assistant') {
+    const display_message : Message = {
       role: role,
       content: new_message,
     }
-    setMessages(prevMessages => [...prevMessages!, display_message])
+    setChatState(prev => ({
+      ...prev,
+      conversation: [...prev.conversation, display_message]
+    }))
   }
   const handleSendMessage = async () => {
-    if (lock) {
+    if (uiState.sendLock) {
       return
     }
 
-    if (!message && !image) {
-      setMessage('')
+    if (!chatState.message && !chatState.image) {
+      setChatState(prev => ({
+        ...prev,
+        message: '',
+      }))
       return
     }
 
-    setLock(true)
-    const user_message = message
-    setMessage('')
+    setUIState(prev => ({
+      ...prev,
+      sendLock: true,
+      aiLoading: true,
+    }))
 
-    const filename = file
-    setFile('')
+    const user_question = chatState.message
+    const filename = chatState.file
 
-    displayNewMessage(user_message, 'user')
-    let final_message = user_message
-    if (image) {
-      final_message = await imageTranscription(filename)
-    }
+    setChatState(prev => ({
+      ...prev,
+      file: '',
+      message: '',
+    }))
 
+    const initial_conversation = [...chatState.conversation]
 
-    var json_message: any = newMessage(final_message, "user")
-    const fullConversation = [...conversation, json_message]
-
-    const mode_start_time = performance.now()
-    setLoading(true)
-    const mode = await getMode(fullConversation)
-    const mode_end_time = performance.now()
-    Log(LogLevel.Always, `Mode fetch took ${(mode_end_time - mode_start_time) / 1000}`)
-    setQuestion(mode)
-
-    let current_conversation_id = conversationId
-    var conversation_id_promise 
-
-    if (current_conversation_id == null) {
-      conversation_id_promise = getTitle(final_message)
-        .then(title => DB.addConversation(title, course, mode))
-        .then(add_conversation_result => {
-
-          if (add_conversation_result == null) {
-            throw new Error("Did not find course or title")
-          }
-          const new_conversation_id = add_conversation_result
-          setConversationId(new_conversation_id)
-          setSelectedThread(new_conversation_id)
-          return new_conversation_id
-        })
-        .then(new_conversation_id => {
-          DB.addMessage(new_conversation_id, 'user', final_message)
-          return new_conversation_id
-        })
-    } else {
-      DB.updateMode(current_conversation_id, mode)
-      DB.addMessage(current_conversation_id, 'user', final_message)
-    }
-
-    setThinking(true)
-    const ask_start_time = performance.now()
-    const ai_message = await ask(fullConversation, mode)
-    const ask_end_time = performance.now()
-    Log(LogLevel.Always, `Question took ${(ask_end_time - ask_start_time) / 1000}`)
-
-    displayNewMessage(ai_message, 'assistant')
-    if (current_conversation_id == null) {
-      current_conversation_id = await conversation_id_promise
-    }
-    DB.addMessage(current_conversation_id!, 'assistant', ai_message)
-
-    setConversation([
-      ...conversation, 
-      newMessage(final_message, 'user'), 
-      newMessage(ai_message, 'assistant'),
-    ])
-
-    setImage('')
-    setLock(false)
-
-  }
-
-  /*
-  const oldHandleSendMessage = async () => {
-    if (!lock && (message || image)) {
-      setLock(true)
-      const fileName = file
-      setFile('')
-
-      var current_message = message
-
-
-      const current_display_question: DisplayMessage = {
-        role: "user",
-        content: current_message
-
-      }
-      const image_info: DisplayMessage = {
-        role: "user",
-        content: ""
-      }
-
-      if (image) {
-        image_info.content = `\n\n*[transcribing ${fileName}...]*`
-        setMessages([...messages!, current_display_question, image_info])
+    try {
+      appendMessage(user_question, 'user')
+      let final_question = ''
+      if (chatState.image) {
+        Log(LogLevel.Debug, "Awaiting Transcription")
+        final_question = await imageTranscription(filename)
       } else {
-        setMessages([...messages!, current_display_question])
+        final_question = chatState.message
       }
-      setMessage("")
 
-      var final_message = message
+      const user_message: Message = {
+        role: 'user',
+        content: final_question
+      }
 
-      if (image) {
-        const transcription = await readImage(image)
-        image_info.content = `\n\n*Image Transcription:*\n\n${transcription}` 
-        setMessages([...messages!, current_display_question, image_info])
-        final_message += "The following is a transcription of an image sent by the user:\n\n" + transcription
-      } 
+      const conversation = [...chatState.conversation]
 
-
-      var json_message: any = newMessage(final_message, "user")
-      const fullConversation = [...conversation, json_message]
+      conversation.shift()
+      if (chatState.summary) {
+        const summary_message: Message = {
+          role: 'assistant',
+          content: chatState.summary
+        }
+        conversation.unshift(summary_message)
+      }
+      conversation.push(user_message)
 
       const mode_start_time = performance.now()
-      setLoading(true)
-      const mode = await getMode(fullConversation)
+      lock()
+      Log(LogLevel.Debug, "Awaiting Mode")
+      const mode = await API.getMode(question, conversation)
       const mode_end_time = performance.now()
-      Log(LogLevel.Always, `Mode fetch took ${(mode_end_time - mode_start_time) / 1000}`)
+      Log(LogLevel.Always, `Selected "${mode}" in ${Math.round((mode_end_time - mode_start_time) / 100) / 10}s`)
       setQuestion(mode)
 
+      let current_conversation_id = chatState.id
+      var conversation_id_promise 
+
+      if (current_conversation_id == null) {
+        conversation_id_promise = API.getTitle(final_question)
+          .then(title => DB.addConversation(title, course, mode))
+          .then(add_conversation_result => {
+
+            if (add_conversation_result == null) {
+              throw new Error("Did not find course or title")
+            }
+            const new_conversation_id = add_conversation_result
+            setChatState(prev => ({
+              ...prev,
+              id: new_conversation_id
+            }))
+            setSelectedThread(new_conversation_id)
+            DB.addMessage(new_conversation_id, 'user', final_question)
+            return new_conversation_id
+          })
+      } else {
+        DB.updateMode(current_conversation_id, mode)
+        DB.addMessage(current_conversation_id, 'user', final_question)
+      }
+
+      setUIState(prev => ({
+        ...prev,
+        thinking: true,
+      }))
+
       const ask_start_time = performance.now()
-      const ai_message = await ask(fullConversation, mode)
+      Log(LogLevel.Debug, "Awaiting response")
+      var assistant_response = ""
+      var firstChunkReceived = false
+      for await (const currentAnswer of API.ask(conversation, mode, course)) {
+        if (!firstChunkReceived) {
+          firstChunkReceived = true
+          setUIState(prev => ({
+            ...prev,
+            aiLoading: false,
+            thinking: false,
+          }))
+        }
+        assistant_response += currentAnswer
+        setChatState(prev => ({
+          ...prev,
+          aiMessage: assistant_response,
+        }))
+      }
       const ask_end_time = performance.now()
       Log(LogLevel.Always, `Question took ${(ask_end_time - ask_start_time) / 1000}`)
 
-      const display_ai_message: DisplayMessage = {
-        role: "assistant",
-        content: ai_message
+      if (assistant_response == '') {
+        throw new Error("Ask returned zero tokens")
       }
 
-      if (image) {
-        setMessages([...messages!, current_display_question, image_info, display_ai_message])
-      } else {
-        setMessages([...messages!, current_display_question, display_ai_message])
-      }
-
-      setConversation([
-        ...conversation, 
-        newMessage(final_message, 'user'), 
-        newMessage(ai_message, 'assistant'),
-      ])
-
-      setTotalConversation([
-        ...conversation, 
-        newMessage(final_message, 'user'), 
-        newMessage(ai_message, 'assistant'),
-      ])
-
-      var current_conversation_id = conversationId
       if (current_conversation_id == null) {
-        const title = await getTitle(final_message)
-        Log(LogLevel.Debug, "Title: ", title)
-        const add_conversation_result = await DB.addConversation(title, course, mode)
-        if (add_conversation_result == null) {
-          throw new Error("Did not find course or title")
-        }
-        current_conversation_id = add_conversation_result
-        setConversationId(current_conversation_id)
-        setSelectedThread(current_conversation_id)
-      } else {
-        await DB.updateMode(current_conversation_id, mode)
+        Log(LogLevel.Debug, "Awaiting conversation creation")
+        const db_start_time = performance.now()
+        current_conversation_id = await conversation_id_promise
+        const db_end_time = performance.now()
+        Log(LogLevel.Always, `Waited for conversation result in ${Math.round((db_end_time - db_start_time) / 100) / 10}s`)
+      }
+      DB.addMessage(current_conversation_id!, 'assistant', assistant_response)
+
+
+
+      const ai_message: Message = {
+        role: 'assistant',
+        content: assistant_response
       }
 
-      await DB.addMessage(current_conversation_id, "user", final_message)
-      await DB.addMessage(current_conversation_id, "assistant", ai_message)
-
-
-      setImage('')
-      setLock(false)
-    } else if (!lock) {
-      setMessage("")
+      setChatState(prev => ({
+        ...prev,
+        image: '',
+        aiMessage: '',
+        conversation: [
+          ...prev.conversation,
+          ai_message,
+        ]
+      }))
+    } catch {
+      alert("Sorry, an error occured! Please try again")
+      setUIState(prev => ({
+        ...prev,
+        thinking: false,
+        aiLoading: false,
+      }))
+      setChatState(prev => ({
+        ...prev,
+        image: '',
+        file: '',
+        aiMessage: '',
+        conversation: initial_conversation
+      }))
     }
+    Log(LogLevel.Debug, "Unlocking Chat")
+    unlock()
+    summarize()
 
   }
-*/
 
-  async function summarize() {
-    setToSummarize(false)
+
+  function shouldSummarize(): boolean {
+    const conversation = chatState.conversation
     if (conversation.length < 5) {
-      return
+      return false
     }
 
     if (conversation[conversation.length - 1].role != 'assistant') {
-      return
+      return false
     }
     var total_length = 0
     for (var i = 0; i < conversation.length-1; i++) {
@@ -491,54 +387,45 @@ const useConversation = () => {
     }
 
     if (estimateTokens(total_length) <= TOKEN_THRESHOLD) {
+      Log(LogLevel.Debug, "Characters in conversation: ", total_length)
       Log(LogLevel.Debug, "Estimated tokens: " + estimateTokens(total_length))
       Log(LogLevel.Debug, "Threshold: " + TOKEN_THRESHOLD)
       Log(LogLevel.Debug, "Does not meet token threshold")
+      return false
+    }
+    return true
+  }
+
+
+  async function summarize() {
+    if (!shouldSummarize()) {
       return
     }
 
+    lock()
+    const conversationToSummarize = chatState.conversation.slice(0,-4)
 
-    setLock(true)
-    const conversationToSummarize = conversation.slice(0,-4)
+    const summary = await API.getSummary(conversationToSummarize)
 
-    const summary = await getSummary(conversationToSummarize)
-    const summaryMessage = newMessage(summary, 'system')
+    setChatState(prev => ({
+      ...prev,
+      summary: summary,
+    }))
 
-    setConversation([
-      summaryMessage, 
-      ...conversation.slice(-4)
-    ])
+    await DB.updateSummary(chatState.id!, summary)
 
-    await DB.updateSummary(conversationId!, summary)
-
-    setLock(false)
+    unlock()
   }
 
   return {
-    conversation,
-    setConversation,
-    message,
-    setMessage,
-    messages,
-    setMessages,
-    aiMessage,
-    setAiMessage,
-    lock,
-    setLock,
-    file,
-    setFile,
-    image,
-    setImage,
-    toSummarize,
-    setToSummarize,
-    addMessage,
     intro,
     handleSendMessage,
     summarize,
     loadConversation,
-    loadingConversation,
-    loading,
-    thinking,
+    chatState,
+    setChatState,
+    uiState,
+    setUIState,
   }
 }
 

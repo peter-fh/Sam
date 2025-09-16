@@ -2,8 +2,9 @@ from enum import Enum
 import time
 from dataclasses import dataclass
 
+from flask import json
+from gotrue import List
 from openai import OpenAI
-from openai.types.responses import ResponseTextDeltaEvent
 from pydantic import BaseModel
 
 from api.prompt import Mode
@@ -19,12 +20,14 @@ GET_MODE_DIR = STATIC_PROMPT_DIR + os.sep + "mode_prompts"
 
 
 class ModelType(Enum):
-    gpt_5 = "gpt-5"
-    gpt_5_mini = "gpt-5-mini"
-    o3_mini = "o3-mini"
-    o4_mini = "o4-mini"
-    gpt_4_1 = "gpt-4.1"
-    gpt_4_1_mini = "gpt-4.1-mini"
+    gpt_5 = "openai/gpt-5"
+    gpt_5_mini = "openai/gpt-5-mini"
+    o3_mini = "openai/o3-mini"
+    o4_mini = "openai/o4-mini"
+    gpt_4_1 = "openai/gpt-4.1"
+    gpt_4_1_mini = "openai/gpt-4.1-mini"
+    gemini_2_5_flash = "google/gemini-2.5-flash"
+    gemini_2_0_flash_lite = "google/gemini-2.0-flash-lite-001"
 
 @dataclass
 class APIConfig:
@@ -32,6 +35,7 @@ class APIConfig:
     problem_model: ModelType
     study_model: ModelType
     utility_model: ModelType
+    mode_model: ModelType
     debug_mode: bool
     mock_mode: bool
     pass
@@ -65,21 +69,26 @@ class API:
         else:
             return "system"
 
-    def ask(self, conversation, course_code, prompt_type: Mode, brevity):
+    def ask(self, conversation: List, course_code, prompt_type: Mode, brevity):
 
         model = self.getModel(prompt_type)
-        print("===")
-        print(prompt_type.value)
-        print(model.value)
-        print("===")
         instructions = self.db.getPrompt(prompt_type.value, model.value)
         outline = self.db.getOutline(course_code)
         prompt = instructions + "\n" + outline
         prompt = prompt.replace("{$brevity}", brevity)
+
+        print("===")
+        print(prompt_type.value)
+        print(model.value)
+        print("===")
         print("Conversation: ")
         print(conversation)
         print("End of conversation")
 
+        conversation.insert(0, {
+            "role": "system",
+            "content": prompt,
+                            })
 
         # if self.config.debug_mode:
         #    displayConversation(conversation)
@@ -91,28 +100,24 @@ class API:
                     for word in line.split(" "):
                         time.sleep(0.002)
                         yield word + " "
-            return
 
 
         try:
-            stream = self.client.responses.create(
+            stream = self.client.chat.completions.create(
+                messages=conversation,
                 model=model.value,
-                reasoning={"effort": "low"},
-                input=conversation,
-                instructions=prompt,
-                stream=True
+                reasoning_effort="low",
+                max_tokens=5000,
+                stream=True,
             )
+            for chunk in stream:
+                content = chunk.choices[0].delta.content
+                yield content
         except Exception as e:
             print("Ask error: ", e)
             yield "This service is currently unavailable, sorry!"
-            return
 
 
-        for event in stream:
-            if event.type == "response.output_text.delta":
-                yield event.delta
-            if event.type == "response.output_text.done":
-                return event.text
 
 
     def transcribe(self, image):
@@ -191,21 +196,22 @@ class API:
 
         instructions = open(TITLE_FILE_PATH).read().replace("${question}", question)
         try:
-            response = self.client.responses.create(
+            response = self.client.chat.completions.create(
                 model=self.config.utility_model.value,
-                input=[
+                messages=[
                     {
                         "role": "user",
                         "content": instructions
                     },
                 ],
+                max_tokens=5000,
             )
         except:
             print("Title error")
             return "Error Getting Title"
 
 
-        title = str(response.output_text)
+        title = str(response.choices[0].message.content)
 
         if self.config.debug_mode:
             print("Title: ", title)
@@ -228,30 +234,44 @@ class API:
 
         instructions_path = self.getModePromptPath(type)
         instructions = open(instructions_path).read().replace("${question}", str(question))
-        print(instructions)
-        start_time = time.time()
-        response = self.client.responses.parse(
-            model=self.config.utility_model.value,
-            service_tier="priority",
-            reasoning=None,
-            input=[
+        response = self.client.chat.completions.create(
+            model=self.config.mode_model.value,
+            reasoning_effort=None,
+            messages=[
                 {
                     "role": "user",
                     "content": instructions,
                 },
             ],
-            text_format=ModeResponse,
+            response_format= {
+                "type": "json_schema",
+                    "json_schema": {
+                    "name": "mode",
+                    "description": "Which mode is most accurate for the assistant to respond in",
+                    "strict": True,
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "choice": {
+                                "type": "string",
+                                "enum": ["Problem", "Concept", "Other"],
+                                "description": "Mode for assistant response"
+                            }
+                        },
+                        "required": ["choice"],
+                        "additionalProperties": False,
+                    }
+                }
+            },
+            max_tokens=100,
         )
-        end_time = time.time()
-        duration = end_time - start_time
-        print("Duration for only OpenAI API call: %s" % duration)
 
 
-        res = response.output_parsed
+        res = response.choices[0].message.content
 
         if res == None:
             return None
-        mode_raw = res.mode
+        mode_raw = json.loads(res)["choice"]
 
         if self.config.debug_mode:
             print("Mode: ", mode_raw)

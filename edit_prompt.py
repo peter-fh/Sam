@@ -1,6 +1,8 @@
 import os
 
 from dotenv import load_dotenv
+from api.api import ModelType
+from api.prompt import Mode
 from db import Database
 import argparse
 from supabase import Client, create_client
@@ -16,12 +18,12 @@ class PromptEditor:
             prompt = self.db.getPrompt(mode, model)
         except:
             pass
-        filename = f'{mode}_{model}.md'
+        filename = f'{mode}_{model}.md'.replace("/", "+")
         with open(filename, 'w') as f:
             f.write(prompt)
 
     def updatePrompt(self, mode, model):
-        filename = f'{mode}_{model}.md'
+        filename = f'{mode}_{model}.md'.replace("/", "+")
         prompt = open(filename, 'r').read()
         self.db.addPrompt(prompt, mode, model)
 
@@ -71,6 +73,21 @@ if __name__ == "__main__":
     db = Database(supabase)
     editor = PromptEditor(db)
     args = parser.parse_args()
+
+    try:
+        model = ModelType(args.model)
+    except Exception as e:
+        print("Unknown model name: ", args.model)
+        print("Exception: ", e)
+        exit(1)
+
+    try:
+        mode = Mode(args.mode)
+    except:
+        print("Unknown mode: ", args.mode)
+        exit(1)
+
+
     if args.write:
         editor.updatePrompt(args.mode, args.model)
     else:

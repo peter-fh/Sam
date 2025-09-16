@@ -14,6 +14,12 @@ import supabase from './supabase'
 function ChatRouteWrapper() {
   const { id } = useParams<{ id: string }>();
 
+  const conversationId = id ? parseInt(id) : null
+
+  useEffect(() => {
+    Log(LogLevel.Debug, "Updated conversationId: ", conversationId)
+  }, [conversationId])
+
   if (!id) {
     return (
       <>
@@ -21,11 +27,6 @@ function ChatRouteWrapper() {
       </>
     )
   }
-  const conversationId = parseInt(id)
-
-  useEffect(() => {
-    Log(LogLevel.Debug, "Updated conversationId: ", conversationId)
-  }, [conversationId])
 
   return (
     <>

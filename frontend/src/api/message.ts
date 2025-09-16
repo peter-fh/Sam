@@ -1,6 +1,6 @@
 
 export type Message = {
-  role: string
+  role: 'assistant' | 'user'
   content: string
 }
 

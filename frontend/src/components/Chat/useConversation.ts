@@ -135,7 +135,7 @@ const useConversation = () => {
 
     setUIState(prev => ({
       ...prev,
-      initialLoad: false,
+      initialLoading: false,
       sendLock: false,
     }))
   }

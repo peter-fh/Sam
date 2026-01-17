@@ -73,7 +73,7 @@ class API:
         else:
             return "system"
 
-    def ask(self, conversation: List, course_code, prompt_type: Mode, brevity):
+    def getMessage(self, conversation: List, course_code, prompt_type: Mode, brevity):
 
         model = self.getModel(prompt_type)
         instructions = self.db.getPrompt(prompt_type.value, model.value)
@@ -124,7 +124,7 @@ class API:
 
 
 
-    async def transcribe(self, image):
+    async def getTranscription(self, image):
 
         if self.config.mock_mode:
             time.sleep(2)
@@ -159,7 +159,7 @@ class API:
 
         return transcription
 
-    async def summarize(self, conversation):
+    async def getSummary(self, conversation):
 
         instructions = open(SUMMARY_FILE_PATH).read()
         conversation.insert(0, {
@@ -192,7 +192,7 @@ class API:
 
         return summary
 
-    async def title(self, question):
+    async def getTitle(self, question):
 
         if self.config.mock_mode:
             time.sleep(2)

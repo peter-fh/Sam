@@ -57,7 +57,7 @@ def benchmark_mode():
     conversation = "Derivative of x^2"
     api_start = time.time()
 
-    prompt_type = api.getMode(conversation, prompt_type)
+    prompt_type = asyncio.run(api.getMode(conversation, prompt_type))
     api_end = time.time()
 
     total_end = time.time()
@@ -67,11 +67,11 @@ def benchmark_mode():
     print("API get mode took %s seconds" % api_duration)
     print(prompt_type)
 
-async def benchmark_title():
+def benchmark_title():
     conversation = "Derivative of x^2"
 
     api_start = time.time()
-    title = await api.title(conversation)
+    title = asyncio.run(api.getTitle(conversation))
     api_end = time.time()
 
     api_duration = api_end - api_start
@@ -79,4 +79,5 @@ async def benchmark_title():
     print(title)
 
 if __name__ == "__main__":
-    asyncio.run(benchmark_title())
+    # benchmark_title()
+    exit(0)

@@ -136,23 +136,23 @@ def create_app(test_config=None):
 
     @app.route('/api/summary', methods=['POST'])
     @require_auth
-    def summary():
+    def fetch_summary():
         conversation = request.get_json()
-        return asyncio.run(api.summarize(conversation))
+        return asyncio.run(api.getSummary(conversation))
 
 
     @app.route('/api/image', methods=['POST'])
     @require_auth
     def image():
         image = request.get_data(as_text=True)
-        return asyncio.run(api.transcribe(image))
+        return asyncio.run(api.getTranscription(image))
 
     @app.route('/api/title', methods=['POST'])
     @require_auth
     def title():
         question = request.get_data(as_text=True)
         start_time = time.time()
-        fetched_title = asyncio.run(api.title(question))
+        fetched_title = asyncio.run(api.getTitle(question))
         end_time = time.time()
         print('Title took ' + str(end_time - start_time))
         return fetched_title
@@ -198,7 +198,7 @@ def create_app(test_config=None):
 
         conversation = request.get_json()
 
-        stream = api.ask(conversation, course, prompt_type, brevity)
+        stream = api.getMessage(conversation, course, prompt_type, brevity)
 
         res = Response(stream_with_context(stream), content_type="text/plain")
         return res

@@ -65,8 +65,8 @@ def create_app(test_config=None):
         concept_model=ModelType.gpt_5_2,
         problem_model=ModelType.gpt_5_2,
         study_model=ModelType.gpt_5_2,
-        utility_model=ModelType.gpt_5_mini,
-        mode_model=ModelType.gemini_2_0_flash_lite,
+        utility_model=ModelType.gemini_2_5_flash_lite,
+        mode_model=ModelType.gemini_2_5_flash_lite,
         debug_mode=app.config["FLASK_ENV"] == "development",
         mock_mode=app.config["MOCK_MODE"],
     )
@@ -151,7 +151,11 @@ def create_app(test_config=None):
     @require_auth
     def title():
         question = request.get_data(as_text=True)
-        return asyncio.run(api.title(question))
+        start_time = time.time()
+        fetched_title = asyncio.run(api.title(question))
+        end_time = time.time()
+        print('Title took ' + str(end_time - start_time))
+        return fetched_title
 
     @app.route('/api/mode', methods=['POST'])
     @require_auth

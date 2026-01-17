@@ -286,12 +286,10 @@ const useConversation = () => {
               id: new_conversation_id
             }))
             setSelectedThread(new_conversation_id)
-            DB.addMessage(new_conversation_id, 'user', final_question)
             return new_conversation_id
           })
       } else {
         DB.updateMode(current_conversation_id, mode)
-        DB.addMessage(current_conversation_id, 'user', final_question)
       }
 
       setUIState(prev => ({
@@ -332,7 +330,8 @@ const useConversation = () => {
         const db_end_time = performance.now()
         Log(LogLevel.Always, `Waited for conversation result in ${Math.round((db_end_time - db_start_time) / 100) / 10}s`)
       }
-      DB.addMessage(current_conversation_id!, 'assistant', assistant_response)
+      DB.addMessage(current_conversation_id!, 'user', final_question)
+        .then(() => DB.addMessage(current_conversation_id!, 'assistant', assistant_response))
 
 
 

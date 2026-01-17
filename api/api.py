@@ -200,6 +200,7 @@ class API:
 
         instructions = open(TITLE_FILE_PATH).read().replace("${question}", question)
         try:
+            start_time = time.time()
             response = await self.async_client.chat.completions.create(
                 model=self.config.utility_model.value,
                 messages=[
@@ -208,8 +209,9 @@ class API:
                         "content": instructions
                     },
                 ],
-                max_tokens=5000,
             )
+            end_time = time.time()
+            print('Title in api.py took ' + str(end_time - start_time))
         except:
             print("Title error")
             return "Error Getting Title"
@@ -217,8 +219,10 @@ class API:
 
         title = str(response.choices[0].message.content)
 
+
         if self.config.debug_mode:
             print("Title: ", title)
+        print("Title: ", title)
         return title
 
     def getModePromptPath(self, mode: Mode | None):

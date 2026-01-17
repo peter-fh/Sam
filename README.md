@@ -1,6 +1,6 @@
 # Concordia Sam
 
-This project is a prototype of a tutoring AI that uses ChatGPT. It sends specialized prompts that contain the relevant information about specific courses that a student is taking and asking questions about. It also contains specific instructions in order to respond to each question and type of question in the most helpful ways.
+This project is a prototype of a tutoring AI that uses Generative AI. It sends specialized prompts that contain the relevant information about specific courses that a student is taking and asking questions about. It also contains specific instructions in order to respond to each question and type of question in the most helpful ways.
 
 ## Why is Sam better than using regular Generative AI sites?
 

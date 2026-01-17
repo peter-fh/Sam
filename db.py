@@ -32,6 +32,21 @@ class Database:
                 .eq("modes.name", mode)
                 .eq("model", model)
                 .limit(1)
+                .execute()
+        )
+        if response.data:
+            data = response.data
+            prompt = data[0]["text"]
+            return prompt
+
+        response = (
+            self.client
+                .table("prompts")
+                .select("text, modes!inner()")
+                .order("created_at", desc=True)
+                .eq("modes.name", mode)
+                .eq("model", "DEFAULT")
+                .limit(1)
                 .single()
                 .execute()
         )

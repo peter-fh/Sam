@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 from flask import json
 from gotrue import List
-from openai import OpenAI
+from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel
 
 from api.prompt import Mode
@@ -20,6 +20,7 @@ GET_MODE_DIR = STATIC_PROMPT_DIR + os.sep + "mode_prompts"
 
 
 class ModelType(Enum):
+    gpt_5_2 = "openai/gpt-5.2"
     gpt_5 = "openai/gpt-5"
     gpt_5_mini = "openai/gpt-5-mini"
     o3_mini = "openai/o3-mini"
@@ -27,6 +28,7 @@ class ModelType(Enum):
     gpt_4_1 = "openai/gpt-4.1"
     gpt_4_1_mini = "openai/gpt-4.1-mini"
     gemini_2_5_flash = "google/gemini-2.5-flash"
+    gemini_2_5_flash_lite = "google/gemini-2.5-flash-lite"
     gemini_2_0_flash_lite = "google/gemini-2.0-flash-lite-001"
 
 @dataclass
@@ -46,10 +48,12 @@ class ModeResponse(BaseModel):
 
 class API:
     config: APIConfig
+    async_client: AsyncOpenAI
     client: OpenAI
     db: Database
-    def __init__(self, config: APIConfig, client: OpenAI, db: Database):
+    def __init__(self, config: APIConfig, client: OpenAI, async_client: AsyncOpenAI, db: Database):
         self.config = config
+        self.async_client = async_client
         self.client = client
         self.db = db
 
@@ -120,7 +124,7 @@ class API:
 
 
 
-    def transcribe(self, image):
+    async def transcribe(self, image):
 
         if self.config.mock_mode:
             time.sleep(2)
@@ -128,7 +132,7 @@ class API:
 
         try:
             instructions = open(TRANSCRIPTION_FILE_PATH).read()
-            response = self.client.chat.completions.create(
+            response = await self.async_client.chat.completions.create(
                 model=self.config.utility_model.value,
                 messages=[
                     {
@@ -155,7 +159,7 @@ class API:
 
         return transcription
 
-    def summarize(self, conversation):
+    async def summarize(self, conversation):
 
         instructions = open(SUMMARY_FILE_PATH).read()
         conversation.insert(0, {
@@ -172,7 +176,7 @@ class API:
             return "Example summary"
 
         try:
-            response = self.client.chat.completions.create(
+            response = await self.async_client.chat.completions.create(
                 model=self.config.utility_model.value,
                 messages=conversation,
                 temperature=0,
@@ -188,7 +192,7 @@ class API:
 
         return summary
 
-    def title(self, question):
+    async def title(self, question):
 
         if self.config.mock_mode:
             time.sleep(2)
@@ -196,7 +200,7 @@ class API:
 
         instructions = open(TITLE_FILE_PATH).read().replace("${question}", question)
         try:
-            response = self.client.chat.completions.create(
+            response = await self.async_client.chat.completions.create(
                 model=self.config.utility_model.value,
                 messages=[
                     {
@@ -227,14 +231,16 @@ class API:
 
         return GET_MODE_DIR + os.sep + "none.md"
 
-    def getMode(self, question, type: Mode | None):
+    async def getMode(self, question, type: Mode | None):
         if self.config.mock_mode:
-            time.sleep(3)
+            # time.sleep(3)
             return Mode.PROBLEM
 
         instructions_path = self.getModePromptPath(type)
         instructions = open(instructions_path).read().replace("${question}", str(question))
-        response = self.client.chat.completions.create(
+
+        start_time = time.time()
+        response = await self.async_client.chat.completions.create(
             model=self.config.mode_model.value,
             reasoning_effort=None,
             messages=[
@@ -265,6 +271,8 @@ class API:
             },
             max_tokens=100,
         )
+        end_time = time.time()
+        print("Time for mode fetch within api.py: " + str(end_time - start_time))
 
 
         res = response.choices[0].message.content

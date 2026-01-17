@@ -2,9 +2,11 @@ import os
 import sys
 import time
 
+import asyncio
+
 from flask import Flask, g, jsonify, request, send_from_directory, stream_with_context, Response
 from flask_cors import CORS
-from openai import OpenAI
+from openai import AsyncOpenAI, OpenAI
 from dotenv import load_dotenv
 from supabase import Client, create_client
 
@@ -44,7 +46,12 @@ def create_app(test_config=None):
     if app.config["FLASK_ENV"] == "development":
             CORS(app)
 
+    
     openai_client = OpenAI(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=app.config["OPENROUTER_API_KEY"]
+    )
+    async_openai_client = AsyncOpenAI(
         base_url="https://openrouter.ai/api/v1",
         api_key=app.config["OPENROUTER_API_KEY"]
     )
@@ -55,16 +62,21 @@ def create_app(test_config=None):
 
     db = Database(supabase)
     api_config = APIConfig(
-        concept_model=ModelType.gemini_2_5_flash,
-        problem_model=ModelType.gemini_2_5_flash,
-        study_model=ModelType.gemini_2_5_flash,
-        utility_model=ModelType.gemini_2_0_flash_lite,
+        concept_model=ModelType.gpt_5_2,
+        problem_model=ModelType.gpt_5_2,
+        study_model=ModelType.gpt_5_2,
+        utility_model=ModelType.gpt_5_mini,
         mode_model=ModelType.gemini_2_0_flash_lite,
         debug_mode=app.config["FLASK_ENV"] == "development",
         mock_mode=app.config["MOCK_MODE"],
     )
 
-    api = API(api_config, openai_client, db)
+    api = API(
+        config=api_config,
+        client=openai_client,
+        async_client=async_openai_client,
+        db=db
+    )
 
     def require_auth(f):
         """Decorator to require authentication for routes"""
@@ -126,20 +138,20 @@ def create_app(test_config=None):
     @require_auth
     def summary():
         conversation = request.get_json()
-        return api.summarize(conversation)
+        return asyncio.run(api.summarize(conversation))
 
 
     @app.route('/api/image', methods=['POST'])
     @require_auth
     def image():
         image = request.get_data(as_text=True)
-        return api.transcribe(image)
+        return asyncio.run(api.transcribe(image))
 
     @app.route('/api/title', methods=['POST'])
     @require_auth
     def title():
         question = request.get_data(as_text=True)
-        return api.title(question)
+        return asyncio.run(api.title(question))
 
     @app.route('/api/mode', methods=['POST'])
     @require_auth
@@ -153,7 +165,7 @@ def create_app(test_config=None):
             pass
         conversation = request.get_json()
         api_start = time.time()
-        prompt_type = api.getMode(conversation, prompt_type)
+        prompt_type = asyncio.run(api.getMode(conversation, prompt_type))
         api_end = time.time()
         if prompt_type == None:
             return "Did not get type"
@@ -182,7 +194,7 @@ def create_app(test_config=None):
 
         conversation = request.get_json()
 
-        stream = api.ask(conversation, course, prompt_type, brevity) 
+        stream = api.ask(conversation, course, prompt_type, brevity)
 
         res = Response(stream_with_context(stream), content_type="text/plain")
         return res

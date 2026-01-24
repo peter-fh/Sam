@@ -8,7 +8,7 @@ public_folder: "/images"
 collections:
   - name: "prompts"
     label: "Course Prompts"
-    folder: "prompts" # This must match your actual folder name
+    folder: "prompt/prompts" # This must match your actual folder name
     create: true
     slug: "{{slug}}"
     fields:

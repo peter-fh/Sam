@@ -1,15 +1,16 @@
 backend:
   name: git-gateway
-  branch: main
+  branch: main # or master, check your repo!
 
-media_folder: "uploads"
-public_folder: "/uploads"
+media_folder: "images" # Required even if you don't use it
+public_folder: "/images"
 
 collections:
   - name: "prompts"
-    label: "AI Prompts"
-    folder: "prompts"
+    label: "Course Prompts"
+    folder: "prompts" # This must match your actual folder name
     create: true
+    slug: "{{slug}}"
     fields:
       - {label: "Title", name: "title", widget: "string"}
       - {label: "Body", name: "body", widget: "markdown"}

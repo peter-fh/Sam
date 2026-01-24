@@ -30,6 +30,7 @@ class ModelType(Enum):
     gemini_2_5_flash = "google/gemini-2.5-flash"
     gemini_2_5_flash_lite = "google/gemini-2.5-flash-lite"
     gemini_2_0_flash_lite = "google/gemini-2.0-flash-lite-001"
+    claude_haiku_4_5 = "anthropic/claude-haiku-4.5"
 
 @dataclass
 class APIConfig:

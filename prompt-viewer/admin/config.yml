@@ -15,7 +15,7 @@ collections:
       - {label: "Title", name: "title", widget: "string"}
       - {label: "Body", name: "body", widget: "markdown"}
   - name: "concept-prompts"
-    label: "Course Mode Prompts"
+    label: "Concept Mode Prompts"
     folder: "prompts/concept-mode" # This must match your actual folder name
     create: true
     slug: "{{slug}}"

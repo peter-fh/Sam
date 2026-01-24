@@ -1,0 +1,40 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "images" # fake directory, this is required but unused
+public_folder: "/images" # fake directory, this is required but unused
+
+collections:
+  - name: "course-prompts"
+    label: "Course Prompts"
+    folder: "prompts/outlines"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Body", name: "body", widget: "markdown"}
+  - name: "concept-prompts"
+    label: "Concept Mode Prompts"
+    folder: "prompts/concept-mode"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Body", name: "body", widget: "markdown"}
+  - name: "problem-prompts"
+    label: "Problem Mode Prompts"
+    folder: "prompts/problem-mode"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Body", name: "body", widget: "markdown"}
+  - name: "default-prompts"
+    label: "Default Mode Prompts"
+    folder: "prompts/default-mode"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - {label: "Title", name: "title", widget: "string"}
+      - {label: "Body", name: "body", widget: "markdown"}

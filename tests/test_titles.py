@@ -1,25 +1,27 @@
 import os
 from flask import json
-from api.model import UtilityModel
+from api.api import API
+from tests.fixture import Fixture
 
 
 test_dir = "tests"
 problem_file = test_dir + os.sep + "problems.json"
 
 questions= [
-    "hi"
+    "hi",
+    "hello",
+    "hi, how are you?"
 ]
 
-def testConversationTitles(model, count=-1):
+async def testConversationTitles(fixture: Fixture):
     with open(problem_file) as f:
         test_cases = json.load(f)
         problems = test_cases["problems"]
-        if count > len(problems) or count < 0:
-            count = len(problems)
+        count = len(problems)
 
         for problem_obj in problems[0:count]:
             problem = problem_obj["problem"]
-            title = model.title(problem)
+            title = await fixture.api.getTitle(problem)
             print("=" * 50)
             print("Question: ", problem)
             print("Title: ", title)
@@ -27,13 +29,9 @@ def testConversationTitles(model, count=-1):
             print()
 
 
-def testCasualConversationTitles(model, count=-1):
-    if count > len(questions) or count < 0:
-        count = len(questions)
-
+async def testCasualConversationTitles(fixture: Fixture):
     for question in questions:
-        
-        title = model.title(question)
+        title = await fixture.api.getTitle(question)
         print("=" * 50)
         print("Question: ", question)
         print("Title: ", title)

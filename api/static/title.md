@@ -1,7 +1,10 @@
-A user has asked an AI tutoring assistant the following question: ${question}
+I just asked my Math Tutoring AI chatbot this question: `${question}`
 
-The user will we the one seeing the title. Make sure it is taylored to what they might want to see to remember this chat.
+Can you give me a short (less than 10 word) title so that I can remember what this conversation was about?
 
-Give a short (less than 10 word) title of the conversation that starts with this message. Don't use latex or markdown formatting. Don't explicilty say the exact function or question, but be descriptive. Avoid punctuation at the end of the title, but capitalize the title as a proper title to ensure it looks professional. Make sure its descriptive and professional without repeating exactly what they said.
-
-This conversation is between a user and an AI Assistant tutor. The question being asked is from the user, use it to describe what the conversation will be about without guessing. DO NOT GUESS. If something is not part of the question, do not include that in the title. Do not answer the question either, and do not directly paste the message into the title.
+Use these instructions to format the output:
+- Don't use any Latex or Markdown formatting in the title
+- The question is from me, please don't guess or make anything up if the subject isn't in the title
+- Don't answer the question I asked, please just give me a title for the conversation
+- All of the other conversation titles are also with the Math Tutoring chatbot, so no need to mention that that's who I'm talking to
+- This request for the title is not part of the conversation, only the quoted message

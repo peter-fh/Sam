@@ -1,83 +1,47 @@
-import os
-import time
 import asyncio
-
-from dotenv import load_dotenv
-from openai import AsyncOpenAI, OpenAI
-from supabase import Client, create_client
-
-from supabase import create_client, Client
-
-from api.api import API, APIConfig, ModelType
-from api.types import Mode
-from db import Database
+from typing import Any, Callable, Coroutine
+from api.api import API
+from tests.test_mode_switch import run_mode_tests
+from tests.fixture import Fixture, load_test_fixture
+from tests.test_titles import testCasualConversationTitles, testConversationTitles
+from tests.benchmarks import benchmark_mode, benchmark_title
+import argparse
 
 
-def load_test_fixture() -> API:
-    load_dotenv(override=True)
-    ANTHROPIC_API_KEY=os.getenv("ANTHROPIC_API_KEY")
-    SUPABASE_URL=os.getenv("SUPABASE_URL")
-    SUPABASE_KEY=os.getenv("SUPABASE_SERVICE_KEY")
-    OPENAI_API_KEY=os.getenv("OPENROUTER_API_KEY")
 
-    openai_client = OpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=OPENAI_API_KEY
-    )
-    async_openai_client = AsyncOpenAI(
-        base_url="https://openrouter.ai/api/v1",
-        api_key=OPENAI_API_KEY
-    )
-
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-    db = Database(supabase)
-    api_config = APIConfig(
-        concept_model=ModelType.gpt_5_mini,
-        problem_model=ModelType.gpt_5_mini,
-        study_model=ModelType.gpt_5_mini,
-        utility_model=ModelType.gemini_2_5_flash_lite,
-        mode_model=ModelType.gemini_2_5_flash_lite,
-        debug_mode=True,
-        mock_mode=False,
-    )
-
-    api = API(
-        config=api_config,
-        client=openai_client,
-        async_client=async_openai_client,
-        db=db
-    )
-    return api
-
-api = load_test_fixture()
-
-def benchmark_mode():
-    total_start = time.time()
-    prompt_type = None
-    conversation = "Derivative of x^2"
-    api_start = time.time()
-
-    prompt_type = asyncio.run(api.getMode(conversation, prompt_type))
-    api_end = time.time()
-
-    total_end = time.time()
-    total_duration = total_end - total_start
-    api_duration = api_end - api_start
-    print("Total get mode took %s seconds" % total_duration)
-    print("API get mode took %s seconds" % api_duration)
-    print(prompt_type)
-
-def benchmark_title():
-    conversation = "Derivative of x^2"
-
-    api_start = time.time()
-    title = asyncio.run(api.getTitle(conversation))
-    api_end = time.time()
-
-    api_duration = api_end - api_start
-    print("API get mode took %s seconds" % api_duration)
-    print(title)
 
 if __name__ == "__main__":
-    # benchmark_title()
+    parser = argparse.ArgumentParser(description="Test suite for Sam")
+    _ = parser.add_argument(
+        "action",
+        type=str,
+        choices=["all", "benchmark", "title", "mode"],
+        help="The type of tests to perform"
+    )
+
+    _ = parser.add_argument(
+        "--iters",
+        type=int,
+        help="Number of iterations for each test"
+    )
+
+    test_fixture = Fixture()
+    # test_fixture.mode_test_case = -1
+
+    test_functions: list[Callable[[Fixture], Coroutine[Any, Any, None]]] = []
+    args = parser.parse_args()
+    if args.iters:
+        test_fixture.setIterations(args.iters)
+    if args.action == "benchmark" or args.action == "all":
+        test_functions.append(benchmark_mode)
+        test_functions.append(benchmark_title)
+    if args.action == "title" or args.action == "all":
+        test_functions.append(testCasualConversationTitles)
+        test_functions.append(testConversationTitles)
+    if args.action == "mode" or args.action == "all":
+        test_functions.append(run_mode_tests)
+
+    for test_func in test_functions:
+        asyncio.run(test_func(test_fixture))
+
     exit(0)

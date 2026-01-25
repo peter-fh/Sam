@@ -1,0 +1,58 @@
+[
+	{
+		"conversation": [
+			{
+				"role": "user", 
+				"content": "derivative of x^2*e^x"
+			}
+		],
+		"mode": "problem",
+		"from": "none"
+	},
+	{
+		"conversation": [
+			{
+				"role": "user", 
+				"content": "hi"
+			}, 
+			{
+				"role": "assistant", 
+				"content": "# Hello! 👋\n\nWelcome! I\"m your learning specialist, and I\"m here to help you succeed in **MATH 203 (Differential Calculus)**.\n\nI can provide you with:\n\n- **In-depth study advice** on any calculus concept you\"re working on\n- **Targeted practice problems** to help you master specific topics\n- **Guidance on problem-solving strategies** for the types of questions that appear on exams\n- **Resources** like information about tutoring through the student success center\n\n---\n\n## What can I help you with today?\n\nAre you:\n\n- Struggling with a **specific concept** (like limits, derivatives, implicit differentiation, etc.)?\n- Looking for **study strategies** for an upcoming exam?\n- Wanting to **work through practice problems** on a particular topic?\n- Trying to **understand the connection** between different concepts?\n- Something else?\n\nJust let me know what you\"re working on, and I\"ll give you detailed, helpful guidance! 📚"
+			}, 
+			{
+				"role": "user",
+				"content":"derivative of x^2*e^x"
+			}
+		],
+		"mode": "problem",
+		"from": "other"
+	},
+	{
+		"conversation": [
+			{
+				"role": "what is a derivative", 
+				"content": "hi"
+			}
+		],
+		"mode": "concept",
+		"from": "none"
+	},
+	{
+		"conversation": [
+			{
+			"role": "user",
+			"content": "derivative of x^2*e^x"
+			}, 
+			{
+				"role": "assistant",
+				"content": "# Finding the Derivative of $x^2 \\cdot e^x$\n\nGreat question! Before we dive in, let me ask you: **What do you notice about the structure of this function?** In other words, what operation is being performed between $x^2$ and $e^x$?\n\nOnce you identify that, think about whether you've learned a derivative rule that applies when you multiply two functions together."
+			}, 
+			{
+				"role": "user",
+				"content": "its a product"
+			}
+		],
+		"mode": "problem",
+		"from": "problem"
+	}
+]

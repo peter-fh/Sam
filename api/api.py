@@ -8,7 +8,6 @@ from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel
 
 from api.types import Mode, ModelType, PromptManager, UtilityType
-from db import Database
 import os
 
 EXAMPLE_RESPONSE_FILEPATH = "api" + os.sep + "example_response.md"
@@ -67,9 +66,12 @@ class API:
         print(prompt_type.value)
         print(model.value)
         print("===")
+        print("Formatting string:")
+        print(prompt.splitlines()[0])
+        print("===")
         print("Conversation: ")
         print(conversation)
-        print("End of conversation")
+        print("===")
 
         conversation.insert(0, {
             "role": "system",
@@ -207,55 +209,44 @@ class API:
         print("Title: ", title)
         return title
 
-    async def getMode(self, question, type: Mode | None):
+    async def getMode(self, question, type: Mode | None) -> str | None:
         if self.config.mock_mode:
             # time.sleep(3)
-            return Mode.PROBLEM
+            return "Problem"
 
         instructions = self.prompt_manager.getModePrompt(type).replace("${question}", str(question))
 
+        class ModeResponse(BaseModel):
+            mode: Mode
+
         start_time = time.time()
-        response = await self.async_client.chat.completions.create(
+        response = await self.async_client.responses.parse(
             model=self.config.mode_model.value,
-            reasoning_effort=None,
-            messages=[
+            input=[
                 {
                     "role": "user",
                     "content": instructions,
                 },
             ],
-            response_format= {
-                "type": "json_schema",
-                    "json_schema": {
-                    "name": "mode",
-                    "description": "Which mode is most accurate for the assistant to respond in",
-                    "strict": True,
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "choice": {
-                                "type": "string",
-                                "enum": ["Problem", "Concept", "Other"],
-                                "description": "Mode for assistant response"
-                            }
-                        },
-                        "required": ["choice"],
-                        "additionalProperties": False,
-                    }
-                }
-            },
-            max_tokens=100,
+            text_format=ModeResponse
         )
         end_time = time.time()
         print("Time for mode fetch within api.py: " + str(end_time - start_time))
 
 
-        res = response.choices[0].message.content
-
+        res = response.output_parsed
         if res == None:
-            return None
-        mode_raw = json.loads(res)["choice"]
+            raise ValueError("Mode fetch did not return a response")
+        return res.mode.value
+        try:
 
-        if self.config.debug_mode:
-            print("Mode: ", mode_raw)
-        return mode_raw
+            if res == None:
+                raise ValueError("Mode fetch did not return a response")
+            mode_raw = json.loads(res)["choice"]
+
+            if self.config.debug_mode:
+                print("Mode: ", mode_raw)
+            return mode_raw
+        except Exception as e: 
+            print("Error: ", e)
+            return None

@@ -21,6 +21,10 @@ Takes an image and gives a transcription of the text on it. Allows us to use mod
 
 Gives each conversation a title, displayed in the threads view ({url}/threads)
 
+### POST /api/mode
+
+Determines the mode that the conversation should be in based on the previous conversation and most recent message. Used every message that the user sends in case they are asking a new question that should be handled differently from the current mode.
+
 ## Database: /db/{endpoint}
 
 ### /db/conversations

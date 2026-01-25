@@ -20,20 +20,19 @@ Detailing what isn't in the course allows us to find common places where Generat
 
 ## Instructions
 
-Three different modes are provided in order to address any kind of question a student might have. In the future, we hope to automatically select which mode to pick.
+Three different modes are provided in order to address any kind of question a student might have. These are selected automatically before responding to each question.
 
-### Concept
+This creates an agentic workflow, where the question is first triaged to determine which of the following three agents is best suited for the question. They consist of the following:
+
+### Concept Tutor
 
 In concept mode, Sam will respond with long, detailed explanations. Most of the instructions in this mode have to do with ensuring quality of these explanations. 
 
-### Problem
+### Problem Tutor
 
 In problem mode, Sam will respond socratically. This is the main, most impressive mode of Sam. It will allow students to work through problems without giving away answers.
 
-### Other
+### General Tutor
 
 The "Other" mode is a catch-all mode for all types of questions that don't require problem solving for Sam to answer, i.e. "what's on the midterm" or other questions not directly related to problems or concepts.
 
-### Switching Modes
-
-The process for switching between each mode is automatic. It uses a cheap AI model to classify the first message between one of the three modes, then for each subsequent message, read the conversation and most recent message then decide whether to switch modes or not.

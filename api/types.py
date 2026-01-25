@@ -23,17 +23,3 @@ class Mode(Enum):
     OTHER = "Other"
 
 
-@dataclass
-class PromptManagerConfig:
-    outline_dir: Path
-    concept_dir: Path
-    problem_dir: Path
-    default_dir: Path
-    util_dir: Path
-    mode_dir: Path
-
-class UtilityType(Enum):
-    SUMMARY = "summary"
-    TITLE = "title"
-    TRANSCRIPTION = "transcription"
-

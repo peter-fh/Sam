@@ -42,6 +42,11 @@ class PromptManager:
     def __init__(self, config: PromptManagerConfig):
         self.config = config
 
+    def getFormattingString(self):
+        formatting_filepath = self.config.util_dir / 'formatting.md'
+        formatting_str = formatting_filepath.open('r').read()
+        return formatting_str
+
     def readLocalPrompt(self, filepath: Path) -> str:
         prompt_raw = filepath.open('r').readlines()
         prompt = "\n".join(prompt_raw)
@@ -49,7 +54,8 @@ class PromptManager:
 
     def readNetlifyPrompt(self, filepath: Path) -> str:
         prompt_raw = filepath.open('r').readlines()
-        prompt = "\n".join(prompt_raw[3:])
+        formatting_string = self.getFormattingString()
+        prompt = formatting_string + "\n" + "\n".join(prompt_raw[3:])
         return prompt
 
     def getModePrompt(self, mode: Mode | None) -> str:

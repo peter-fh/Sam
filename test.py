@@ -9,7 +9,7 @@ from supabase import Client, create_client
 from supabase import create_client, Client
 
 from api.api import API, APIConfig, ModelType
-from api.prompt import Mode
+from api.types import Mode
 from db import Database
 
 

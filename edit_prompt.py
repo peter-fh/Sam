@@ -2,7 +2,7 @@ import os
 
 from dotenv import load_dotenv
 from api.api import ModelType
-from api.prompt import Mode
+from api.types import Mode
 from db import Database
 import argparse
 from supabase import Client, create_client

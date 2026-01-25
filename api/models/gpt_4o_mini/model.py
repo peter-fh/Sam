@@ -2,7 +2,7 @@ import os
 import time
 from dotenv import load_dotenv
 from openai import OpenAI
-from api.prompt import MODELS_DIR, PromptManager, PromptManagerConfig
+from api.types import MODELS_DIR, PromptManager, PromptManagerConfig
 from api.model import UtilityModel
 
 

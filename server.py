@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 import sys
 import time
 
@@ -13,8 +14,8 @@ from supabase import Client, create_client
 from supabase import create_client, Client
 
 from functools import wraps
-from api.prompt import Mode
-from api.api import API, APIConfig, ModelType
+from api.types import Mode, PromptManager, PromptManagerConfig, ModelType
+from api.api import API, APIConfig
 from db import Database
 
 def create_app(test_config=None):
@@ -70,12 +71,21 @@ def create_app(test_config=None):
         debug_mode=app.config["FLASK_ENV"] == "development",
         mock_mode=app.config["MOCK_MODE"],
     )
+    prompt_manager_config = PromptManagerConfig(
+        outline_dir = Path("./prompts/outlines"),
+        problem_dir = Path("./prompts/problem-mode"),
+        concept_dir = Path("./prompts/concept-mode"),
+        default_dir = Path("./prompts/default-mode"),
+        util_dir = Path("./api/static"),
+        mode_dir = Path("./api/static/mode_prompts")
+    )
+    prompt_manager = PromptManager(prompt_manager_config)
 
     api = API(
         config=api_config,
         client=openai_client,
         async_client=async_openai_client,
-        db=db
+        prompt_manager=prompt_manager,
     )
 
     def require_auth(f):

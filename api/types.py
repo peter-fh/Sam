@@ -20,7 +20,7 @@ class ModelType(Enum):
 class Mode(Enum):
     PROBLEM = "Problem"
     CONCEPT = "Concept"
-    DEFAULT = "DEFAULT"
+    OTHER = "Default"
 
 
 @dataclass
@@ -53,7 +53,7 @@ class PromptManager:
             mode_filepath = self.config.mode_dir / 'problem.md'
         elif mode == Mode.CONCEPT:
             mode_filepath = self.config.mode_dir / 'concept.md'
-        elif mode == Mode.DEFAULT:
+        elif mode == Mode.OTHER:
             mode_filepath = self.config.mode_dir / 'other.md'
         else:
             mode_filepath = self.config.mode_dir / 'none.md'
@@ -67,7 +67,7 @@ class PromptManager:
             prompt_dir = self.config.problem_dir
         if mode == Mode.CONCEPT:
             prompt_dir = self.config.concept_dir
-        if mode == Mode.DEFAULT:
+        if mode == Mode.OTHER:
             prompt_dir = self.config.default_dir
 
         if prompt_dir == None:
@@ -81,7 +81,7 @@ class PromptManager:
         return self.readPrompt(model_filepath)
 
     def getOutline(self, course_code: str):
-        outline_filename = course_code.lower().replace(" ", "-")
+        outline_filename = course_code.lower().replace(" ", "-") + ".md"
         outline_path = self.config.outline_dir / outline_filename
         return self.readPrompt(outline_path)
 

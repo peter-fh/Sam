@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from api.log import displayConversation
 from api.model import TutorModel, EXAMPLE_RESPONSE_FILEPATH, estimateTokens
-from api.prompt import PromptManager, MODELS_DIR, PromptManagerConfig
+from api.types import PromptManager, MODELS_DIR, PromptManagerConfig
 
 
 O3_DIR = MODELS_DIR + os.sep + "o3_mini"

@@ -8,7 +8,7 @@ from dataclasses import dataclass
 import time
 from api.log import displayConversation
 from api.models.o3_mini.model import OpenAI_o3_mini
-from api.prompt import PromptManager, PromptType
+from api.types import PromptManager
 from db import Database
 
 

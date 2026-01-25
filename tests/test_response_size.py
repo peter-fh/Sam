@@ -1,6 +1,6 @@
 from flask import json
 from api.model import TutorModel
-from api.prompt import PromptType
+from api.types import PromptType
 from courses.read_course_prompt import coursePrompt
 import os
 

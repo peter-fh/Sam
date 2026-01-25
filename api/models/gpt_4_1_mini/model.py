@@ -3,7 +3,7 @@ import time
 from dotenv import load_dotenv
 from api.log import displayConversation
 from openai import OpenAI
-from api.prompt import MODELS_DIR, PromptManager, PromptManagerConfig, PromptType
+from api.types import MODELS_DIR, PromptManager, PromptManagerConfig, PromptType
 from api.model import EXAMPLE_RESPONSE_FILEPATH, UtilityModel, TutorModel
 
 

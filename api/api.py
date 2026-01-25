@@ -7,30 +7,12 @@ from gotrue import List
 from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel
 
-from api.prompt import Mode
+from api.types import Mode, ModelType, PromptManager, UtilityType
 from db import Database
 import os
 
 EXAMPLE_RESPONSE_FILEPATH = "api" + os.sep + "example_response.md"
-STATIC_PROMPT_DIR = "api" + os.sep + "static"
-SUMMARY_FILE_PATH = STATIC_PROMPT_DIR + os.sep + "summary.md"
-TITLE_FILE_PATH = STATIC_PROMPT_DIR + os.sep + "title.md"
-TRANSCRIPTION_FILE_PATH = STATIC_PROMPT_DIR + os.sep + "transcription.md"
-GET_MODE_DIR = STATIC_PROMPT_DIR + os.sep + "mode_prompts"
 
-
-class ModelType(Enum):
-    gpt_5_2 = "openai/gpt-5.2"
-    gpt_5 = "openai/gpt-5"
-    gpt_5_mini = "openai/gpt-5-mini"
-    o3_mini = "openai/o3-mini"
-    o4_mini = "openai/o4-mini"
-    gpt_4_1 = "openai/gpt-4.1"
-    gpt_4_1_mini = "openai/gpt-4.1-mini"
-    gemini_2_5_flash = "google/gemini-2.5-flash"
-    gemini_2_5_flash_lite = "google/gemini-2.5-flash-lite"
-    gemini_2_0_flash_lite = "google/gemini-2.0-flash-lite-001"
-    claude_haiku_4_5 = "anthropic/claude-haiku-4.5"
 
 @dataclass
 class APIConfig:
@@ -51,12 +33,11 @@ class API:
     config: APIConfig
     async_client: AsyncOpenAI
     client: OpenAI
-    db: Database
-    def __init__(self, config: APIConfig, client: OpenAI, async_client: AsyncOpenAI, db: Database):
+    def __init__(self, config: APIConfig, client: OpenAI, async_client: AsyncOpenAI, prompt_manager: PromptManager):
         self.config = config
         self.async_client = async_client
         self.client = client
-        self.db = db
+        self.prompt_manager: PromptManager = prompt_manager
 
     def getModel(self, prompt_type: Mode):
         if prompt_type == Mode.PROBLEM:
@@ -74,11 +55,11 @@ class API:
         else:
             return "system"
 
-    def getMessage(self, conversation: List, course_code, prompt_type: Mode, brevity):
+    def getMessage(self, conversation, course_code, prompt_type: Mode, brevity):
 
         model = self.getModel(prompt_type)
-        instructions = self.db.getPrompt(prompt_type.value, model.value)
-        outline = self.db.getOutline(course_code)
+        instructions = self.prompt_manager.getInstructions(prompt_type, model)
+        outline = self.prompt_manager.getOutline(course_code)
         prompt = instructions + "\n" + outline
         prompt = prompt.replace("{$brevity}", brevity)
 
@@ -132,7 +113,7 @@ class API:
             return "This conversation concerns an image sent by the user. It's transcription is as follows:\n\n" + "x^2*e^x (example response)"
 
         try:
-            instructions = open(TRANSCRIPTION_FILE_PATH).read()
+            instructions = self.prompt_manager.getUtilityPrompt(UtilityType.TRANSCRIPTION)
             response = await self.async_client.chat.completions.create(
                 model=self.config.utility_model.value,
                 messages=[
@@ -162,7 +143,7 @@ class API:
 
     async def getSummary(self, conversation):
 
-        instructions = open(SUMMARY_FILE_PATH).read()
+        instructions = self.prompt_manager.getUtilityPrompt(UtilityType.SUMMARY)
         conversation.insert(0, {
             "role": "system",
             "content": [{
@@ -199,7 +180,7 @@ class API:
             time.sleep(2)
             return "Example title"
 
-        instructions = open(TITLE_FILE_PATH).read().replace("${question}", question)
+        instructions = self.prompt_manager.getUtilityPrompt(UtilityType.TITLE).replace("${question}", question)
         try:
             start_time = time.time()
             response = await self.async_client.chat.completions.create(
@@ -226,23 +207,12 @@ class API:
         print("Title: ", title)
         return title
 
-    def getModePromptPath(self, mode: Mode | None):
-        if mode == Mode.PROBLEM:
-            return GET_MODE_DIR + os.sep + "problem.md"
-        elif mode == Mode.CONCEPT:
-            return GET_MODE_DIR + os.sep + "concept.md"
-        elif mode == Mode.OTHER:
-            return GET_MODE_DIR + os.sep + "other.md"
-
-        return GET_MODE_DIR + os.sep + "none.md"
-
     async def getMode(self, question, type: Mode | None):
         if self.config.mock_mode:
             # time.sleep(3)
             return Mode.PROBLEM
 
-        instructions_path = self.getModePromptPath(type)
-        instructions = open(instructions_path).read().replace("${question}", str(question))
+        instructions = self.prompt_manager.getModePrompt(type).replace("${question}", str(question))
 
         start_time = time.time()
         response = await self.async_client.chat.completions.create(

@@ -20,7 +20,7 @@ class ModelType(Enum):
 class Mode(Enum):
     PROBLEM = "Problem"
     CONCEPT = "Concept"
-    OTHER = "Default"
+    OTHER = "Other"
 
 
 @dataclass

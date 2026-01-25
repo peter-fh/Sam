@@ -14,7 +14,8 @@ from supabase import Client, create_client
 from supabase import create_client, Client
 
 from functools import wraps
-from api.types import Mode, PromptManager, PromptManagerConfig, ModelType
+from api.types import Mode, ModelType
+from api.prompt import PromptManager, PromptManagerConfig
 from api.api import API, APIConfig
 from db import Database
 

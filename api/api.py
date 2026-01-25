@@ -7,7 +7,8 @@ from gotrue import List
 from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel
 
-from api.types import Mode, ModelType, PromptManager, UtilityType
+from api.types import Mode, ModelType
+from api.prompt import PromptManager, UtilityType
 import os
 
 EXAMPLE_RESPONSE_FILEPATH = "api" + os.sep + "example_response.md"

@@ -67,7 +67,7 @@ def create_app(test_config=None):
         problem_model=ModelType.claude_haiku_4_5,
         study_model=ModelType.claude_haiku_4_5,
         utility_model=ModelType.gemini_2_5_flash_lite,
-        mode_model=ModelType.gemini_2_5_flash_lite,
+        mode_model=ModelType.gpt_5_mini,
         debug_mode=app.config["FLASK_ENV"] == "development",
         mock_mode=app.config["MOCK_MODE"],
     )

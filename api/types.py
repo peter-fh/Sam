@@ -42,7 +42,12 @@ class PromptManager:
     def __init__(self, config: PromptManagerConfig):
         self.config = config
 
-    def readPrompt(self, filepath: Path) -> str:
+    def readLocalPrompt(self, filepath: Path) -> str:
+        prompt_raw = filepath.open('r').readlines()
+        prompt = "\n".join(prompt_raw)
+        return prompt
+
+    def readNetlifyPrompt(self, filepath: Path) -> str:
         prompt_raw = filepath.open('r').readlines()
         prompt = "\n".join(prompt_raw[3:])
         return prompt
@@ -58,7 +63,7 @@ class PromptManager:
         else:
             mode_filepath = self.config.mode_dir / 'none.md'
 
-        return self.readPrompt(mode_filepath)
+        return self.readLocalPrompt(mode_filepath)
 
     def getInstructions(self, mode: Mode, model: ModelType) -> str:
         model_filename = model.value.replace("/", "_") + ".md"
@@ -75,18 +80,18 @@ class PromptManager:
 
         model_filepath: Path = prompt_dir / model_filename
         if model_filepath.is_file():
-            return self.readPrompt(model_filepath)
+            return self.readNetlifyPrompt(model_filepath)
 
         model_filepath = prompt_dir / "default.md"
-        return self.readPrompt(model_filepath)
+        return self.readNetlifyPrompt(model_filepath)
 
     def getOutline(self, course_code: str):
         outline_filename = course_code.lower().replace(" ", "-") + ".md"
         outline_path = self.config.outline_dir / outline_filename
-        return self.readPrompt(outline_path)
+        return self.readNetlifyPrompt(outline_path)
 
     def getUtilityPrompt(self, utility_type: UtilityType):
         prompt_filename = utility_type.value + ".md"
         prompt_filepath = self.config.util_dir / prompt_filename
-        return self.readPrompt(prompt_filepath)
+        return self.readLocalPrompt(prompt_filepath)
 

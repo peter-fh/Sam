@@ -8,7 +8,6 @@ from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel
 
 from api.types import Mode, ModelType, PromptManager, UtilityType
-from db import Database
 import os
 
 EXAMPLE_RESPONSE_FILEPATH = "api" + os.sep + "example_response.md"
@@ -207,10 +206,10 @@ class API:
         print("Title: ", title)
         return title
 
-    async def getMode(self, question, type: Mode | None):
+    async def getMode(self, question, type: Mode | None) -> str:
         if self.config.mock_mode:
             # time.sleep(3)
-            return Mode.PROBLEM
+            return "Problem"
 
         instructions = self.prompt_manager.getModePrompt(type).replace("${question}", str(question))
 
@@ -253,7 +252,7 @@ class API:
         res = response.choices[0].message.content
 
         if res == None:
-            return None
+            raise ValueError("Mode fetch did not return a response")
         mode_raw = json.loads(res)["choice"]
 
         if self.config.debug_mode:

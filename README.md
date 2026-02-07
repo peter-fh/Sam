@@ -4,7 +4,9 @@ This project is a prototype of a tutoring AI that uses Generative AI. It sends s
 
 ## Why is Sam better than using regular Generative AI sites?
 
-See [docs/prompt.md](docs/prompt.md) for information on Sam's behaviour and how it differs/improves on regular generative AI sites for math tutoring.
+See [Sam-Prompts/readme.md](https://github.com/peter-fh/Sam-Prompts/blob/main/README.md) for details about Sam's behaviour and how it differs and improves from regular generative AI sites for math tuturoing.
+
+These prompts are held in a different repository: [peterfh/Sam-Prompt](https://github.com/peter-fh/Sam-Prompts).
 
 ## API
 
@@ -16,7 +18,7 @@ Frontend is a React-Typescript Single Page Application. For more information, se
 
 ## Deployment
 
-This project is deployed via Render.com to [concordia-sam.onrender.com](https://concordia-sam.onrender.com/). In its current state, the site takes 50 seconds to spin up after it is inactive for some time. If it does not load, wait or try again in 50 seconds. This will be resolved when we can invest in a paid hosting service, whether onrender or something else.
+This project is deployed via Render.com to [csam.onrender.com](https://csam.onrender.com). In its current state, the site takes 50 seconds to spin up after it is inactive for some time. If it does not load, wait or try again in 50 seconds. This will be resolved when we can invest in a paid hosting service, whether onrender or something else.
 
 
 ## Contributing

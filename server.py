@@ -20,7 +20,7 @@ from api.api import API, APIConfig
 from db import Database
 
 def create_app(test_config=None):
-    app = Flask(__name__, static_folder="frontend/dist")
+    app = Flask(__name__, static_folder="static")
 
     load_dotenv(override=True)
 

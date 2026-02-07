@@ -1,0 +1,8 @@
+.git/
+__pycache__/
+docs/
+prompt-viewer/
+tests/
+venv/
+frontend/node_modules/
+frontend/dist/

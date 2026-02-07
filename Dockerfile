@@ -1,11 +1,11 @@
-FROM node:20 AS frontend
+FROM node:20-alpine AS frontend
 WORKDIR /app/frontend
 COPY frontend/package*.json ./
 RUN npm i
 COPY frontend/ ./
 RUN npm run build
 
-FROM python:3.12
+FROM python:3.12-slim
 WORKDIR /app
 COPY --from=frontend /app/frontend/dist ./static
 COPY . .

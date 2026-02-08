@@ -19,6 +19,9 @@ def create_app(test_config: Any=None):
     app_dir = Path(__file__).parent
     root_dir = app_dir.parent
     static_dir = root_dir / 'static'
+    prompt_dir = root_dir / 'prompts'
+    app_static_dir = app_dir / 'static'
+
     app = Flask(__name__, static_folder=static_dir)
 
     app.config.from_object(Config)
@@ -52,12 +55,12 @@ def create_app(test_config: Any=None):
         mock_mode=app.config["MOCK_MODE"],
     )
     prompt_manager_config = PromptManagerConfig(
-        outline_dir = Path("./prompts/outlines"),
-        problem_dir = Path("./prompts/problem-mode"),
-        concept_dir = Path("./prompts/concept-mode"),
-        default_dir = Path("./prompts/default-mode"),
-        util_dir = Path("./api/static"),
-        mode_dir = Path("./api/static/mode_prompts")
+        outline_dir = prompt_dir / 'outlines',
+        problem_dir = prompt_dir / 'problem-mode',
+        concept_dir = prompt_dir / 'concept-mode',
+        default_dir = prompt_dir / 'default-mode',
+        util_dir = app_static_dir,
+        mode_dir = app_static_dir / 'mode_prompts',
     )
     prompt_manager = PromptManager(prompt_manager_config)
 

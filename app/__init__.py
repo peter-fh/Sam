@@ -40,7 +40,6 @@ def create_app(test_config: Any=None):
         api_key=app.config["OPENROUTER_API_KEY"]
     )
 
-    print(app.config["SUPABASE_URL"])
     supabase: Client = create_client(
         app.config["SUPABASE_URL"], app.config["SUPABASE_KEY"]
     )

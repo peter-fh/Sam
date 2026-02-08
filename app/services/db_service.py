@@ -56,7 +56,6 @@ class Database:
             .execute()
         )
         data = response.data
-        print(data)
         return data
 
     def addMessage(self, conversation_id: int, role: str, content: str):

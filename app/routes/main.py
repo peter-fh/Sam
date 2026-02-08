@@ -23,5 +23,4 @@ def index(path: str):
     _ = path
     if not current_app.static_folder:
         raise Exception("Static folder not found!")
-    print("Static folder: ", current_app.static_folder)
     return send_from_directory(current_app.static_folder, "index.html")

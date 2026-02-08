@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
 
-from api.types import Mode, ModelType
+from app.core.types import Mode, ModelType
 
 
 @dataclass

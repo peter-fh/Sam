@@ -1,17 +1,15 @@
 import os
 from pathlib import Path
-import time
-import asyncio
-
 from dotenv import load_dotenv
+
 from openai import AsyncOpenAI, OpenAI
-from supabase import Client, create_client
+# from supabase import Client, create_client
 
-from supabase import create_client, Client
+from app.core.types import ModelType
+from app.core.prompt import PromptManager, PromptManagerConfig
+from app.services.ai_service import API, APIConfig
+# from app.services.db_service import Database
 
-from api.api import API, APIConfig, ModelType
-from api.types import Mode, PromptManager, PromptManagerConfig
-from db import Database
 
 class Fixture:
     api: API
@@ -20,17 +18,17 @@ class Fixture:
     def __init__(self, iters: int = 1):
         self.api = load_test_fixture()
         self.test_iterations = iters
-    def setIterations(self, iters):
+    def setIterations(self, iters: int):
         self.test_iterations = iters
     def setModeTestCase(self, case: int):
         self.mode_test_case = case
 
 
 def load_test_fixture() -> API:
-    load_dotenv(override=True)
-    SUPABASE_URL=os.getenv("SUPABASE_URL")
-    SUPABASE_KEY=os.getenv("SUPABASE_SERVICE_KEY")
-    OPENAI_API_KEY=os.getenv("OPENROUTER_API_KEY")
+    _ = load_dotenv(override=True)
+    # SUPABASE_URL=os.getenv("SUPABASE_URL", "")
+    # SUPABASE_KEY=os.getenv("SUPABASE_SERVICE_KEY", "")
+    OPENAI_API_KEY=os.getenv("OPENROUTER_API_KEY", "")
 
     openai_client = OpenAI(
         base_url="https://openrouter.ai/api/v1",
@@ -41,8 +39,8 @@ def load_test_fixture() -> API:
         api_key=OPENAI_API_KEY
     )
 
-    supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
-    db = Database(supabase)
+    # supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    # db = Database(supabase)
     api_config = APIConfig(
         concept_model=ModelType.gpt_5_mini,
         problem_model=ModelType.gpt_5_mini,

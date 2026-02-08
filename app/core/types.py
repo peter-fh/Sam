@@ -1,7 +1,4 @@
-from dataclasses import dataclass
 from enum import Enum
-from pathlib import Path
-
 
 class ModelType(Enum):
     gpt_5_2 = "openai/gpt-5.2"

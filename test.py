@@ -1,8 +1,8 @@
 import asyncio
-from typing import Any, Callable, Coroutine
-from api.api import API
+from typing import Any, Callable
+from collections.abc import Coroutine
 from tests.test_mode_switch import run_mode_tests
-from tests.fixture import Fixture, load_test_fixture
+from tests.fixture import Fixture
 from tests.test_titles import testCasualConversationTitles, testConversationTitles
 from tests.benchmarks import benchmark_mode, benchmark_title
 import argparse

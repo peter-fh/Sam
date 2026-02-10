@@ -1,7 +1,7 @@
 import Endpoints from "../endpoints"
 import { Log, LogLevel } from "../log"
 import supabase from "../supabase"
-import { Course, DetailLevel, QuestionType } from "../types/options"
+import { Course, DetailLevel, Mode, QuestionType } from "../types/options"
 import { Message } from "./message"
 
 async function fetchWithAuth(endpoint: string, headers: any, body: string) {
@@ -77,7 +77,19 @@ export namespace API {
     return summary
   }
 
-  export async function getMode(current_mode: QuestionType | null, conversation: Message[]) {
+  export async function getMode(current_mode: Mode, conversation: Message[]) {
+    const mode_response = await fetchWithAuth(Endpoints.Mode, {
+      'Content-Type': 'application/json',
+      'Mode': current_mode,
+    }, JSON.stringify(conversation))
+
+    const mode = await mode_response.text()
+    if (mode == "") {
+      throw new Error("Could not fetch mode")
+    }
+    return mode as Mode
+  }
+  export async function getModeLegacy(current_mode: QuestionType | null, conversation: Message[]) {
     var question_type: string = ""
     if (current_mode == null) {
       question_type = "None"
@@ -98,7 +110,7 @@ export namespace API {
     return mode
   }
 
-  export async function* ask(conversation: Message[], mode: QuestionType, course: Course) {
+  export async function* ask(conversation: Message[], mode: Mode, course: Course) {
 
     const response = await fetchWithAuth(Endpoints.Ask, {
       'Content-Type': 'application/json',

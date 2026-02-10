@@ -11,5 +11,12 @@ export enum DetailLevel {
 export enum QuestionType {
   CONCEPT = "Concept",
   PROBLEM = "Problem",
-  OTHER = "Other"
+  OTHER = "Other",
+}
+
+export enum Mode {
+  CONCEPT = "Concept",
+  PROBLEM = "Problem",
+  DEFAULT = "Default",
+  NONE = "None",
 }

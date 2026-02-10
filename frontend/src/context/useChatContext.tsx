@@ -1,9 +1,9 @@
 import { createContext, ReactNode, useContext, useState } from "react";
-import { QuestionType, Course, DetailLevel } from "../types/options";
+import { Course, DetailLevel, Mode } from "../types/options";
 
 interface ChatSettingsContextType {
-  question: QuestionType | null
-  setQuestion: (q: QuestionType | null) => void
+  mode: Mode,
+  setMode: (q: Mode) => void
   course: Course
   setCourse: (c: Course) => void
   detailLevel: DetailLevel
@@ -20,7 +20,7 @@ const ChatSettingsContext = createContext<ChatSettingsContextType | undefined>(u
 
 
 export function ChatSettingsProvider({ children }: { children: ReactNode }) {
-  const [question, setQuestion] = useState<QuestionType | null>(null);
+  const [mode, setMode] = useState<Mode>(Mode.NONE);
   const [course, setCourse] = useState<Course>(Course.MATH203);
   const [detailLevel, setDetailLevel] = useState<DetailLevel>(DetailLevel.DETAILED);
   const [sidebar, setSidebar] = useState<boolean>(true);
@@ -30,7 +30,7 @@ export function ChatSettingsProvider({ children }: { children: ReactNode }) {
   return (
     <ChatSettingsContext.Provider
       value={{
-        question, setQuestion,
+        mode, setMode,
         course, setCourse,
         detailLevel, setDetailLevel,
         sidebar, setSidebar,

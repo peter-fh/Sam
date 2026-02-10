@@ -5,7 +5,7 @@ class Database:
     def __init__(self, client: Client):
         self.client = client
 
-    def getConversations(self, user_id):
+    def getConversations(self, user_id: int):
         response = (
             self.client
                 .table("conversations")
@@ -17,7 +17,7 @@ class Database:
         data = response.data
         return data
 
-    def getSettings(self, user_id, id: int):
+    def getSettings(self, user_id: int, id: int):
         response = (
             self.client
                 .table("conversations")
@@ -33,7 +33,7 @@ class Database:
         data = response.data
         return data
 
-    def getConversation(self, user_id, id: int):
+    def getConversation(self, id: int):
         response = (
             self.client
                 .table("messages")
@@ -45,7 +45,7 @@ class Database:
         data = response.data
         return data
 
-    def getSummary(self, user_id, id: int):
+    def getSummary(self, user_id: int, id: int):
         response = (
             self.client
             .table("conversations")
@@ -56,11 +56,10 @@ class Database:
             .execute()
         )
         data = response.data
-        print(data)
         return data
 
     def addMessage(self, conversation_id: int, role: str, content: str):
-        response = (
+        _ = (
             self.client
             .table("messages")
             .insert({
@@ -71,7 +70,7 @@ class Database:
             .execute()
         )
 
-    def getModeId(self, conversation_type):
+    def getModeId(self, conversation_type: str):
         response = (
             self.client
             .table("modes")
@@ -83,7 +82,7 @@ class Database:
 
         return response.data["id"]
 
-    def getCourseId(self, course):
+    def getCourseId(self, course: str):
         response = (
             self.client
             .table("courses")
@@ -95,7 +94,7 @@ class Database:
         return response.data["id"]
 
 
-    def addConversation(self, user_id, title: str, course: str, mode: str):
+    def addConversation(self, user_id: int, title: str, course: str, mode: str):
         course_id = self.getCourseId(course)
         mode_id = self.getModeId(mode)
         response = (

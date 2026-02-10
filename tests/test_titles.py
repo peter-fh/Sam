@@ -1,6 +1,5 @@
 import os
 from flask import json
-from api.api import API
 from tests.fixture import Fixture
 
 

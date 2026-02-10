@@ -1,7 +1,4 @@
 import time
-from api.api import API
-import asyncio
-
 from tests.fixture import Fixture
 
 async def benchmark_mode(fixture: Fixture):

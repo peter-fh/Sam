@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
-from api.api import API
-from api.types import Mode
+from typing import Any
+from app.core.types import Mode
 from tests.fixture import Fixture
 
 
@@ -36,7 +36,7 @@ async def run_mode_tests(fixture: Fixture):
         None: 0,
         }
     }
-    async def run_test_case(case):
+    async def run_test_case(case: Any):
         print("=" * 30)
         conversation = case["conversation"]
         from_raw = case["from"].upper()

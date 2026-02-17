@@ -64,26 +64,6 @@
 	column-gap: 1.5rem;
 }
 
-.output {
-	text-align: left;
-	width: 100%;
-	padding: .2em 1em .2em 1em;
-	margin: 0em 0em 1em 0em;
-	background-color: var(--dark-background);
-	border-radius: 1.5em;
-	border-radius: 1em 1em 1em 0em;
-	overflow-y: auto;
-}
-
-.question {
-	width: auto;
-	text-align: left;
-	margin-left: auto;
-	background-color: var(--highlight-color);
-	padding: 0em 1em 0em 1em;
-	border-radius: 1em 1em 0 1em;
-	margin-bottom: 1em;
-}
 
 .input {
 	display: flex;

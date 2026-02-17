@@ -1,14 +1,13 @@
-import { Course, DetailLevel, QuestionType } from '../../types/options'
+import { Course, DetailLevel, Mode, QuestionType } from '../../types/options'
 import './Sidebar.css'
 import React from 'react'
 import { useChatSettings } from '../../context/useChatContext';
-import { useThreadSelectionContext } from '../../context/useThreadContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 export function NewConversationButton() {
 
   const { 
-    setQuestion 
+    setMode
   } = useChatSettings()
 
   const navigate = useNavigate()
@@ -17,7 +16,7 @@ export function NewConversationButton() {
       title="New Chat"
       className="interactive sidebar-button"
       onClick={() => {
-        setQuestion(null)
+        setMode(Mode.NONE)
         navigate("/")
       }}
     >
@@ -25,35 +24,6 @@ export function NewConversationButton() {
       <i className="fa-solid fa-pen-to-square" />
     </button>
   );
-}
-
-export function OpenThreadsButton() {
-  const navigate = useNavigate()
-  const location = useLocation()
-
-  const {
-    selectedThread
-  } = useThreadSelectionContext()
-
-  return (
-    <button
-      title='Open Chat History'
-      className="interactive sidebar-button"
-      onClick={ () => {
-        if (location.pathname.includes('/chat')) {
-          navigate("/threads")
-        } else {
-          if (selectedThread) {
-            navigate(`/chat/${selectedThread}`)
-          } else {
-            navigate("/chat")
-          }
-        }
-      }}
-    >
-      <i className="fa-solid fa-comments"></i>
-    </button>
-  )
 }
 
 export function SidebarButton() {
@@ -142,8 +112,8 @@ export function CourseSelect() {
 
 export function QuestionTypeSelect() {
   const {
-    question,
-    setQuestion,
+    mode,
+    setMode,
   } = useChatSettings()
 
   return (
@@ -151,14 +121,14 @@ export function QuestionTypeSelect() {
       <h3 className="sidebar-input-header">Question Type</h3>
 
       <span>
-        {Object.values(QuestionType).map((option, index) => (
+        {Object.values(Mode).map((option, index) => (
           <React.Fragment key={option}>
             <button
               key={option}
-              onClick={() => setQuestion(option)}
+              onClick={() => setMode(option)}
               className={`select-box-option ${
-question === option ? "active" : ""
-}`}
+                mode === option ? "active" : ""
+              }`}
             >
               {option}
             </button>

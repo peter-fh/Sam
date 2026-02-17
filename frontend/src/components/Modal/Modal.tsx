@@ -3,7 +3,6 @@ import { Course } from '../../types/options'
 import './Modal.css'
 import { useChatSettings } from '../../context/useChatContext';
 import { useNavigate } from 'react-router-dom';
-import { useThreadSelectionContext } from '../../context/useThreadContext';
 
 function Modal() {
 
@@ -19,15 +18,11 @@ function Modal() {
     disclaimerAccepted, setDisclaimerAccepted
   } = useChatSettings();
 
-  const {
-    setSelectedThread,
-  } = useThreadSelectionContext()
 
   const navigate = useNavigate()
 
   const navigateToChat = () => {
     navigate("/chat")
-    setSelectedThread(null)
   }
 
 

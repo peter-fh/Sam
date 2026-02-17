@@ -6,7 +6,6 @@ import useConversation from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
 import { Log, LogLevel } from '../../log'
 import { BeatLoader, PropagateLoader, } from "react-spinners"
-import { useThreadSelectionContext } from '../../context/useThreadContext'
 
 
 interface ChatProps {

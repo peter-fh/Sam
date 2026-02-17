@@ -4,7 +4,7 @@ import { useChatSettings } from "../../context/useChatContext";
 import { DB } from "../../database/db";
 import { useThreadSelectionContext } from "../../context/useThreadContext";
 import { Log, LogLevel } from "../../log";
-import { Course, QuestionType } from "../../types/options";
+import { Course, Mode } from "../../types/options";
 import { API } from "../../api/api";
 
 
@@ -42,7 +42,7 @@ interface UIState {
 const useConversation = () => {
 
   const {
-    question, setQuestion,
+    mode, setMode,
     course, setCourse,
   } = useChatSettings()
 
@@ -99,7 +99,7 @@ const useConversation = () => {
     const settingsResult = await DB.getSettings(id)
     if (settingsResult && settingsResult.course && settingsResult.mode) {
       setCourse(settingsResult.course.code as Course)
-      setQuestion(settingsResult.mode.name as QuestionType)
+      setMode(settingsResult.mode.name as Mode)
     }
 
     const conversation: Message[] = []
@@ -264,17 +264,17 @@ const useConversation = () => {
       const mode_start_time = performance.now()
       lock()
       Log(LogLevel.Debug, "Awaiting Mode")
-      const mode = await API.getMode(question, conversation)
+      const new_mode = await API.getMode(mode, conversation)
       const mode_end_time = performance.now()
-      Log(LogLevel.Always, `Selected "${mode}" in ${Math.round((mode_end_time - mode_start_time) / 100) / 10}s`)
-      setQuestion(mode)
+      Log(LogLevel.Always, `Selected "${new_mode}" in ${Math.round((mode_end_time - mode_start_time) / 100) / 10}s`)
+      setMode(new_mode)
 
       let current_conversation_id = chatState.id
       var conversation_id_promise 
 
       if (current_conversation_id == null) {
         conversation_id_promise = API.getTitle(final_question)
-          .then(title => DB.addConversation(title, course, mode))
+          .then(title => DB.addConversation(title, course, new_mode))
           .then(add_conversation_result => {
 
             if (add_conversation_result == null) {
@@ -289,7 +289,7 @@ const useConversation = () => {
             return new_conversation_id
           })
       } else {
-        DB.updateMode(current_conversation_id, mode)
+        DB.updateMode(current_conversation_id, new_mode)
       }
 
       setUIState(prev => ({
@@ -301,7 +301,7 @@ const useConversation = () => {
       Log(LogLevel.Debug, "Awaiting response")
       var assistant_response = ""
       var firstChunkReceived = false
-      for await (const currentAnswer of API.ask(conversation, mode, course)) {
+      for await (const currentAnswer of API.ask(conversation, new_mode, course)) {
         if (!firstChunkReceived) {
           firstChunkReceived = true
           setUIState(prev => ({

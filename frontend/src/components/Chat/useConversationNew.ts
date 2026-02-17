@@ -1,60 +1,70 @@
 import { useEffect, useRef, useState } from "react";
 import { Message } from "../../api/message";
 import { useChatSettings } from "../../context/useChatContext";
-import { DB } from "../../database/db";
 import { Course, Mode } from "../../types/options";
 import { API } from "../../api/api";
+import { Log, LogLevel } from "../../log";
+import { useNavigate, useParams } from "react-router-dom";
 
 
-const TOKEN_THRESHOLD = 0
-const INTRO_MESSAGE = "Hello! I'm Sam, an AI chatbot powered by Chat-GPT. I use context specific to Concordia to provide better explanations. AI makes mistakes, so please double check any answers you are given."
+type ChatStatus = 'IDLE'          // Waiting for user input
+                | 'LOADING'       // Initial loading of conversation
+                | 'STREAMING'     // Message from the assistant is currently streaming
+                | 'WAITING'       // Message from user is being sent to the API
+                | 'THINKING'      // Assistant has recieved the user message and is reasoning
+                | 'TRANSCRIBING'  // A transcription for the user's image is being processed
+                | 'ERROR'         // An error has occurred. The chat will not leave this mode until refreshed
 
-interface ConversationProps {
-  id?: number
-}
-type ChatStatus = 'IDLE' | 'LOADING' | 'STREAMING' | 'WAITING' | 'THINKING' | 'ERROR'
 
+interface ChatState {
+  userMessage: string,
+  userImage: string,
 
-interface Conversation {
+  streamingMessage?: string,
+  errorMessage?: string,
+
   messages: Message[],
   mode: Mode,
   course: Course,
 }
 
-interface ChatState {
-  streamingMessage?: string,
-  userMessage: string,
-  userImage: string,
-  conversation: Conversation,
-  status: ChatStatus,
-  errorMessage?: string,
-}
+const useConversation = () => {
 
+  const {
+    id
+  } = useParams()
 
-
-const useConversation = (props: ConversationProps) => {
-
+  const navigate = useNavigate()
   const {
     course
   } = useChatSettings()
 
-  const stateRef = useRef<ChatState>({
-    status: 'LOADING',
+  const [chatState, setChatState] = useState<ChatState>({
     userMessage: '',
     userImage: '',
-    conversation: {
-      messages: [],
-      mode: Mode.DEFAULT,
-      course: course,
-    }
+    messages: [],
+    mode: Mode.DEFAULT,
+    course: course,
   })
 
-  const [tempId, setTempId] = useState<number | null>(null)
+  const statusRef = useRef<ChatStatus>('IDLE')
+  const [status, setStatus] = useState<ChatStatus>('IDLE')
+
+  const handleError = (err: unknown, msg: string) => {
+    setStatus('ERROR')
+    setChatState((prev) => ({
+      ...prev,
+      errorMessage: msg,
+    }))
+    console.error(err)
+  }
 
   const loadConversation = async (id: number) => {
-    const conversationPromise = DB.getConversation(id)
-      .then((conversationJson) => {
-
+    setStatus('LOADING')
+    const conversationPromise = API.getConversation(id)
+      .then((resultJson) => {
+        const course = resultJson['course']
+        const conversationJson = resultJson['messages']
         const conversation: Message[] = []
         for (const raw_message of conversationJson) {
           const message: Message = {
@@ -63,161 +73,157 @@ const useConversation = (props: ConversationProps) => {
           }
           conversation.push(message)
         }
-        stateRef.current.conversation.messages = conversation
-      })
-      .catch(err => {
-        stateRef.current.status = 'ERROR'
-        stateRef.current.errorMessage = 'Could not fetch messages for this conversation'
-        console.error(err) })
+        setChatState((prev) => ({
+          ...prev,
+          messages: conversation,
+          course: course,
+        }))
+        })
+      .catch(err => handleError(err, 'Could not fetch messages for this conversation'))
 
-    const settingsResult = DB.getSettings(id)
-      .then(settingsJson => {
-        stateRef.current.conversation.course = settingsJson.course.code as Course
-        stateRef.current.conversation.mode = settingsJson.mode.name as Mode
-      })
-      .catch(err => {
-        stateRef.current.status = 'ERROR'
-        stateRef.current.errorMessage = 'Could not fetch metadata for this conversation'
-        console.error(err) })
 
-    await Promise.all([conversationPromise, settingsResult])
-    stateRef.current.status = 'IDLE'
-
+    await conversationPromise
+    setStatus('IDLE')
   }
 
 
   useEffect(() => {
-    stateRef.current.status = 'LOADING'
-    if (!props.id) {
+    if (id == null) {
       return
     }
-    loadConversation(props.id)
-
-
-  }, [])
-
-  const updateMode = async (mode: Mode) => {
-    if (!props.id) {
+    if (chatState.messages.length > 0) {
       return
     }
-    await DB.updateMode(props.id, mode)
-  }
+    loadConversation(parseInt(id))
 
-  const newConversation = async (firstMessage: string, mode: Mode, course: Course) => {
-    if (props.id) {
+
+  }, [id])
+
+  const newConversation = async (course: Course) => {
+
+    if (id) {
+      Log(LogLevel.Error, `Creating new conversation even with ID: ${id}`)
       return
     }
 
-    const title = await API.getTitle(firstMessage)
-    const id = await DB.addConversation(title, course, mode)
-    if (!id) {
-      stateRef.current.status = 'ERROR'
-      stateRef.current.errorMessage = "Couldn't add conversation to the database"
-      console.error("Couldn't add conversation to db, id returned none")
+    const id_response = await API.addConversation(course)
+    const new_id = id_response["id"]
+    Log(LogLevel.Info, `Created new conversation with ID: ${new_id}`)
+    if (!new_id) {
+      const err = new Error("Couldn't add conversation to db, id returned none")
+      throw err
     }
-    setTempId(id)
+    return new_id
 
-  }
-
-  const addNewMessages = async (id: number, newMessages: Message[]) => {
-    for (const message of newMessages) {
-      await DB.addMessage(id, message.role, message.content)
-    }
   }
 
   const handleSendMessage = async () => {
-    if (stateRef.current.status != 'IDLE') {
+    if (statusRef.current != 'IDLE') {
       return
     }
 
-    if (!stateRef.current.userMessage && !stateRef.current.userImage) {
+    if (!chatState.userMessage && !chatState.userImage) {
+      return
     }
 
-    stateRef.current.status = 'WAITING'
-
-    const newMessages: Message[] = []
-    const userMessage = stateRef.current.userMessage
-    stateRef.current.userMessage = ''
-    const userMessageObj: Message = {
-      role: 'user',
-      content: userMessage,
-    }
-    stateRef.current.conversation.messages = [...stateRef.current.conversation.messages, userMessageObj]
-    newMessages.push(userMessageObj)
-
-
-    const userImage = stateRef.current.userImage
-    stateRef.current.userImage = ''
-
-    if (userImage) {
-      stateRef.current.conversation.messages = [...stateRef.current.conversation.messages, {
-        role: 'user',
-        content: `\n\n*[transcribing ${userImage}...]*`,
-      }]
-      const transcription = await API.readImage(userImage)
-      const transcriptionMessage: Message = {
-        role: 'user',
-        content: `\n\n*Image Transcription:*\n\n${transcription}`,
+    var temp_id: string
+    if (id == null) {
+      try {
+        temp_id = await newConversation(chatState.course)
+      } catch(e) {
+        handleError(e, "Failed do add new conversation")
+        return
       }
-      stateRef.current.conversation.messages = [...stateRef.current.conversation.messages.slice(0, -1), transcriptionMessage]
-      newMessages.push(transcriptionMessage)
-    }
-
-    const mode = await API.getMode(stateRef.current.conversation.mode, stateRef.current.conversation.messages)
-    var conversationDbUpdatePromise
-    if (props.id) {
-      var firstMessage = ''
-      for (const message of newMessages) {
-        firstMessage += message + "\n"
-      }
-      conversationDbUpdatePromise = newConversation(firstMessage, mode, stateRef.current.conversation.course)
     } else {
-      conversationDbUpdatePromise = updateMode(mode)
+      temp_id = id
     }
 
-    stateRef.current.status = 'THINKING'
+    const userQuestion = chatState.userMessage
+    setChatState((prev) => ({
+      ...prev,
+      messages: [...prev.messages, {
+        role: 'user',
+        content: userQuestion,
+      }],
+      userMessage: '',
+    }))
 
-    stateRef.current.streamingMessage = ''
+    setStatus('WAITING')
+
+    chatState.streamingMessage = ''
+      setChatState((prev) => ({
+        ...prev,
+        streamingMessage: '',
+      }))
+
+    if (temp_id == null) {
+      const err = new Error("ID is null when asking question")
+      handleError(err, 'An error occurred while trying to get a response')
+      return
+    }
+
+    var totalMessage = ''
     var firstChunkReceived = false
-    for await(const chunk of API.ask(stateRef.current.conversation.messages, mode, stateRef.current.conversation.course)) {
-      if (!firstChunkReceived) {
-        stateRef.current.status = 'STREAMING'
-        firstChunkReceived = true
+    var startSymbolRecieved = false
+    for await(const chunk of API.ask(parseInt(temp_id), userQuestion)) {
+      if (!startSymbolRecieved) {
+        setStatus('THINKING')
+        startSymbolRecieved = true
+      } else {
+        if (!firstChunkReceived) {
+          setStatus('STREAMING')
+          firstChunkReceived = true
+        } 
+
+        totalMessage += chunk
+        setChatState((prev) => ({
+          ...prev,
+          streamingMessage: totalMessage
+        }))
       }
 
-      stateRef.current.streamingMessage += chunk
     }
 
-    if (!stateRef.current.streamingMessage || stateRef.current.streamingMessage == '') {
-      stateRef.current.status = 'ERROR',
-      stateRef.current.errorMessage = 'An error occurred while trying to get a response'
-      console.error("AI message request returned zero tokens")
+    if (!totalMessage) {
+      const err = new Error("AI message request returned zero tokens")
+      handleError(err, 'An error occurred while trying to get a response')
       return
     }
 
     const aiResponse: Message = {
       role: 'assistant',
-      content: stateRef.current.streamingMessage,
+      content: totalMessage,
     }
-    stateRef.current.conversation.messages = [...stateRef.current.conversation.messages, aiResponse]
-    newMessages.push(aiResponse)
-
-    await conversationDbUpdatePromise
-
-    const currentId = props.id ? props.id : tempId
-    if (!currentId) {
-      stateRef.current.status = 'ERROR',
-      stateRef.current.errorMessage = 'An error occurred while trying to process the response'
-      console.error("ID is null while attempting to add new messages")
-      return
+    setChatState((prev) => ({
+      ...prev,
+      messages: [...prev.messages, aiResponse],
+      streamingMessage: '',
+    }))
+    if (id == null) {
+        navigate(String(temp_id!), { replace: true })
     }
-    await addNewMessages(currentId, newMessages)
-    stateRef.current.status = 'IDLE'
+    setStatus('IDLE')
+  }
+
+  const updateUserMessage = (msg: string) => {
+    setChatState((prev) => ({
+      ...prev,
+      userMessage: msg,
+    }))
+  }
+  const updateUserImage = (imageData: string) => {
+    setChatState((prev) => ({
+      ...prev,
+      userImage: imageData,
+    }))
   }
 
   return {
     handleSendMessage,
-    stateRef,
+    chatState,
+    status,
+    updateUserMessage,
+    updateUserImage,
   }
 }
 

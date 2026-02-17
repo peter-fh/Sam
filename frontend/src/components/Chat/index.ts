@@ -1,2 +1,2 @@
-import Chat from "./Chat";
+import Chat from "./ChatNew";
 export default Chat

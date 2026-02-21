@@ -123,3 +123,9 @@
 	width: 100vw;
 	z-index: 9;
 }
+
+.message-image {
+	border-radius: 1.2em;
+	padding: 1em;
+
+}

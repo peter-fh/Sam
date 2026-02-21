@@ -1,4 +1,7 @@
-A user has asked an AI tutoring assistant the following question: ${question}
+A user has asked an AI tutoring assistant the following question in the conversation: 
+```json
+${question}
+```
 
 The user is conversing with an AI tutor and you must select the mode that the assistant should reply in. They are currently in "Problem" mode, meaning they have just asked a conceptual question. The default should be to stay in this mode.
 

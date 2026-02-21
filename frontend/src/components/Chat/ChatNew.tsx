@@ -33,7 +33,7 @@ const Chat: React.FC = () => {
     if (!imageData){
       return
     }
-    updateUserImage(imageData.data)
+    updateUserImage(imageData)
   }, [imageData])
 
   const bottomMarkerRef = useRef<HTMLDivElement>(null);
@@ -101,7 +101,7 @@ const Chat: React.FC = () => {
 
         <div className="input">
           <InputArea
-            isLocked={status == "IDLE" ? true : false}
+            isLocked={status != "IDLE"}
             fileRef={fileInputRef}
             updateMessage={updateUserMessage}
             updateFile={updateImage}

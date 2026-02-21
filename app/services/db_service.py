@@ -134,7 +134,23 @@ class Database:
                 "title": title,
                 })
             .eq("id", conversation_id)
+            .execute()
         )
+
+    def hasTitle(self, conversation_id: int) -> bool:
+        title = ( 
+            self.client 
+            .table("conversations")
+            .select("title")
+            .eq("id", conversation_id)
+            .execute()
+        ).data[0]["title"]
+
+        if not title or title == "":
+            return False
+        return True
+
+
     def getMode(self, conversation_id: int):
         mode_id = (
             self.client
@@ -185,6 +201,7 @@ class Database:
                 "mode_id": mode_id,
                 })
             .eq("id", conversation_id)
+            .execute()
         )
 
     def updateSummary(self, conversation_id: int, summary: str):

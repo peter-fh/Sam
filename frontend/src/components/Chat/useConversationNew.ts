@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Message } from "../../api/message";
+import { Message, newMessage } from "../../api/message";
 import { useChatSettings } from "../../context/useChatContext";
 import { Course, Mode } from "../../types/options";
 import { API } from "../../api/api";
 import { Log, LogLevel } from "../../log";
 import { useNavigate, useParams } from "react-router-dom";
+import { ImageInfo } from "./useFileReader";
 
 
 type ChatStatus = 'IDLE'          // Waiting for user input
@@ -15,10 +16,12 @@ type ChatStatus = 'IDLE'          // Waiting for user input
                 | 'TRANSCRIBING'  // A transcription for the user's image is being processed
                 | 'ERROR'         // An error has occurred. The chat will not leave this mode until refreshed
 
+const START_SYMBOL = "__START__"
+const END_SYMBOL = "__END__"
 
 interface ChatState {
   userMessage: string,
-  userImage: string,
+  userImage: ImageInfo | null,
 
   streamingMessage?: string,
   errorMessage?: string,
@@ -41,14 +44,14 @@ const useConversation = () => {
 
   const [chatState, setChatState] = useState<ChatState>({
     userMessage: '',
-    userImage: '',
+    userImage: null,
     messages: [],
     mode: Mode.DEFAULT,
     course: course,
   })
 
-  const statusRef = useRef<ChatStatus>('IDLE')
   const [status, setStatus] = useState<ChatStatus>('IDLE')
+  const [loadedId, setLoadedId] = useState<number | null>(null)
 
   const handleError = (err: unknown, msg: string) => {
     setStatus('ERROR')
@@ -67,10 +70,7 @@ const useConversation = () => {
         const conversationJson = resultJson['messages']
         const conversation: Message[] = []
         for (const raw_message of conversationJson) {
-          const message: Message = {
-            role: raw_message.role as "user" | "assistant",
-            content: raw_message.content!,
-          }
+          const message: Message = newMessage(raw_message.content!, raw_message.role as "user" | "assistant")
           conversation.push(message)
         }
         setChatState((prev) => ({
@@ -82,6 +82,7 @@ const useConversation = () => {
       .catch(err => handleError(err, 'Could not fetch messages for this conversation'))
 
 
+    setLoadedId(id)
     await conversationPromise
     setStatus('IDLE')
   }
@@ -91,7 +92,7 @@ const useConversation = () => {
     if (id == null) {
       return
     }
-    if (chatState.messages.length > 0) {
+    if (loadedId == parseInt(id)) {
       return
     }
     loadConversation(parseInt(id))
@@ -102,8 +103,8 @@ const useConversation = () => {
   const newConversation = async (course: Course) => {
 
     if (id) {
-      Log(LogLevel.Error, `Creating new conversation even with ID: ${id}`)
-      return
+      const err = new Error(`Creating new conversation where ID already exists: ${id}`)
+      throw err
     }
 
     const id_response = await API.addConversation(course)
@@ -113,74 +114,87 @@ const useConversation = () => {
       const err = new Error("Couldn't add conversation to db, id returned none")
       throw err
     }
-    return new_id
+    setLoadedId(new_id)
+    return parseInt(new_id)
 
   }
 
   const handleSendMessage = async () => {
-    if (statusRef.current != 'IDLE') {
+    if (status != 'IDLE') {
       return
     }
+    console.log("Message in sendMessage: ", chatState.userMessage)
 
     if (!chatState.userMessage && !chatState.userImage) {
       return
     }
 
-    var temp_id: string
-    if (id == null) {
+    var local_id: number
+    if (id == null || !parseInt(id) || !(parseInt(id) > 0)) {
       try {
-        temp_id = await newConversation(chatState.course)
+        local_id = await newConversation(chatState.course)
       } catch(e) {
         handleError(e, "Failed do add new conversation")
         return
       }
     } else {
-      temp_id = id
+      local_id = parseInt(id)
     }
 
     const userQuestion = chatState.userMessage
     setChatState((prev) => ({
       ...prev,
-      messages: [...prev.messages, {
-        role: 'user',
-        content: userQuestion,
-      }],
+      messages: [...prev.messages, newMessage(userQuestion, 'user')],
       userMessage: '',
     }))
 
     setStatus('WAITING')
 
-    chatState.streamingMessage = ''
       setChatState((prev) => ({
         ...prev,
         streamingMessage: '',
       }))
 
-    if (temp_id == null) {
+    if (local_id == null) {
       const err = new Error("ID is null when asking question")
+      handleError(err, 'An error occurred while trying to get a response')
+      return
+    }
+    var image = null
+    if (chatState.userImage != null) {
+      image = chatState.userImage.data
+      setChatState((prev) => ({
+        ...prev,
+        messages: [...prev.messages, newMessage('', 'user', chatState.userImage!.url)],
+        userImage: null,
+      }))
+    }
+
+    const answerGenerator = API.ask(local_id, userQuestion, image)
+    const startingSymbol = await answerGenerator.next()
+    if (startingSymbol.value != START_SYMBOL) {
+      const err = new Error("First symbol was not the start symbol")
       handleError(err, 'An error occurred while trying to get a response')
       return
     }
 
     var totalMessage = ''
     var firstChunkReceived = false
-    var startSymbolRecieved = false
-    for await(const chunk of API.ask(parseInt(temp_id), userQuestion)) {
-      if (!startSymbolRecieved) {
-        setStatus('THINKING')
-        startSymbolRecieved = true
-      } else {
-        if (!firstChunkReceived) {
-          setStatus('STREAMING')
-          firstChunkReceived = true
-        } 
-
-        totalMessage += chunk
-        setChatState((prev) => ({
-          ...prev,
-          streamingMessage: totalMessage
-        }))
+    for await(const chunk of answerGenerator) {
+      if (!firstChunkReceived) {
+        console.log("received first chunk")
+        setStatus('STREAMING')
+        firstChunkReceived = true
+      } 
+      if (chunk == END_SYMBOL) {
+        break
       }
+
+      totalMessage += chunk
+      setChatState((prev) => ({
+        ...prev,
+        streamingMessage: totalMessage
+      }))
 
     }
 
@@ -190,17 +204,14 @@ const useConversation = () => {
       return
     }
 
-    const aiResponse: Message = {
-      role: 'assistant',
-      content: totalMessage,
-    }
+    const aiResponse: Message = newMessage(totalMessage, 'assistant')
     setChatState((prev) => ({
       ...prev,
       messages: [...prev.messages, aiResponse],
       streamingMessage: '',
     }))
     if (id == null) {
-        navigate(String(temp_id!), { replace: true })
+        navigate(String(local_id), { replace: true })
     }
     setStatus('IDLE')
   }
@@ -211,7 +222,7 @@ const useConversation = () => {
       userMessage: msg,
     }))
   }
-  const updateUserImage = (imageData: string) => {
+  const updateUserImage = (imageData: ImageInfo) => {
     setChatState((prev) => ({
       ...prev,
       userImage: imageData,

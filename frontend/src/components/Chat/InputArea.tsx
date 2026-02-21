@@ -11,20 +11,21 @@ type InputAreaProps = {
 const InputArea : React.FC<InputAreaProps> = (props: InputAreaProps) => {
   const [message, setMessage] = useState<string>('')
   const [imageFilename, setImageFilename] = useState<string>('')
+  const [buttonClass, setButtonClass] = useState<string>("chat-button interactive")
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const img = event.target.files?.[0];
     if (img) {
       setImageFilename(img.name)
       props.updateFile(img)
+      setButtonClass("chat-button interactive file-present")
+    } else {
+      setButtonClass("chat-button interactive")
     }
   };
   const handleFileButtonClick = () => {
     props.fileRef!.current!.click()
   }
-  const buttonClass = props.fileRef.current && props.fileRef.current.files && props.fileRef.current.files.length > 0 
-    ? "chat-button interactive file-present" 
-    : "chat-button interactive"
 
   const enterListener = (e: KeyboardEvent) => {
     if (e.key == "Enter" && !e.shiftKey) {
@@ -43,6 +44,7 @@ const InputArea : React.FC<InputAreaProps> = (props: InputAreaProps) => {
 
   const handleSend = async () => {
     setMessage('')
+    setButtonClass("chat-button interactive")
     props.handleSend()
   }
 

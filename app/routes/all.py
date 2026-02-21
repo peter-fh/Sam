@@ -54,10 +54,12 @@ def new_message():
     data = request.get_json()
     id = data.get('id')
     message = data.get('message')
+    image = data.get('image')
+
     print("id: ", id)
     print("message: ", message)
 
     api: API = current_app.extensions['api']
-    stream = api.newMessage(g.user_id, id, message)
+    stream = api.newMessage(g.user_id, id, message, image)
     return Response(stream_with_context(stream), content_type="text/plain")
 

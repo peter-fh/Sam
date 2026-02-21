@@ -81,13 +81,14 @@ export namespace API {
   }
 
 
-  export async function* ask(id: number, message: string) {
+  export async function* ask(id: number, message: string, image: string | null = null) {
 
     const response = await fetchWithAuth(Endpoints.Chat, {
       'Content-Type': 'application/json',
     }, JSON.stringify({
         'id': id,
         'message': message,
+        'image': image,
       }))
 
 

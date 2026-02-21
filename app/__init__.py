@@ -1,3 +1,4 @@
+import logging
 from typing import Any
 from flask import Flask
 from flask_cors import CORS
@@ -8,9 +9,8 @@ from pathlib import Path
 from app.config import Config
 from app.core.types import ModelType
 from app.core.prompt import PromptManager, PromptManagerConfig
-from app.services.ai_service import AIService, AIConfig
+from app.services.ai_service import AIConfig
 from app.services.api import API
-from app.services.db_service import Database
 
 from app.routes.all import bp as api_bp
 from app.routes.main import bp as main_bp
@@ -30,6 +30,9 @@ def create_app(test_config: Any=None):
 
     if app.config["FLASK_ENV"] == "development":
             _ = CORS(app)
+            logging.basicConfig(level=logging.INFO, format='%(asctime)s[%(levelname)s]: %(message)s')
+    else: 
+            logging.basicConfig(level=logging.ERROR, format='%(asctime)s[%(levelname)s]: %(message)s')
 
     openai_client = OpenAI(
         base_url="https://openrouter.ai/api/v1",

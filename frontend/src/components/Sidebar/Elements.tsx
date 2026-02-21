@@ -7,28 +7,6 @@ import { useEffect, useState } from "react"
 import { API } from '../../api/api.ts'
 import supabase from '../../supabase.ts'
 
-export function NewConversationButton() {
-
-  const { 
-    setMode
-  } = useChatSettings()
-
-  const navigate = useNavigate()
-  return (
-    <button
-      title="New Chat"
-      className="interactive sidebar-button"
-      onClick={() => {
-        setMode(Mode.NONE)
-        navigate("/")
-      }}
-    >
-      {/* <i className="fa-solid fa-plus" /> */}
-      <i className="fa-solid fa-pen-to-square" />
-    </button>
-  );
-}
-
 export function SidebarButton() {
   const {
     sidebar,
@@ -46,18 +24,6 @@ export function SidebarButton() {
         :
         <i className="fa-solid fa-bars"></i>
       }
-    </button>
-  )
-}
-
-export function LogoutButton() {
-  return (
-    <button
-      title='Toggle Sidebar'
-      className="interactive sidebar-button"
-      onClick={ () => supabase.auth.signOut() }
-    >
-      <i className="fa-solid fa-right-from-bracket"></i>
     </button>
   )
 }
@@ -163,90 +129,6 @@ export function CourseSelect() {
   );
 }
 
-export function QuestionTypeSelect() {
-  const {
-    mode,
-    setMode,
-  } = useChatSettings()
-
-  return (
-    <div className="option">
-      <h3 className="sidebar-input-header">Question Type</h3>
-
-      <span>
-        {Object.values(Mode).map((option, index) => (
-          <React.Fragment key={option}>
-            <button
-              key={option}
-              onClick={() => setMode(option)}
-              className={`select-box-option ${
-                mode === option ? "active" : ""
-              }`}
-            >
-              {option}
-            </button>
-            {index < Object.values(QuestionType).length - 1
-              ? "|"
-              : ""}
-          </React.Fragment>
-        ))}
-      </span>
-    </div>
-  );
-}
-
-export function NewConversation() {
-  const { 
-    setMode,
-  } = useChatSettings()
-
-  const navigate = useNavigate()
-  return (
-    <div className="option">
-    <button
-      title="New Chat"
-      className="interactive new-conversation-button"
-      onClick={() => {
-        setMode(Mode.NONE)
-        navigate("/")
-      }}
-    >
-      {/* <i className="fa-solid fa-plus" /> */}
-        <p>New Conversation</p>
-    </button>
-    </div>
-  );
-}
-
-export function BrevitySelect() {
-  const {
-    detailLevel,
-    setDetailLevel,
-  } = useChatSettings()
-
-  return (
-    <div className="option">
-      <h3 className='sidebar-input-header'>Level of Detail</h3>
-
-      <span>
-        {Object.values(DetailLevel).map((option, index) => (
-          <React.Fragment key={option}>
-            <button
-              key={option}
-              onClick={() => setDetailLevel(option)}
-              className={`select-box-option ${
-detailLevel === option ? "active" : ""
-}`}
-            >
-              {option}
-            </button>
-            {index < Object.values(DetailLevel).length - 1 ? "|" : ""}
-          </React.Fragment>
-        ))}
-      </span>
-    </div>
-  );
-}
 
 interface ConversationItem {
   title: string,
@@ -254,7 +136,7 @@ interface ConversationItem {
 }
 export function Threads() {
 
-  const { idParam } = useParams()
+  const { id } = useParams()
   const navigate = useNavigate()
 
   const {
@@ -276,19 +158,19 @@ export function Threads() {
     let current_classes = ""
     const thread_classes = "thread thread-list-item"
     const selected_thread_classes = "thread thread-list-item thread-selected"
-    if (idParam && props.id == parseInt(idParam)){
+    if (id && props.id == parseInt(id)){
       current_classes = selected_thread_classes
     } else {
       current_classes = thread_classes
     }
 
     useEffect(() => {
-      if (idParam && props.id == parseInt(idParam)){
+      if (id && props.id == parseInt(id)){
         current_classes = selected_thread_classes
       } else {
-        current_classes = thread_classes
       }
-    }, [idParam])
+      current_classes = thread_classes
+    }, [id])
 
     return (
       <div className={current_classes} onClick={handleClick}>
@@ -327,7 +209,7 @@ export function Threads() {
 
   useEffect(() => {
     updateConversations()
-  }, [idParam])
+  }, [id])
 
   if (loading) {
     return (

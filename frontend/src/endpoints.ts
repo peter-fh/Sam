@@ -1,10 +1,6 @@
 export const Endpoints = {
-  Ask: '/api/question',
-  Intro: '/api/introduction',
-  Image: '/api/image',
-  Summary: '/api/summary',
-  Title: '/api/title',
-  Mode: '/api/mode',
+  Chat: '/api/chat',
+  Conversation: '/api/conversations'
 }
 
 export default Endpoints

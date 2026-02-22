@@ -12,7 +12,7 @@ EXAMPLE_RESPONSE_FILEPATH = "api" + os.sep + "example_response.md"
 
 
 @dataclass
-class APIConfig:
+class AIConfig:
     concept_model: ModelType
     problem_model: ModelType
     study_model: ModelType
@@ -26,11 +26,11 @@ class APIConfig:
 class ModeResponse(BaseModel):
     mode: Mode
 
-class API:
-    config: APIConfig
+class AIService:
+    config: AIConfig
     async_client: AsyncOpenAI
     client: OpenAI
-    def __init__(self, config: APIConfig, client: OpenAI, async_client: AsyncOpenAI, prompt_manager: PromptManager):
+    def __init__(self, config: AIConfig, client: OpenAI, async_client: AsyncOpenAI, prompt_manager: PromptManager):
         self.config = config
         self.async_client = async_client
         self.client = client
@@ -50,7 +50,7 @@ class API:
         else:
             return "system"
 
-    def getMessage(self, conversation: Any, course_code: str, prompt_type: Mode, brevity: str) -> Generator[str]:
+    def getMessage(self, conversation: Any, course_code: str, prompt_type: Mode, brevity: str = "Detailed") -> Generator[str]:
 
         model = self.getModel(prompt_type)
         instructions = self.prompt_manager.getInstructions(prompt_type, model)

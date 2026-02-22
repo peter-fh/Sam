@@ -2,12 +2,14 @@
 export type Message = {
   role: 'assistant' | 'user'
   content: string
+  url: string | null
 }
 
-export function newMessage(content: string, role: string) {
+export function newMessage(content: string, role: 'assistant' | 'user', image_url: string | null = null): Message {
   return {
     role: role,
-    content: content
+    content: content,
+    url: image_url,
   }
 }
 

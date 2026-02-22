@@ -1,4 +1,4 @@
-import { Course, DetailLevel, Mode, QuestionType } from '../../types/options'
+import { Course } from '../../types/options'
 import './Elements.css'
 import React from 'react'
 import { useChatSettings } from '../../context/useChatContext';
@@ -43,9 +43,6 @@ export function LogoutText() {
 }
 
 export function NewConversationText() {
-  const { 
-    setMode
-  } = useChatSettings()
 
   const navigate = useNavigate()
   return (
@@ -53,7 +50,6 @@ export function NewConversationText() {
       title="New Chat"
       className="interactive sidebar-text-button"
       onClick={() => {
-        setMode(Mode.NONE)
         navigate("/")
       }}
     >

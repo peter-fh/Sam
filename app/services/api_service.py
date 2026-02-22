@@ -14,7 +14,7 @@ import logging
 executor = ThreadPoolExecutor(max_workers=8)
 
 
-THREAD_RANGE = 5
+THREAD_RANGE = 100
 
 class NewConversationResult(TypedDict):
     id: int
@@ -103,6 +103,7 @@ class API:
             logging.info(f'Time to message end:    {t['message_end'] - t0}s')
             logging.info(f'Total time:             {t['end'] - t0}s')
         except Exception as e:
+            yield "__ERROR__"
             logging.exception("Failed to get next message: ", e)
         finally:
             # Yield the end symbol to ensure the app knows when this conversation is done processing

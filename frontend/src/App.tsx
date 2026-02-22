@@ -11,19 +11,30 @@ import supabase from './supabase'
 
 function App() {
 
+  const [loading, setLoading] = useState<boolean>(true)
   const [session, setSession] = useState<any>(null)
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
+      setLoading(false)
     })
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
+      setLoading(false)
     })
     return () => subscription.unsubscribe()
   }, [])
+
+  if (loading) {
+    return (
+      <>
+        <p>loading</p>
+      </>
+    )
+  }
 
   if (!session) {
     return (<Auth supabaseClient={supabase} appearance={{ theme: ThemeSupa }} />)

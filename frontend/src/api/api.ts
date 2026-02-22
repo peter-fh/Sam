@@ -1,8 +1,6 @@
 import Endpoints from "../endpoints"
 import { Log, LogLevel } from "../log"
 import supabase from "../supabase"
-import { Course, DetailLevel, Mode, QuestionType } from "../types/options"
-import { Message } from "./message"
 
 async function fetchWithAuth(endpoint: string, headers: any, body: string) {
   const { data: { session }, error } = await supabase.auth.getSession()

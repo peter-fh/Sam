@@ -1,13 +1,14 @@
-from flask import Blueprint, Response, jsonify, request, current_app, stream_with_context
+from flask import Blueprint, Response, jsonify, request, current_app, stream_with_context, g
 from werkzeug.exceptions import HTTPException
 from app.auth import require_auth
-from app.services.ai_service import API
+from app.services.api_service import API, ConversationResult
 from app.core.types import Mode
 import asyncio
 
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
+'''
 @bp.errorhandler(Exception)
 def handle_exception(e: Exception):
     if isinstance(e, HTTPException):
@@ -17,60 +18,48 @@ def handle_exception(e: Exception):
         "message": str(e)
     }), 500
 
-@bp.route('/summary', methods=['POST'])
+        '''
+
+@bp.route('/conversations', methods=['POST'])
 @require_auth
-def fetch_summary():
-    conversation = request.get_json()
+def new_conversation():
+    settings = request.get_json()
+    course = settings['course']
     api: API = current_app.extensions['api']
-    summary = asyncio.run(api.getSummary(conversation))
-    return summary
+    id = api.newConversation(g.user_id, course)
+    return jsonify({
+        'id': id
+    }), 201
 
-@bp.route('/image', methods=['POST'])
+@bp.route('/conversations', methods=['GET'])
 @require_auth
-def fetch_transcription():
-    image = request.get_data(as_text=True)
+def get_conversations():
+    index = request.headers.get('index')
+    if index is None:
+        index = 0
     api: API = current_app.extensions['api']
-    transcription = asyncio.run(api.getTranscription(image))
-    return transcription
+    conversations = api.getConversationList(g.user_id, int(index))
+    return jsonify(conversations), 200
 
-@bp.route('/title', methods=['POST'])
+@bp.route('/conversations/<int:conversation_id>', methods=['GET'])
 @require_auth
-def fetch_title():
-    question = request.get_data(as_text=True)
+def get_messages(conversation_id: int):
     api: API = current_app.extensions['api']
-    title = asyncio.run(api.getTitle(question))
-    return title
+    res: ConversationResult = api.getConversationMessages(conversation_id)
+    return jsonify(res), 200
 
-@bp.route('/mode', methods=['POST'])
+@bp.route('/chat', methods=['POST'])
 @require_auth
-def fetch_mode():
-    mode = request.headers["Mode"]
-    prompt_type = None
-    try:
-        prompt_type = Mode[mode.upper()]
-    except:
-        pass
-    conversation = request.get_json()
-    api: API = current_app.extensions['api']
-    prompt_type = asyncio.run(api.getMode(conversation, prompt_type))
-    return prompt_type
+def new_message():
+    data = request.get_json()
+    id = data.get('id')
+    message = data.get('message')
+    image = data.get('image')
 
-@bp.route('/question', methods=['POST'])
-@require_auth
-def fetch_response():
-
-    # Retrieve question and its context from the request
-    course = request.headers["Course"]
-    brevity = request.headers["Brevity"]
-    mode = request.headers["Mode"]
-    try:
-        prompt_type = Mode[mode.upper()]
-    except KeyError:
-        return "Could not get prompt type! Was given \"%s\"" % mode
-
-    conversation = request.get_json()
+    print("id: ", id)
+    print("message: ", message)
 
     api: API = current_app.extensions['api']
-    stream = api.getMessage(conversation, course, prompt_type, brevity)
-
+    stream = api.newMessage(g.user_id, id, message, image)
     return Response(stream_with_context(stream), content_type="text/plain")
+

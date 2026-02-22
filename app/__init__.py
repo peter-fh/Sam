@@ -10,9 +10,9 @@ from app.config import Config
 from app.core.types import ModelType
 from app.core.prompt import PromptManager, PromptManagerConfig
 from app.services.ai_service import AIConfig
-from app.services.api import API
+from app.services.api_service import API
 
-from app.routes.all import bp as api_bp
+from app.routes.api import bp as api_bp
 from app.routes.main import bp as main_bp
 
 def create_app(test_config: Any=None):
@@ -30,6 +30,9 @@ def create_app(test_config: Any=None):
 
     if app.config["FLASK_ENV"] == "development":
             _ = CORS(app)
+            local_frontend_dir = root_dir / 'frontend'
+            local_dist_dir = local_frontend_dir / 'dist'
+            app.static_folder = local_dist_dir
             logging.basicConfig(level=logging.INFO, format='%(asctime)s[%(levelname)s]: %(message)s')
     else: 
             logging.basicConfig(level=logging.ERROR, format='%(asctime)s[%(levelname)s]: %(message)s')

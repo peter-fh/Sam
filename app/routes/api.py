@@ -45,7 +45,7 @@ def get_conversations():
 @require_auth
 def get_messages(conversation_id: int):
     api: API = current_app.extensions['api']
-    res: ConversationResult = api.getConversationMessages(conversation_id)
+    res = api.getConversationMessages(g.user_id, conversation_id)
     return jsonify(res), 200
 
 @bp.route('/chat', methods=['POST'])
@@ -55,9 +55,6 @@ def new_message():
     id = data.get('id')
     message = data.get('message')
     image = data.get('image')
-
-    print("id: ", id)
-    print("message: ", message)
 
     api: API = current_app.extensions['api']
     stream = api.newMessage(g.user_id, id, message, image)

@@ -1,6 +1,8 @@
 from dataclasses import dataclass
+import json
 from typing import Any
 from collections.abc import Generator
+from flask import current_app
 from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel
 
@@ -50,7 +52,7 @@ class AIService:
         else:
             return "system"
 
-    def getMessage(self, conversation: Any, course_code: str, prompt_type: Mode, brevity: str = "Detailed") -> Generator[str]:
+    def getMessage(self, current_conversation: Any, course_code: str, prompt_type: Mode, brevity: str = "Detailed") -> Generator[str]:
 
         model = self.getModel(prompt_type)
         instructions = self.prompt_manager.getInstructions(prompt_type, model)
@@ -58,10 +60,7 @@ class AIService:
         prompt = instructions + "\n" + outline
         prompt = prompt.replace("{$brevity}", brevity)
 
-        conversation.insert(0, {
-            "role": "system",
-            "content": prompt,
-                            })
+        conversation: Any = [{"role": "system", "content": prompt}, *current_conversation]
 
         stream = self.client.chat.completions.create(
             messages=conversation,
@@ -104,19 +103,16 @@ class AIService:
 
     async def getSummary(self, conversation: Any) -> str:
 
-        instructions = self.prompt_manager.getUtilityPrompt(UtilityType.SUMMARY)
-        conversation.insert(0, {
-            "role": "system",
-            "content": [{
-                "type": "text",
-                "text": instructions 
-            }
-                        ]
-        })
+        instructions = self.prompt_manager.getUtilityPrompt(UtilityType.SUMMARY).replace("${conversation}", json.dumps(conversation))
 
         response = await self.async_client.chat.completions.create(
             model=self.config.utility_model.value,
-            messages=conversation,
+            messages=[
+                {
+                    "role": "user",
+                    "content": instructions
+                },
+            ],
             temperature=0,
             max_tokens=600
         )   

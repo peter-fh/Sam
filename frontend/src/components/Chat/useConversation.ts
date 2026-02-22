@@ -179,6 +179,7 @@ const useConversation = () => {
 
     var totalMessage = ''
     var firstChunkReceived = false
+    try {
     for await(const chunk of answerGenerator) {
       if (!firstChunkReceived) {
         console.log("received first chunk")
@@ -191,6 +192,7 @@ const useConversation = () => {
       if (chunk == ERROR_SYMBOL) {
         const err = new Error("Error symbol encountered during generation")
         handleError(err, 'An error occurred while trying to get a response')
+        break
       }
 
       totalMessage += chunk
@@ -199,6 +201,9 @@ const useConversation = () => {
         streamingMessage: totalMessage
       }))
 
+    }
+    } catch (e) {
+      handleError(e, "Error thrown during generation")
     }
 
     if (!totalMessage) {

@@ -18,6 +18,12 @@ class AsyncRunner:
         asyncio.set_event_loop(self._loop)
         self._loop.run_forever()
 
+    def fire_and_forget(
+        self,
+        coro: Coroutine[Any, Any, Any],
+    ) -> None:
+        _ = asyncio.run_coroutine_threadsafe(coro, self._loop)
+
     def run(
         self,
         coro: Coroutine[Any, Any, Any],

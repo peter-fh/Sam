@@ -8,7 +8,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ImageInfo } from "./useFileReader";
 
 
-type ChatStatus = 'IDLE'          // Waiting for user input
+export type ChatStatus = 'IDLE'          // Waiting for user input
                 | 'LOADING'       // Initial loading of conversation
                 | 'STREAMING'     // Message from the assistant is currently streaming
                 | 'WAITING'       // Message from user is being sent to the API

@@ -7,6 +7,7 @@ import { LoadingConversationSpinner, WaitingSpinner, ThinkingSpinner } from './S
 import useConversation from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
 import useFileReader from './useFileReader'
+import MessageContent from './ConversationView'
 
 
 const Chat: React.FC = () => {
@@ -63,34 +64,6 @@ const Chat: React.FC = () => {
   }, [status])
 
 
-  const MessageContent = () => {
-    if (status == "LOADING") {
-
-      return (
-        <>
-          <LoadingConversationSpinner/>
-        </>
-      )
-    }
-    return (
-      <>
-        <ConversationView
-          messages={chatState.messages}
-        />
-        {status == "THINKING" && (
-          <ThinkingSpinner/>
-          )}
-        {status == "WAITING" && (
-          <WaitingSpinner/>
-        )}
-        {status == "STREAMING" && chatState.streamingMessage && (
-          <span key={-1}className="output">
-            <MarkTeX content={chatState.streamingMessage!}/>
-          </span>
-        )}
-      </>
-    )
-  }
 
 
   return (
@@ -99,7 +72,11 @@ const Chat: React.FC = () => {
         marginLeft: sidebar ? '15em' : 0
       }}>
         <div className="messages" ref={messagesRef}>
-          <MessageContent/>
+          <MessageContent
+            messages={chatState.messages}
+            status={status}
+            streamingMessage={chatState.streamingMessage}
+            />
           <div ref={bottomMarkerRef} style={{ height: 0, margin: 0, padding: 0, border: 'none', lineHeight: 0 }} />
         </div>
 

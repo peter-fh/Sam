@@ -19,3 +19,9 @@
 	border-radius: 1em 1em 0 1em;
 	margin-bottom: 1em;
 }
+
+.message-image {
+	border-radius: 1.2em;
+	padding: 1em;
+
+}

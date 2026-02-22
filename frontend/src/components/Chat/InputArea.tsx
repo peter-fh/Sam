@@ -1,3 +1,4 @@
+import './InputArea.css'
 import { useEffect, useState } from 'react'
 
 type InputAreaProps = {

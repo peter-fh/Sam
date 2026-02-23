@@ -69,6 +69,12 @@ class Database:
         response = (
             self.client
             .table("courses")
+            .select()
+            .execute()
+        )
+        response = (
+            self.client
+            .table("courses")
             .select("id")
             .eq("code", course)
             .single()
@@ -84,7 +90,7 @@ class Database:
         )
 
         if timestamp:
-            query = query.gte("timestamp", timestamp)
+            query = query.gt("timestamp", timestamp)
 
         response = (
             query

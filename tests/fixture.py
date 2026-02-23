@@ -7,12 +7,12 @@ from openai import AsyncOpenAI, OpenAI
 
 from app.core.types import ModelType
 from app.core.prompt import PromptManager, PromptManagerConfig
-from app.services.ai_service import API, APIConfig
+from app.services.ai_service import AIService, AIConfig
 # from app.services.db_service import Database
 
 
 class Fixture:
-    api: API
+    api: AIService
     test_iterations: int
     mode_test_case: int | None = None
     def __init__(self, iters: int = 1):
@@ -24,7 +24,7 @@ class Fixture:
         self.mode_test_case = case
 
 
-def load_test_fixture() -> API:
+def load_test_fixture() -> AIService:
     _ = load_dotenv(override=True)
     # SUPABASE_URL=os.getenv("SUPABASE_URL", "")
     # SUPABASE_KEY=os.getenv("SUPABASE_SERVICE_KEY", "")
@@ -41,7 +41,7 @@ def load_test_fixture() -> API:
 
     # supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
     # db = Database(supabase)
-    api_config = APIConfig(
+    api_config = AIConfig(
         concept_model=ModelType.gpt_5_mini,
         problem_model=ModelType.gpt_5_mini,
         study_model=ModelType.gpt_5_mini,
@@ -49,6 +49,7 @@ def load_test_fixture() -> API:
         mode_model=ModelType.gemini_2_5_flash_lite,
         debug_mode=True,
         mock_mode=False,
+        conversation_max_tokens=5000,
     )
     prompt_manager_config = PromptManagerConfig(
         outline_dir = Path("./prompts/outlines"),
@@ -61,7 +62,7 @@ def load_test_fixture() -> API:
 
     prompt_manager = PromptManager(prompt_manager_config)
 
-    api = API(
+    api = AIService(
         config=api_config,
         client=openai_client,
         async_client=async_openai_client,

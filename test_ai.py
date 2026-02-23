@@ -1,3 +1,12 @@
+##########################################################################################
+#
+# Real tests that use the AIService directly
+# These tests use real tokens and should only be used when improving/maintaining 
+# the prompts or other aspects of the real endpoints
+# These tests should NOT be used as regression tests
+#
+##########################################################################################
+
 import asyncio
 from typing import Any, Callable
 from collections.abc import Coroutine

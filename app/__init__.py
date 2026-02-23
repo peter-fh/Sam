@@ -15,7 +15,7 @@ from app.services.api_service import API
 from app.routes.api import bp as api_bp
 from app.routes.main import bp as main_bp
 
-def create_app(test_config: Any=None):
+def create_app(test_config: Any = None):
     app_dir = Path(__file__).parent
     root_dir = app_dir.parent
     static_dir = root_dir / 'static'
@@ -30,9 +30,6 @@ def create_app(test_config: Any=None):
 
     if app.config["FLASK_ENV"] == "development":
             _ = CORS(app)
-            local_frontend_dir = root_dir / 'frontend'
-            local_dist_dir = local_frontend_dir / 'dist'
-            app.static_folder = local_dist_dir
             logging.basicConfig(level=logging.INFO, format='%(asctime)s[%(levelname)s]: %(message)s')
     else: 
             logging.basicConfig(level=logging.ERROR, format='%(asctime)s[%(levelname)s]: %(message)s')
@@ -58,6 +55,7 @@ def create_app(test_config: Any=None):
         mode_model=ModelType.gemini_2_5_flash_lite,
         debug_mode=app.config["FLASK_ENV"] == "development",
         mock_mode=app.config["MOCK_MODE"],
+        conversation_max_tokens=app.config["CONVERSATION_MAX_TOKENS"]
     )
     prompt_manager_config = PromptManagerConfig(
         outline_dir = prompt_dir / 'outlines',
@@ -75,6 +73,7 @@ def create_app(test_config: Any=None):
                  asyncAiClient=async_openai_client,
                  promptManager=prompt_manager,
                  supabaseClient=supabase,
+                 mockMode=app.config["MOCK_MODE"],
         )
 
     app.extensions['api'] = api_service

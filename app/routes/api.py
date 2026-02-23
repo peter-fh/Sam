@@ -58,5 +58,5 @@ def new_message():
 
     api: API = current_app.extensions['api']
     stream = api.newMessage(g.user_id, id, message, image)
-    return Response(stream_with_context(stream), content_type="text/plain")
+    return Response(stream_with_context(stream), content_type="text/plain"), 201
 

@@ -10,8 +10,6 @@ from app.core.types import Mode, ModelType
 from app.core.prompt import PromptManager, UtilityType
 import os
 
-EXAMPLE_RESPONSE_FILEPATH = "api" + os.sep + "example_response.md"
-
 
 @dataclass
 class AIConfig:
@@ -22,7 +20,7 @@ class AIConfig:
     mode_model: ModelType
     debug_mode: bool
     mock_mode: bool
-    pass
+    conversation_max_tokens: int
 
 
 class ModeResponse(BaseModel):
@@ -38,7 +36,7 @@ class AIService:
         self.client = client
         self.prompt_manager: PromptManager = prompt_manager
 
-    def getModel(self, prompt_type: Mode) -> ModelType:
+    def _getModel(self, prompt_type: Mode) -> ModelType:
         if prompt_type == Mode.PROBLEM:
             return self.config.problem_model
         elif prompt_type == Mode.CONCEPT:
@@ -46,7 +44,7 @@ class AIService:
         elif prompt_type == Mode.OTHER:
             return self.config.study_model
 
-    def getDeveloperRole(self, model: ModelType) -> str:
+    def _getDeveloperRole(self, model: ModelType) -> str:
         if model == ModelType.o3_mini or model == ModelType.o4_mini:
             return "developer"
         else:
@@ -54,7 +52,7 @@ class AIService:
 
     def getMessage(self, current_conversation: Any, course_code: str, prompt_type: Mode, brevity: str = "Detailed") -> Generator[str]:
 
-        model = self.getModel(prompt_type)
+        model = self._getModel(prompt_type)
         instructions = self.prompt_manager.getInstructions(prompt_type, model)
         outline = self.prompt_manager.getOutline(course_code)
         prompt = instructions + "\n" + outline

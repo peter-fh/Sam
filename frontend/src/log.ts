@@ -3,6 +3,7 @@ export enum LogLevel {
   Error = "ERROR",
   Warning = "WARNING",
   Debug = "DEBUG",
+  Info = "INFO",
 }
 
 const isDebugMode = () => {
@@ -10,8 +11,13 @@ const isDebugMode = () => {
 }
 
 export function Log(level: LogLevel, ...args: any[]) {
-  if (level == LogLevel.Debug && !isDebugMode()) {
-    return
+  if (!isDebugMode()) {
+    if (level == LogLevel.Info) {
+      return
+    }
+    if (level == LogLevel.Debug) {
+      return
+    }
   }
 
   console.log(level, ...args)

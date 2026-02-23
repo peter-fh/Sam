@@ -1,430 +1,248 @@
-import { useState } from "react";
-import { getMessageContent, Message } from "../../api/message";
+import { useEffect, useState } from "react";
+import { Message, newMessage } from "../../api/message";
 import { useChatSettings } from "../../context/useChatContext";
-import { DB } from "../../database/db";
-import { useThreadSelectionContext } from "../../context/useThreadContext";
-import { Log, LogLevel } from "../../log";
-import { Course, QuestionType } from "../../types/options";
+import { Course } from "../../types/options";
 import { API } from "../../api/api";
+import { Log, LogLevel } from "../../log";
+import { useNavigate, useParams } from "react-router-dom";
+import { ImageInfo } from "./useFileReader";
 
 
-const TOKEN_THRESHOLD = 0
-const INTRO_MESSAGE = "Hello! I'm Sam, an AI chatbot powered by Chat-GPT. I use context specific to Concordia to provide better explanations. AI makes mistakes, so please double check any answers you are given."
+export type ChatStatus = 'IDLE'          // Waiting for user input
+                | 'LOADING'       // Initial loading of conversation
+                | 'STREAMING'     // Message from the assistant is currently streaming
+                | 'WAITING'       // Message from user is being sent to the API
+                | 'THINKING'      // Assistant has recieved the user message and is reasoning
+                | 'TRANSCRIBING'  // A transcription for the user's image is being processed
+                | 'ERROR'         // An error has occurred. The chat will not leave this mode until refreshed
 
-const estimateTokens = (characterCount: number) => {
-  return Math.ceil(characterCount * 0.25)
-}
-
-function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+const START_SYMBOL = "__START__"
+const ERROR_SYMBOL = "__ERROR__"
+const END_SYMBOL = "__END__"
 
 interface ChatState {
-  message: string,
-  file: string,
-  image: string,
+  userMessage: string,
+  userImage: ImageInfo | null,
 
-  aiMessage: string,
+  streamingMessage?: string,
+  errorMessage?: string,
 
-  conversation: Message[],
-  summary: string,
-  id: number | null,
+  messages: Message[],
+  course: Course,
 }
-
-interface UIState {
-  sendLock: boolean,
-  initialLoading: boolean,
-  aiLoading: boolean,
-  thinking: boolean,
-}
-
 
 const useConversation = () => {
 
   const {
-    question, setQuestion,
-    course, setCourse,
+    id
+  } = useParams()
+
+  const navigate = useNavigate()
+  const {
+    course
   } = useChatSettings()
 
-  const {
-    setSelectedThread
-  } = useThreadSelectionContext()
-
   const [chatState, setChatState] = useState<ChatState>({
-    message: '',
-    file: '',
-    image: '',
-    aiMessage: '',
-    conversation: [],
-    summary: '',
-    id: null,
+    userMessage: '',
+    userImage: null,
+    messages: [],
+    course: course,
   })
 
-  const [uiState, setUIState] = useState<UIState>({
-    sendLock: false,
-    initialLoading: false,
-    aiLoading: false,
-    thinking: false,
-  })
+  const [status, setStatus] = useState<ChatStatus>('IDLE')
+  const [loadedId, setLoadedId] = useState<number | null>(null)
 
-  const lock = () => {
-    setUIState(prev => ({
+  const handleError = (err: unknown, msg: string) => {
+    setStatus('ERROR')
+    setChatState((prev) => ({
       ...prev,
-      sendLock: true,
+      errorMessage: msg,
     }))
+    console.error(err)
   }
 
-  const unlock = () => {
-    setUIState(prev => ({
-      ...prev,
-      sendLock: false,
-    }))
-  }
-
-
-  async function loadConversation(id: number) {
-    setUIState(prev => ({
-      ...prev, 
-      sendLock: true, 
-      initialLoading: true
-    }))
-
-    const summaryResult = await DB.getSummary(id)
-
-    const messagesResult = await DB.getConversation(id)
-    if (messagesResult == null) {
-      return
-    }
-
-    const settingsResult = await DB.getSettings(id)
-    if (settingsResult && settingsResult.course && settingsResult.mode) {
-      setCourse(settingsResult.course.code as Course)
-      setQuestion(settingsResult.mode.name as QuestionType)
-    }
-
-    const conversation: Message[] = []
-
-    const intro_message: Message = {
-      role: "assistant",
-      content: INTRO_MESSAGE,
-    }
-
-    conversation.push(intro_message)
-
-    for (const raw_message of messagesResult) {
-      const message: Message = {
-        role: raw_message.role as "user" | "assistant",
-        content: raw_message.content!,
-      }
-      conversation.push(message)
-    }
-
-    var summary = ''
-    if (summaryResult && summaryResult.summary) {
-      summary = summaryResult.summary
-    }
-
-
-
-    setChatState(prev => ({
-      ...prev,
-      summary: summary,
-      conversation: conversation,
-      id: id,
-    }))
-
-    setUIState(prev => ({
-      ...prev,
-      initialLoading: false,
-      sendLock: false,
-    }))
-  }
-
-
-  async function intro() {
-    setUIState(prev => ({
-      ...prev,
-      sendLock: false,
-    }))
-    var answer = ""
-    for (const word of INTRO_MESSAGE.split(" ")) {
-      await sleep(30)
-      answer += word + " "
-      setChatState(prev => ({
-        ...prev,
-        aiMessage: answer,
-      }))
-    }
-
-    const introductionMessage: Message = {
-      role: "assistant",
-      content: answer,
-    }
-
-    setChatState(prev => ({
-      ...prev,
-      aiMessage: '',
-      conversation: [introductionMessage],
-    }))
-
-    setUIState(prev => ({
-      ...prev,
-      sendLock: false,
-    }))
-  }
-
-
-  const imageTranscription = async (filename: string) => {
-    let transcription = ""
-
-    transcription = `\n\n*[transcribing ${filename}...]*`
-    appendMessage(transcription, 'user')
-    setChatState(prev => ({
-      ...prev,
-      message: "",
-    }))
-
-    var final_message = chatState.message
-
-    transcription = await API.readImage(chatState.image)
-    transcription = `\n\n*Image Transcription:*\n\n${transcription}` 
-    appendMessage(transcription, 'user')
-    final_message += "The following is a transcription of an image sent by the user:\n\n" + transcription
-    return final_message
-
-  }
-
-  function appendMessage(new_message: string, role: 'user' | 'assistant') {
-    const display_message : Message = {
-      role: role,
-      content: new_message,
-    }
-    setChatState(prev => ({
-      ...prev,
-      conversation: [...prev.conversation, display_message]
-    }))
-  }
-  const handleSendMessage = async () => {
-    if (uiState.sendLock) {
-      return
-    }
-
-    if (!chatState.message && !chatState.image) {
-      setChatState(prev => ({
-        ...prev,
-        message: '',
-      }))
-      return
-    }
-
-    setUIState(prev => ({
-      ...prev,
-      sendLock: true,
-      aiLoading: true,
-    }))
-
-    const user_question = chatState.message
-    const filename = chatState.file
-
-    setChatState(prev => ({
-      ...prev,
-      file: '',
-      message: '',
-    }))
-
-    const initial_conversation = [...chatState.conversation]
-
-    try {
-      appendMessage(user_question, 'user')
-      let final_question = ''
-      if (chatState.image) {
-        Log(LogLevel.Debug, "Awaiting Transcription")
-        final_question = await imageTranscription(filename)
-      } else {
-        final_question = chatState.message
-      }
-
-      const user_message: Message = {
-        role: 'user',
-        content: final_question
-      }
-
-      const conversation = [...chatState.conversation]
-
-      conversation.shift()
-      if (chatState.summary) {
-        const summary_message: Message = {
-          role: 'assistant',
-          content: chatState.summary
+  const loadConversation = async (id: number) => {
+    setStatus('LOADING')
+    const conversationPromise = API.getConversation(id)
+      .then((resultJson) => {
+        const course = resultJson['course']
+        const conversationJson = resultJson['messages']
+        const conversation: Message[] = []
+        for (const raw_message of conversationJson) {
+          const message: Message = newMessage(raw_message.content!, raw_message.role as "user" | "assistant")
+          conversation.push(message)
         }
-        conversation.unshift(summary_message)
-      }
-      conversation.push(user_message)
-
-      const mode_start_time = performance.now()
-      lock()
-      Log(LogLevel.Debug, "Awaiting Mode")
-      const mode = await API.getMode(question, conversation)
-      const mode_end_time = performance.now()
-      Log(LogLevel.Always, `Selected "${mode}" in ${Math.round((mode_end_time - mode_start_time) / 100) / 10}s`)
-      setQuestion(mode)
-
-      let current_conversation_id = chatState.id
-      var conversation_id_promise 
-
-      if (current_conversation_id == null) {
-        conversation_id_promise = API.getTitle(final_question)
-          .then(title => DB.addConversation(title, course, mode))
-          .then(add_conversation_result => {
-
-            if (add_conversation_result == null) {
-              throw new Error("Did not find course or title")
-            }
-            const new_conversation_id = add_conversation_result
-            setChatState(prev => ({
-              ...prev,
-              id: new_conversation_id
-            }))
-            setSelectedThread(new_conversation_id)
-            return new_conversation_id
-          })
-      } else {
-        DB.updateMode(current_conversation_id, mode)
-      }
-
-      setUIState(prev => ({
-        ...prev,
-        thinking: true,
-      }))
-
-      const ask_start_time = performance.now()
-      Log(LogLevel.Debug, "Awaiting response")
-      var assistant_response = ""
-      var firstChunkReceived = false
-      for await (const currentAnswer of API.ask(conversation, mode, course)) {
-        if (!firstChunkReceived) {
-          firstChunkReceived = true
-          setUIState(prev => ({
-            ...prev,
-            aiLoading: false,
-            thinking: false,
-          }))
-        }
-        assistant_response += currentAnswer
-        setChatState(prev => ({
+        setChatState((prev) => ({
           ...prev,
-          aiMessage: assistant_response,
+          messages: conversation,
+          course: course,
         }))
-      }
-      const ask_end_time = performance.now()
-      Log(LogLevel.Always, `Question took ${(ask_end_time - ask_start_time) / 1000}`)
-
-      if (assistant_response == '') {
-        throw new Error("Ask returned zero tokens")
-      }
-
-      if (current_conversation_id == null) {
-        Log(LogLevel.Debug, "Awaiting conversation creation")
-        const db_start_time = performance.now()
-        current_conversation_id = await conversation_id_promise
-        const db_end_time = performance.now()
-        Log(LogLevel.Always, `Waited for conversation result in ${Math.round((db_end_time - db_start_time) / 100) / 10}s`)
-      }
-      DB.addMessage(current_conversation_id!, 'user', final_question)
-        .then(() => DB.addMessage(current_conversation_id!, 'assistant', assistant_response))
+        })
+      .catch(err => handleError(err, 'Could not fetch messages for this conversation'))
 
 
-
-      const ai_message: Message = {
-        role: 'assistant',
-        content: assistant_response
-      }
-
-      setChatState(prev => ({
-        ...prev,
-        image: '',
-        aiMessage: '',
-        conversation: [
-          ...prev.conversation,
-          ai_message,
-        ]
-      }))
-    } catch {
-      alert("Sorry, an error occured! Please try again")
-      setUIState(prev => ({
-        ...prev,
-        thinking: false,
-        aiLoading: false,
-      }))
-      setChatState(prev => ({
-        ...prev,
-        image: '',
-        file: '',
-        aiMessage: '',
-        conversation: initial_conversation
-      }))
-    }
-    Log(LogLevel.Debug, "Unlocking Chat")
-    unlock()
-    summarize()
-
+    setLoadedId(id)
+    await conversationPromise
+    setStatus('IDLE')
   }
 
 
-  function shouldSummarize(): boolean {
-    const conversation = chatState.conversation
-    if (conversation.length < 5) {
-      return false
+  useEffect(() => {
+    if (id == null) {
+      return
+    }
+    if (loadedId == parseInt(id)) {
+      return
+    }
+    loadConversation(parseInt(id))
+
+
+  }, [id])
+
+  const newConversation = async (course: Course) => {
+
+    if (id) {
+      const err = new Error(`Creating new conversation where ID already exists: ${id}`)
+      throw err
     }
 
-    if (conversation[conversation.length - 1].role != 'assistant') {
-      return false
+    const id_response = await API.addConversation(course)
+    const new_id = id_response["id"]
+    Log(LogLevel.Info, `Created new conversation with ID: ${new_id}`)
+    if (!new_id) {
+      const err = new Error("Couldn't add conversation to db, id returned none")
+      throw err
     }
-    var total_length = 0
-    for (var i = 0; i < conversation.length-1; i++) {
-      total_length += getMessageContent(conversation[i]).length
-    }
+    setLoadedId(new_id)
+    return parseInt(new_id)
 
-    if (estimateTokens(total_length) <= TOKEN_THRESHOLD) {
-      Log(LogLevel.Debug, "Characters in conversation: ", total_length)
-      Log(LogLevel.Debug, "Estimated tokens: " + estimateTokens(total_length))
-      Log(LogLevel.Debug, "Threshold: " + TOKEN_THRESHOLD)
-      Log(LogLevel.Debug, "Does not meet token threshold")
-      return false
-    }
-    return true
   }
 
+  const handleSendMessage = async () => {
+    if (status != 'IDLE') {
+      return
+    }
+    console.log("Message in sendMessage: ", chatState.userMessage)
 
-  async function summarize() {
-    if (!shouldSummarize()) {
+    if (!chatState.userMessage && !chatState.userImage) {
       return
     }
 
-    lock()
-    const conversationToSummarize = chatState.conversation.slice(0,-4)
+    var local_id: number
+    if (id == null || !parseInt(id) || !(parseInt(id) > 0)) {
+      try {
+        local_id = await newConversation(chatState.course)
+      } catch(e) {
+        handleError(e, "Failed do add new conversation")
+        return
+      }
+    } else {
+      local_id = parseInt(id)
+    }
 
-    const summary = await API.getSummary(conversationToSummarize)
-
-    setChatState(prev => ({
+    const userQuestion = chatState.userMessage
+    setChatState((prev) => ({
       ...prev,
-      summary: summary,
+      messages: [...prev.messages, newMessage(userQuestion, 'user')],
+      userMessage: '',
     }))
 
-    await DB.updateSummary(chatState.id!, summary)
+    setStatus('WAITING')
 
-    unlock()
+      setChatState((prev) => ({
+        ...prev,
+        streamingMessage: '',
+      }))
+
+    if (local_id == null) {
+      const err = new Error("ID is null when asking question")
+      handleError(err, 'An error occurred while trying to get a response')
+      return
+    }
+    var image = null
+    if (chatState.userImage != null) {
+      image = chatState.userImage.data
+      setChatState((prev) => ({
+        ...prev,
+        messages: [...prev.messages, newMessage('', 'user', chatState.userImage!.url)],
+        userImage: null,
+      }))
+    }
+
+    const answerGenerator = API.ask(local_id, userQuestion, image)
+    const startingSymbol = await answerGenerator.next()
+    if (startingSymbol.value != START_SYMBOL) {
+      const err = new Error("First symbol was not the start symbol: " + startingSymbol.value)
+      handleError(err, 'An error occurred while trying to get a response')
+      return
+    }
+
+    var totalMessage = ''
+    var firstChunkReceived = false
+    try {
+    for await(const chunk of answerGenerator) {
+      if (!firstChunkReceived) {
+        console.log("received first chunk")
+        setStatus('STREAMING')
+        firstChunkReceived = true
+      } 
+      if (chunk == END_SYMBOL) {
+        break
+      }
+      if (chunk == ERROR_SYMBOL) {
+        const err = new Error("Error symbol encountered during generation")
+        handleError(err, 'An error occurred while trying to get a response')
+        break
+      }
+
+      totalMessage += chunk
+      setChatState((prev) => ({
+        ...prev,
+        streamingMessage: totalMessage
+      }))
+
+    }
+    } catch (e) {
+      handleError(e, "Error thrown during generation")
+    }
+
+    if (!totalMessage) {
+      const err = new Error("AI message request returned zero tokens")
+      handleError(err, 'An error occurred while trying to get a response')
+      return
+    }
+
+    const aiResponse: Message = newMessage(totalMessage, 'assistant')
+    setChatState((prev) => ({
+      ...prev,
+      messages: [...prev.messages, aiResponse],
+      streamingMessage: '',
+    }))
+    if (id == null) {
+        navigate(String(local_id), { replace: true })
+    }
+    setStatus('IDLE')
+  }
+
+  const updateUserMessage = (msg: string) => {
+    setChatState((prev) => ({
+      ...prev,
+      userMessage: msg,
+    }))
+  }
+  const updateUserImage = (imageData: ImageInfo) => {
+    setChatState((prev) => ({
+      ...prev,
+      userImage: imageData,
+    }))
   }
 
   return {
-    intro,
     handleSendMessage,
-    summarize,
-    loadConversation,
     chatState,
-    setChatState,
-    uiState,
-    setUIState,
+    status,
+    updateUserMessage,
+    updateUserImage,
   }
 }
 

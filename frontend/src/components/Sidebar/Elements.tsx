@@ -1,63 +1,11 @@
-import { Course, DetailLevel, QuestionType } from '../../types/options'
+import { Course } from '../../types/options'
 import './Elements.css'
 import React from 'react'
 import { useChatSettings } from '../../context/useChatContext';
-import { useThreadSelectionContext } from '../../context/useThreadContext';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { DB } from "../../database/db"
+import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from "react"
+import { API } from '../../api/api.ts'
 import supabase from '../../supabase.ts'
-
-export function NewConversationButton() {
-
-  const { 
-    setQuestion 
-  } = useChatSettings()
-
-  const navigate = useNavigate()
-  return (
-    <button
-      title="New Chat"
-      className="interactive sidebar-button"
-      onClick={() => {
-        setQuestion(null)
-        navigate("/")
-      }}
-    >
-      {/* <i className="fa-solid fa-plus" /> */}
-      <i className="fa-solid fa-pen-to-square" />
-    </button>
-  );
-}
-
-export function OpenThreadsButton() {
-  const navigate = useNavigate()
-  const location = useLocation()
-
-  const {
-    selectedThread
-  } = useThreadSelectionContext()
-
-  return (
-    <button
-      title='Open Chat History'
-      className="interactive sidebar-button"
-      onClick={ () => {
-        if (location.pathname.includes('/chat')) {
-          navigate("/threads")
-        } else {
-          if (selectedThread) {
-            navigate(`/chat/${selectedThread}`)
-          } else {
-            navigate("/chat")
-          }
-        }
-      }}
-    >
-      <i className="fa-solid fa-comments"></i>
-    </button>
-  )
-}
 
 export function SidebarButton() {
   const {
@@ -80,18 +28,6 @@ export function SidebarButton() {
   )
 }
 
-export function LogoutButton() {
-  return (
-    <button
-      title='Toggle Sidebar'
-      className="interactive sidebar-button"
-      onClick={ () => supabase.auth.signOut() }
-    >
-      <i className="fa-solid fa-right-from-bracket"></i>
-    </button>
-  )
-}
-
 
 export function LogoutText() {
   return (
@@ -107,9 +43,6 @@ export function LogoutText() {
 }
 
 export function NewConversationText() {
-  const { 
-    setQuestion 
-  } = useChatSettings()
 
   const navigate = useNavigate()
   return (
@@ -117,7 +50,6 @@ export function NewConversationText() {
       title="New Chat"
       className="interactive sidebar-text-button"
       onClick={() => {
-        setQuestion(null)
         navigate("/")
       }}
     >
@@ -193,90 +125,6 @@ export function CourseSelect() {
   );
 }
 
-export function QuestionTypeSelect() {
-  const {
-    question,
-    setQuestion,
-  } = useChatSettings()
-
-  return (
-    <div className="option">
-      <h3 className="sidebar-input-header">Question Type</h3>
-
-      <span>
-        {Object.values(QuestionType).map((option, index) => (
-          <React.Fragment key={option}>
-            <button
-              key={option}
-              onClick={() => setQuestion(option)}
-              className={`select-box-option ${
-question === option ? "active" : ""
-}`}
-            >
-              {option}
-            </button>
-            {index < Object.values(QuestionType).length - 1
-              ? "|"
-              : ""}
-          </React.Fragment>
-        ))}
-      </span>
-    </div>
-  );
-}
-
-export function NewConversation() {
-  const { 
-    setQuestion 
-  } = useChatSettings()
-
-  const navigate = useNavigate()
-  return (
-    <div className="option">
-    <button
-      title="New Chat"
-      className="interactive new-conversation-button"
-      onClick={() => {
-        setQuestion(null)
-        navigate("/")
-      }}
-    >
-      {/* <i className="fa-solid fa-plus" /> */}
-        <p>New Conversation</p>
-    </button>
-    </div>
-  );
-}
-
-export function BrevitySelect() {
-  const {
-    detailLevel,
-    setDetailLevel,
-  } = useChatSettings()
-
-  return (
-    <div className="option">
-      <h3 className='sidebar-input-header'>Level of Detail</h3>
-
-      <span>
-        {Object.values(DetailLevel).map((option, index) => (
-          <React.Fragment key={option}>
-            <button
-              key={option}
-              onClick={() => setDetailLevel(option)}
-              className={`select-box-option ${
-detailLevel === option ? "active" : ""
-}`}
-            >
-              {option}
-            </button>
-            {index < Object.values(DetailLevel).length - 1 ? "|" : ""}
-          </React.Fragment>
-        ))}
-      </span>
-    </div>
-  );
-}
 
 interface ConversationItem {
   title: string,
@@ -284,12 +132,8 @@ interface ConversationItem {
 }
 export function Threads() {
 
+  const { id } = useParams()
   const navigate = useNavigate()
-
-  const {
-    selectedThread,
-    setSelectedThread,
-  } = useThreadSelectionContext()
 
   const {
   } = useChatSettings()
@@ -306,24 +150,23 @@ export function Threads() {
   function ClickableThread(props: ClickableThreadProps) {
     const handleClick = () => {
       navigate(`/chat/${props.id}`)
-      setSelectedThread(props.id)
     }
     let current_classes = ""
     const thread_classes = "thread thread-list-item"
     const selected_thread_classes = "thread thread-list-item thread-selected"
-    if (props.id == selectedThread) {
+    if (id && props.id == parseInt(id)){
       current_classes = selected_thread_classes
     } else {
       current_classes = thread_classes
     }
 
     useEffect(() => {
-      if (props.id == selectedThread) {
+      if (id && props.id == parseInt(id)){
         current_classes = selected_thread_classes
       } else {
-        current_classes = thread_classes
       }
-    }, [selectedThread])
+      current_classes = thread_classes
+    }, [id])
 
     return (
       <div className={current_classes} onClick={handleClick}>
@@ -336,7 +179,7 @@ export function Threads() {
   async function updateConversations() {
     setError(false)
     try {
-      const conversation_data = await DB.getConversations()
+      const conversation_data = await API.getConversations()
       if (!conversation_data) {
         setLoading(false)
         return
@@ -352,6 +195,7 @@ export function Threads() {
       }
       setConversations(total_conversations)
     } catch (e) {
+      console.error(e)
       setError(true)
     } finally {
       setLoading(false)
@@ -361,7 +205,7 @@ export function Threads() {
 
   useEffect(() => {
     updateConversations()
-  }, [selectedThread])
+  }, [id])
 
   if (loading) {
     return (

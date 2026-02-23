@@ -21,8 +21,10 @@ class UtilityType(Enum):
 
 class PromptManager:
     config: PromptManagerConfig
-    def __init__(self, config: PromptManagerConfig):
+    debugMode: bool = False
+    def __init__(self, config: PromptManagerConfig, debug_mode: bool = False):
         self.config = config
+        self.debugMode = debug_mode
 
     def getFormattingString(self):
         formatting_filepath = self.config.util_dir / 'formatting.md'

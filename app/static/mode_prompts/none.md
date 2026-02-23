@@ -1,4 +1,7 @@
-A user has asked an AI tutoring assistant the following question: ${question}
+A user has asked an AI tutoring assistant the following question in the conversation: 
+```json
+${question}
+```
 
 Based on the conversation, you must select the mode that the assistant should respond in. The modes are as follows:
 

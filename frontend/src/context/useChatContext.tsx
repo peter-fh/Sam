@@ -1,13 +1,9 @@
 import { createContext, ReactNode, useContext, useState } from "react";
-import { QuestionType, Course, DetailLevel } from "../types/options";
+import { Course } from "../types/options";
 
 interface ChatSettingsContextType {
-  question: QuestionType | null
-  setQuestion: (q: QuestionType | null) => void
   course: Course
   setCourse: (c: Course) => void
-  detailLevel: DetailLevel
-  setDetailLevel: (d: DetailLevel) => void
   sidebar: boolean
   setSidebar: (s: boolean) => void
   smallScreen: boolean
@@ -20,9 +16,7 @@ const ChatSettingsContext = createContext<ChatSettingsContextType | undefined>(u
 
 
 export function ChatSettingsProvider({ children }: { children: ReactNode }) {
-  const [question, setQuestion] = useState<QuestionType | null>(null);
   const [course, setCourse] = useState<Course>(Course.MATH203);
-  const [detailLevel, setDetailLevel] = useState<DetailLevel>(DetailLevel.DETAILED);
   const [sidebar, setSidebar] = useState<boolean>(true);
   const [smallScreen, setSmallScreen] = useState<boolean>(true);
   const [disclaimerAccepted, setDisclaimerAccepted] = useState<boolean>(false);
@@ -30,9 +24,7 @@ export function ChatSettingsProvider({ children }: { children: ReactNode }) {
   return (
     <ChatSettingsContext.Provider
       value={{
-        question, setQuestion,
         course, setCourse,
-        detailLevel, setDetailLevel,
         sidebar, setSidebar,
         smallScreen, setSmallScreen,
         disclaimerAccepted, setDisclaimerAccepted

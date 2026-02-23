@@ -1,6 +1,8 @@
 from dataclasses import dataclass
+import json
 from typing import Any
 from collections.abc import Generator
+from flask import current_app
 from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel
 
@@ -8,11 +10,9 @@ from app.core.types import Mode, ModelType
 from app.core.prompt import PromptManager, UtilityType
 import os
 
-EXAMPLE_RESPONSE_FILEPATH = "api" + os.sep + "example_response.md"
-
 
 @dataclass
-class APIConfig:
+class AIConfig:
     concept_model: ModelType
     problem_model: ModelType
     study_model: ModelType
@@ -20,23 +20,23 @@ class APIConfig:
     mode_model: ModelType
     debug_mode: bool
     mock_mode: bool
-    pass
+    conversation_max_tokens: int
 
 
 class ModeResponse(BaseModel):
     mode: Mode
 
-class API:
-    config: APIConfig
+class AIService:
+    config: AIConfig
     async_client: AsyncOpenAI
     client: OpenAI
-    def __init__(self, config: APIConfig, client: OpenAI, async_client: AsyncOpenAI, prompt_manager: PromptManager):
+    def __init__(self, config: AIConfig, client: OpenAI, async_client: AsyncOpenAI, prompt_manager: PromptManager):
         self.config = config
         self.async_client = async_client
         self.client = client
         self.prompt_manager: PromptManager = prompt_manager
 
-    def getModel(self, prompt_type: Mode) -> ModelType:
+    def _getModel(self, prompt_type: Mode) -> ModelType:
         if prompt_type == Mode.PROBLEM:
             return self.config.problem_model
         elif prompt_type == Mode.CONCEPT:
@@ -44,24 +44,21 @@ class API:
         elif prompt_type == Mode.OTHER:
             return self.config.study_model
 
-    def getDeveloperRole(self, model: ModelType) -> str:
+    def _getDeveloperRole(self, model: ModelType) -> str:
         if model == ModelType.o3_mini or model == ModelType.o4_mini:
             return "developer"
         else:
             return "system"
 
-    def getMessage(self, conversation: Any, course_code: str, prompt_type: Mode, brevity: str) -> Generator[str]:
+    def getMessage(self, current_conversation: Any, course_code: str, prompt_type: Mode, brevity: str = "Detailed") -> Generator[str]:
 
-        model = self.getModel(prompt_type)
+        model = self._getModel(prompt_type)
         instructions = self.prompt_manager.getInstructions(prompt_type, model)
         outline = self.prompt_manager.getOutline(course_code)
         prompt = instructions + "\n" + outline
         prompt = prompt.replace("{$brevity}", brevity)
 
-        conversation.insert(0, {
-            "role": "system",
-            "content": prompt,
-                            })
+        conversation: Any = [{"role": "system", "content": prompt}, *current_conversation]
 
         stream = self.client.chat.completions.create(
             messages=conversation,
@@ -104,19 +101,16 @@ class API:
 
     async def getSummary(self, conversation: Any) -> str:
 
-        instructions = self.prompt_manager.getUtilityPrompt(UtilityType.SUMMARY)
-        conversation.insert(0, {
-            "role": "system",
-            "content": [{
-                "type": "text",
-                "text": instructions 
-            }
-                        ]
-        })
+        instructions = self.prompt_manager.getUtilityPrompt(UtilityType.SUMMARY).replace("${conversation}", json.dumps(conversation))
 
         response = await self.async_client.chat.completions.create(
             model=self.config.utility_model.value,
-            messages=conversation,
+            messages=[
+                {
+                    "role": "user",
+                    "content": instructions
+                },
+            ],
             temperature=0,
             max_tokens=600
         )   

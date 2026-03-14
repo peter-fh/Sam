@@ -2,13 +2,11 @@ from dataclasses import dataclass
 import json
 from typing import Any
 from collections.abc import Generator
-from flask import current_app
 from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel
 
 from app.core.types import Mode, ModelType
 from app.core.prompt import PromptManager, UtilityType
-import os
 
 
 @dataclass
@@ -154,6 +152,6 @@ class AIService:
         )
 
         res = response.output_parsed
-        if res == None:
+        if res is None:
             raise ValueError("Mode fetch did not return a response")
         return res.mode.value

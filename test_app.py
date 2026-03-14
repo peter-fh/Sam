@@ -132,7 +132,7 @@ def test_send_one_message(client_with_auth: FlaskClient):
     time.sleep(3)
 
     # [Assert]
-    response = client_with_auth.get(f'/api/conversations')
+    response = client_with_auth.get('/api/conversations')
     assert response.status_code == 200
     data = response.get_json()
     assert data
@@ -179,7 +179,7 @@ def test_send_messages_with_summary(client_with_auth: FlaskClient):
 
 
     # [Assert]
-    response = client_with_auth.get(f'/api/conversations')
+    response = client_with_auth.get('/api/conversations')
     assert response.status_code == 200
     data = response.get_json()
     assert data

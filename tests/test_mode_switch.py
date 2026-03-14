@@ -61,7 +61,7 @@ async def run_mode_tests(fixture: Fixture):
         print("=" * 30)
         print("\n")
 
-    if fixture.mode_test_case != None:
+    if fixture.mode_test_case is not None:
         for i in range(fixture.test_iterations):
             await run_test_case(mode_cases[fixture.mode_test_case])
     else:

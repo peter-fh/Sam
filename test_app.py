@@ -17,7 +17,7 @@ import time
 
 from app import create_app
 from app.services.mock_ai_service import MOCK_RESPONSE as EXPECTED_RESPONSE
-from app.services.mock_ai_service import MOCK_TITLE as EXPECTED_TITLE
+from app.services.mock_ai_service import MOCK_TEXT_RESPONSE as EXPECTED_TEXT_RESPONSE
 from app.services.mock_ai_service import MOCK_SUMMARY as EXPECTED_SUMMARY
 
 _ = load_dotenv(override=True)
@@ -123,7 +123,7 @@ def test_send_one_message(client_with_auth: FlaskClient):
             results.append(chunk)
         streamed_message = b"".join(results).decode('utf-8')
         assert len(streamed_message) != 0
-        expected_message = f"__START__{EXPECTED_RESPONSE}__END__"
+        expected_message = f"__START__\n{EXPECTED_RESPONSE}__END__\n"
         assert streamed_message == expected_message, f"Returned message: {streamed_message}, expected: {expected_message}"
 
     # [Act]
@@ -139,7 +139,7 @@ def test_send_one_message(client_with_auth: FlaskClient):
     assert len(data) == 1
     conversation = data[0]
     title = conversation.get('title')
-    assert title == EXPECTED_TITLE
+    assert title == EXPECTED_TEXT_RESPONSE
 
 
 def test_send_messages_with_summary(client_with_auth: FlaskClient):
@@ -167,7 +167,7 @@ def test_send_messages_with_summary(client_with_auth: FlaskClient):
             results.append(chunk)
         streamed_message = b"".join(results).decode('utf-8')
         assert len(streamed_message) != 0
-        expected_message = f"__START__{EXPECTED_RESPONSE}__END__"
+        expected_message = f"__START__\n{EXPECTED_RESPONSE}__END__\n"
         assert streamed_message == expected_message, f"Returned message: {streamed_message}, expected: {expected_message}"
 
     # [Act]
@@ -188,7 +188,7 @@ def test_send_messages_with_summary(client_with_auth: FlaskClient):
     summary = conversation.get('summary')
     assert summary == EXPECTED_SUMMARY
     title = conversation.get('title')
-    assert title == EXPECTED_TITLE
+    assert title == EXPECTED_TEXT_RESPONSE
 
     response = client_with_auth.get(f'/api/conversations/{id}')
     assert response.status_code == 200

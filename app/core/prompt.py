@@ -65,7 +65,7 @@ class PromptManager:
         if mode == Mode.OTHER:
             prompt_dir = self.config.default_dir
 
-        if prompt_dir is not None:
+        if prompt_dir is None:
             raise ValueError("Invalid mode given to getInstructions")
 
         model_filepath: Path = prompt_dir / model_filename

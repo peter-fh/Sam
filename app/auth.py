@@ -7,6 +7,13 @@ def require_auth(f: Any):
     """Decorator to require authentication for routes"""
     @wraps(f)
     def decorated_function(*args: Any, **kwargs: Any):
+        '''
+        if current_app.config.get("MOCK_AUTH"):
+            g.user = MockUser()
+            g.user_id = MockUser.id
+            return f(*args, **kwargs)
+        '''
+
         auth_header = request.headers.get('Authorization')
 
         accepted_domains = ['concordia.ca', 'live.concordia.ca']

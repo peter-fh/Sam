@@ -34,7 +34,8 @@ async function authorizedGet(endpoint: string) {
   })
 
   if (!response.ok) {
-    throw new Error(`Http error: ${response.status}`)
+    const bodyText = await response.text().catch(() => '')
+    throw new Error(`Http error: ${response.status}${bodyText ? ` - ${bodyText}` : ''}`)
   }
   const response_json = await response.json()
   return response_json
@@ -56,7 +57,8 @@ async function authorizedPost(endpoint: string, body: string) {
   })
 
   if (!response.ok) {
-    throw new Error(`Http error: ${response.status}`)
+    const bodyText = await response.text().catch(() => '')
+    throw new Error(`Http error: ${response.status}${bodyText ? ` - ${bodyText}` : ''}`)
   }
   return response.json()
 }
@@ -93,6 +95,7 @@ export namespace API {
     Log(LogLevel.Info, `Fetching response for conversation ${JSON.stringify(message)}`)
     const reader = response.body!.getReader()
     const decoder = new TextDecoder('utf-8')
+    let buffer = ""
 
     while (true) {
       const {value, done} = await reader.read()
@@ -100,10 +103,13 @@ export namespace API {
         break
       }
 
-      const chunk = decoder.decode(value, { stream: true})
-      yield chunk
+      buffer += decoder.decode(value, { stream: true})
+      const lines = buffer.split("\n")
+      buffer = lines.pop()!
+      for (const line of lines) {
+        if (line) yield line + "\n"
+      }
     }
 
   }
 }
-

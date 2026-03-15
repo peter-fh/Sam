@@ -1,6 +1,6 @@
 
 export type Message = {
-  role: 'assistant' | 'user'
+  role: 'assistant' | 'user' | 'error'
   content: string
   url: string | null
 }

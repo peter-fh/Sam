@@ -1,0 +1,38 @@
+.error-container {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: left;
+	padding-bottom: 0;
+	margin-bottom: 0;
+	white-space: nowrap;
+	width: 100%;
+}
+
+.error-content-container {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	width: 11.5rem;
+	overflow: hidden;
+	transition: width 0.3s ease;
+}
+
+
+.error-container:hover .error-content-container {
+	width: 100%;
+}
+
+.error-message {
+	padding-left: 0.5rem;
+	padding-right: 1rem;
+	font-size: 1rem;
+	font-weight: bold;
+}
+
+.error-description {
+	font-weight: italic;
+	font-size: 0.7rem;
+
+}
+

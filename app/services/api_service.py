@@ -135,7 +135,7 @@ class API:
 
             t["message_start"] = perf_counter()
             chunks = []
-            yield "__START__"
+            yield "__START__\n"
             for chunk in self.aiService.getMessage(currentConversation, conversationResult["course"], mode):
                 chunks.append(chunk)
                 yield chunk
@@ -162,13 +162,16 @@ class API:
             current_app.logger.info(f'Total time:             {t['end'] - t0}s')
 
             # Yield the end symbol to ensure the app knows when this conversation is done processing
-            yield "__END__"
+            yield "__END__\n"
         except GeneratorExit:
             current_app.logger.exception('Client disconnected the stream')
             return
         except Exception as e:
-            current_app.logger.exception("Failed to get next message: ", e)
-            yield "__ERROR__"
+            current_app.logger.exception("Failed to get next message")
+            current_app.logger.exception(e)
+            yield "__ERROR__\n"
+            yield str(e) + "\n"
+            yield "__END__" + "\n"
 
 
 

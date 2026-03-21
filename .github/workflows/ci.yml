@@ -102,7 +102,11 @@ jobs:
         run: docker build --platform linux/amd64 -t peterfh/sam .
 
       - name: Run container
-        run: docker run -p 8080:5000 -t peterfh/sam
+        run: docker run -d \
+            -p 8080:5000 \
+            -e SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
+            -e SUPABASE_SERVICE_KEY=${{ secrets.SUPABASE_SERVICE_KEY }} \
+            peterfh/sam
 
       - name: Wait for startup
         run: sleep 3

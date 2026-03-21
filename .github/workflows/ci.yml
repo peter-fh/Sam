@@ -61,6 +61,11 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
+    - name: Install prompts
+      run: |
+          git clone https://github.com/peter-fh/Sam-Prompts.git
+          cp -r ./Sam-Prompts/prompts ./prompts
+
     - name: Test Backend
       run: >-
         pytest --log-cli-level=INFO test_app.py

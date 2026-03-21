@@ -16,8 +16,8 @@ export default defineConfig(({ mode }) => {
     setupFiles: './src/test/setup.ts',
     exclude: [...defaultExclude, "**/*e2e*"],
     env: {
-      VITE_API_URL: "mock-url",
-      VITE_SUPABASE_URL: "mock-url",
+      VITE_API_URL: "http://localhost:54321",
+      VITE_SUPABASE_URL: "http://localhost:54321",
       VITE_SUPABASE_ANON_KEY: "mock-key",
     }
   }

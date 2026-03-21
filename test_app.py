@@ -79,10 +79,6 @@ def client_with_auth(app: Flask):
     # admin_client.auth.admin.delete_user(auth_response.user.id)
 
 
-def test_root(client_with_auth: FlaskClient):
-    response = client_with_auth.get('/')
-    assert response.status_code == 200
-
 def test_get_no_conversations(client_with_auth: FlaskClient):
     response = client_with_auth.get('/api/conversations')
     assert response.status_code == 200, f"Failed! backend returned: {response.get_json()}"

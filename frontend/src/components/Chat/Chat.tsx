@@ -68,7 +68,7 @@ const Chat: React.FC = () => {
     <>
       <div className="chat" onDrop={handleDrop} style={{
         marginLeft: sidebar ? '15em' : 0
-      }}>
+      }} data-testid="chat">
         <div className="messages" ref={messagesRef}>
         {status === "ERROR" && 
           <ErrorBar

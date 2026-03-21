@@ -61,6 +61,7 @@ const InputArea : React.FC<InputAreaProps> = (props: InputAreaProps) => {
         cols={50} 
         placeholder="Enter your message here..."
         className="input-block"
+        data-testid="chat-input"
       />
       <input
         type="file"

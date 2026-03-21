@@ -2,12 +2,16 @@ import Endpoints from "../endpoints"
 import { Log, LogLevel } from "../log"
 import supabase from "../supabase"
 
+
+const BASE_URL = import.meta.env.VITE_API_URL ?? ''
+
 async function fetchWithAuth(endpoint: string, headers: any, body: string) {
   const { data: { session }, error } = await supabase.auth.getSession()
   if (error || !session) {
     throw new Error('Not authenticated')
   }
-  const request = new Request(endpoint, {
+  const url = BASE_URL + endpoint
+  const request = new Request(url, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${session.access_token}`,
@@ -25,7 +29,8 @@ async function authorizedGet(endpoint: string) {
   if (error || !session) {
     throw new Error('Not authenticated')
   }
-  const response = await fetch(endpoint, {
+  const url = BASE_URL + endpoint
+  const response = await fetch(url, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -47,7 +52,8 @@ async function authorizedPost(endpoint: string, body: string) {
   if (error || !session) {
     throw new Error('Not authenticated')
   }
-  const response = await fetch(endpoint, {
+  const url = BASE_URL + endpoint
+  const response = await fetch(url, {
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',

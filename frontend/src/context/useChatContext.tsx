@@ -1,7 +1,7 @@
 import { createContext, ReactNode, useContext, useState } from "react";
 import { Course } from "../types/options";
 
-interface ChatSettingsContextType {
+export interface ChatSettingsContextType {
   course: Course
   setCourse: (c: Course) => void
   sidebar: boolean
@@ -12,7 +12,7 @@ interface ChatSettingsContextType {
   setDisclaimerAccepted: (s: boolean) => void
 }
 
-const ChatSettingsContext = createContext<ChatSettingsContextType | undefined>(undefined)
+export const ChatSettingsContext = createContext<ChatSettingsContextType | undefined>(undefined)
 
 
 export function ChatSettingsProvider({ children }: { children: ReactNode }) {

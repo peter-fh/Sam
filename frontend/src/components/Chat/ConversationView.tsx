@@ -68,7 +68,8 @@ const MessageContent = (props: MessageContentProps) => {
         <WaitingSpinner/>
       )}
       {props.status == "STREAMING" && props.streamingMessage && (
-        <span key={-1}className="assistant">
+        <span key={-1}className="assistant" 
+        data-testid="streaming-message">
           <MarkTeX content={props.streamingMessage}/>
         </span>
       )}

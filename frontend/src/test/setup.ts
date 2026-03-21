@@ -1,19 +1,54 @@
 import '@testing-library/jest-dom'
 import supabase from '../supabase'
-import { afterAll, beforeAll } from 'vitest'
+import { afterAll, beforeAll, beforeEach, vi } from 'vitest'
+import type { Session, Subscription } from '@supabase/supabase-js'
+
+window.MathJax = {
+  typeset: vi.fn(),
+}
+
+window.HTMLElement.prototype.scrollIntoView = vi.fn()
+
+vi.mock('../supabase.ts')
+
+const mockSession: Session = {
+  access_token: "mock_access_token",
+  refresh_token: "mock_refresh_token",
+  expires_in: 99999,
+  token_type: "mock_token_type",
+  user: {
+    id: "cb844986-e61c-4f7c-99bb-1ea340145c7a", // Randomly generated UUID
+    app_metadata: {
+    },
+    user_metadata: {
+    },
+    aud: "mock_aud",
+    created_at: "mock_created_at",
+  }
+}
+
+const mockSubscription: Subscription = {
+  id: "cb844986-e61c-4f7c-99bb-1ea340145c7a",
+  callback: vi.fn(),
+  unsubscribe: vi.fn(),
+}
 
 beforeAll(async () => {
-  await supabase.auth.signUp({
-    email: 'test@concordia.ca',
-    password: 'testpassword123!'
-  })
-
-  await supabase.auth.signInWithPassword({
-    email: 'test@concordia.ca',
-    password: 'testpassword123!'
-  })
 })
 
-afterAll(async () => {
-  await supabase.auth.signOut()
+afterAll(() => {
+  vi.restoreAllMocks()
+})
+
+beforeEach(() => {
+  window.history.pushState({}, '', '/')
+  vi.clearAllMocks()
+  vi.mocked(supabase.auth.getSession).mockResolvedValue({
+    data: { session: mockSession },
+    error: null,
+  } as any)
+  vi.mocked(supabase.auth.onAuthStateChange).mockReturnValue({
+    data: { subscription: mockSubscription },
+  } as any)
+  global.fetch = vi.fn()
 })

@@ -20,10 +20,10 @@ from app.services.mock_ai_service import MOCK_RESPONSE as EXPECTED_RESPONSE
 from app.services.mock_ai_service import MOCK_TEXT_RESPONSE as EXPECTED_TEXT_RESPONSE
 from app.services.mock_ai_service import MOCK_SUMMARY as EXPECTED_SUMMARY
 
-_ = load_dotenv(override=True)
-SUPABASE_URL = os.getenv('LOCAL_SUPABASE_URL')
-SUPABASE_ANON_KEY = os.getenv('LOCAL_SUPABASE_ANON_KEY')
-SUPABASE_SECRET_KEY = os.getenv('LOCAL_SUPABASE_SECRET_KEY')
+_ = load_dotenv(".local.env", override=True)
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY')
+SUPABASE_SECRET_KEY = os.getenv('SUPABASE_SECRET_KEY')
 
 @pytest.fixture
 def app():

@@ -54,7 +54,7 @@ jobs:
         echo "SUPABASE_SECRET_KEY=$SERVICE_ROLE_KEY" >> $GITHUB_ENV
 
     - uses: actions/setup-python@v5
-      with: { python-version: "3.14" }
+      with: { python-version: "3.13" }
 
     - name: Install backend dependencies
       run: |

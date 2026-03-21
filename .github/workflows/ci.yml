@@ -112,6 +112,7 @@ jobs:
           curl --fail --retry 5 --retry-delay 2 http://localhost:8080/health
 
   publish:
+    runs-on: ubuntu-latest
     needs: [test-docker]
     if: github.event_name == 'push'
     steps:

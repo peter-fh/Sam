@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
     exclude: [...defaultExclude, "**/*e2e*"],
     env: {
       VITE_API_URL: "mock-url",
-      VITE_SUPABASE_URL: "mock-url"
+      VITE_SUPABASE_URL: "mock-url",
       VITE_SUPABASE_ANON_KEY: "mock-key",
     }
   }

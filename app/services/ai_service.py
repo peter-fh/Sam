@@ -127,7 +127,7 @@ class AIService:
             prompts.append(self.prompt_manager.getOutline("MATH 203"))
             for utilityType in UtilityType:
                 prompts.append(self.prompt_manager.getUtilityPrompt(utilityType))
-        except:
+        except Exception:
             return False
 
         for prompt in prompts:

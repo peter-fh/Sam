@@ -5,7 +5,6 @@ import { Course } from '../types/options'
 import { render, RenderOptions } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import App from '../App'
-import { mockComponent } from 'react-dom/test-utils'
 
 export const defaultSettings: ChatSettingsContextType = {
   course: Course.MATH203,

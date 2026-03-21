@@ -46,6 +46,8 @@ class API:
         self.dbService = db_service.Database(supabaseClient)
         self._asyncRunner = AsyncRunner()
 
+    def healthCheck(self) -> bool:
+        return self.aiService.healthCheck()
     def newConversation(self, userId: int, course: str):
         id = self.dbService.AddConversation(userId, course)
         return id

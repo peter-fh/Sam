@@ -117,6 +117,24 @@ class AIService:
 
         return str(response.choices[0].message.content)
 
+    def healthCheck(self) -> bool:
+        prompts: list[str] = []
+        try:
+            for mode in Mode:
+                prompts.append(self.prompt_manager.getInstructions(mode, self._getModel(mode)))
+                prompts.append(self.prompt_manager.getModePrompt(mode))
+            prompts.append(self.prompt_manager.getModePrompt(None))
+            prompts.append(self.prompt_manager.getOutline("MATH 203"))
+            for utilityType in UtilityType:
+                prompts.append(self.prompt_manager.getUtilityPrompt(utilityType))
+        except:
+            return False
+
+        for prompt in prompts:
+            if not prompt or prompt == "":
+                return False
+
+        return True
 
     def getMessage(self, current_conversation: Any, course_code: str, prompt_type: Mode, brevity: str = "Detailed") -> Generator[str]:
 

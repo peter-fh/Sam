@@ -15,6 +15,11 @@ export default defineConfig(({ mode }) => {
     globals: true,
     setupFiles: './src/test/setup.ts',
     exclude: [...defaultExclude, "**/*e2e*"],
+    env: {
+      VITE_API_URL: "mock-url",
+      VITE_SUPABASE_URL: "mock-url"
+      VITE_SUPABASE_ANON_KEY: "mock-key",
+    }
   }
 
   const e2eTestConfig = {

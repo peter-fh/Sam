@@ -46,6 +46,13 @@ jobs:
     - name: Start Supabase
       run: supabase start
 
+    - name: Set Supabase env vars
+      run: |
+        eval "$(supabase status -o env)"
+        echo "SUPABASE_URL=$API_URL" >> $GITHUB_ENV
+        echo "SUPABASE_ANON_KEY=$ANON_KEY" >> $GITHUB_ENV
+        echo "SUPABASE_SECRET_KEY=$SERVICE_ROLE_KEY" >> $GITHUB_ENV
+
     - uses: actions/setup-python@v5
       with: { python-version: "3.14" }
 

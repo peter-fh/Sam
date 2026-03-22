@@ -98,6 +98,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Run container
+        run: docker compose up -d --build
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
       - name: Build image
         run: docker build --platform linux/amd64 -t peterfh/sam .
 

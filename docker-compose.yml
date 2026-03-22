@@ -4,8 +4,5 @@ services:
     platform: linux/amd64
     build:
       context: .
-      args:
-        - VITE_SUPABASE_URL=${SUPABASE_URL}
-        - VITE_SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
     ports:
         - "8080:5000"

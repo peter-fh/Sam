@@ -104,16 +104,6 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
-      - name: Build image
-        run: docker build --platform linux/amd64 -t peterfh/sam .
-
-      - name: Run container
-        run: |
-          docker run -d \
-            -p 8080:5000 \
-            -e SUPABASE_URL=${{ secrets.SUPABASE_URL }} \
-            -e SUPABASE_SERVICE_KEY=${{ secrets.SUPABASE_SERVICE_KEY }} \
-            peterfh/sam
 
       - name: Wait for startup
         run: sleep 3

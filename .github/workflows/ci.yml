@@ -100,10 +100,6 @@ jobs:
 
       - name: Run container
         run: docker compose up -d --build
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
 
       - name: Wait for startup
         run: sleep 3

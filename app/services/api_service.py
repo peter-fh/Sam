@@ -46,6 +46,8 @@ class API:
         self.dbService = db_service.Database(supabaseClient)
         self._asyncRunner = AsyncRunner()
 
+    def healthCheck(self) -> bool:
+        return self.aiService.healthCheck()
     def newConversation(self, userId: int, course: str):
         id = self.dbService.AddConversation(userId, course)
         return id
@@ -135,7 +137,7 @@ class API:
 
             t["message_start"] = perf_counter()
             chunks = []
-            yield "__START__"
+            yield "\n__START__\n"
             for chunk in self.aiService.getMessage(currentConversation, conversationResult["course"], mode):
                 chunks.append(chunk)
                 yield chunk
@@ -162,13 +164,16 @@ class API:
             current_app.logger.info(f'Total time:             {t['end'] - t0}s')
 
             # Yield the end symbol to ensure the app knows when this conversation is done processing
-            yield "__END__"
+            yield "\n__END__\n"
         except GeneratorExit:
             current_app.logger.exception('Client disconnected the stream')
             return
         except Exception as e:
-            current_app.logger.exception("Failed to get next message: ", e)
-            yield "__ERROR__"
+            current_app.logger.exception("Failed to get next message")
+            current_app.logger.exception(e)
+            yield "\n__ERROR__\n"
+            yield str(e) + "\n"
+            yield "\n__END__" + "\n"
 
 
 

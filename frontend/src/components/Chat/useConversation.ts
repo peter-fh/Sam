@@ -9,21 +9,24 @@ import { ImageInfo } from "./useFileReader";
 
 
 export type ChatStatus = 'IDLE'          // Waiting for user input
-                | 'LOADING'       // Initial loading of conversation
-                | 'STREAMING'     // Message from the assistant is currently streaming
-                | 'WAITING'       // Message from user is being sent to the API
-                | 'THINKING'      // Assistant has recieved the user message and is reasoning
-                | 'TRANSCRIBING'  // A transcription for the user's image is being processed
-                | 'ERROR'         // An error has occurred. The chat will not leave this mode until refreshed
+| 'LOADING'       // Initial loading of conversation
+| 'STREAMING'     // Message from the assistant is currently streaming
+| 'WAITING'       // Message from user is being sent to the API
+| 'THINKING'      // Assistant has recieved the user message and is reasoning
+| 'TRANSCRIBING'  // A transcription for the user's image is being processed
+| 'ERROR'         // An error has occurred. The chat will not leave this mode until refreshed
 
-const START_SYMBOL = "__START__"
-const ERROR_SYMBOL = "__ERROR__"
-const END_SYMBOL = "__END__"
+export type ErrorType = 'FETCH' | 'CHAT'
+
+const START_SYMBOL = "__START__\n"
+const ERROR_SYMBOL = "__ERROR__\n"
+const END_SYMBOL = "__END__\n"
 
 interface ChatState {
   userMessage: string,
   userImage: ImageInfo | null,
 
+  errorType?: ErrorType,
   streamingMessage?: string,
   errorMessage?: string,
 
@@ -52,38 +55,53 @@ const useConversation = () => {
   const [status, setStatus] = useState<ChatStatus>('IDLE')
   const [loadedId, setLoadedId] = useState<number | null>(null)
 
-  const handleError = (err: unknown, msg: string) => {
-    setStatus('ERROR')
+  const handleError = (err: unknown, msg: string, type: ErrorType) => {
+    console.error(`${msg}: ${err}`)
+
+    const detail =
+      err instanceof Error ? err.message : (typeof err === 'string' ? err : '')
+    const formattedMessage = detail ? `${msg}: ${detail}` : msg
+    if (type == "FETCH") {
+      setStatus('ERROR')
+      setChatState((prev) => ({
+        ...prev,
+        errorMessage: formattedMessage,
+      }))
+      return
+    }
+    setStatus('IDLE')
+    const errorMessage: Message = {
+      role: 'error',
+      content: formattedMessage,
+      url: null
+    }
     setChatState((prev) => ({
       ...prev,
-      errorMessage: msg,
+      messages: [...prev.messages, errorMessage]
     }))
-    console.error(err)
   }
 
   const loadConversation = async (id: number) => {
     setStatus('LOADING')
-    const conversationPromise = API.getConversation(id)
-      .then((resultJson) => {
-        const course = resultJson['course']
-        const conversationJson = resultJson['messages']
-        const conversation: Message[] = []
-        for (const raw_message of conversationJson) {
-          const message: Message = newMessage(raw_message.content!, raw_message.role as "user" | "assistant")
-          conversation.push(message)
-        }
-        setChatState((prev) => ({
-          ...prev,
-          messages: conversation,
-          course: course,
-        }))
-        })
-      .catch(err => handleError(err, 'Could not fetch messages for this conversation'))
-
-
-    setLoadedId(id)
-    await conversationPromise
-    setStatus('IDLE')
+    try {
+      const resultJson = await API.getConversation(id)
+      const course = resultJson['course']
+      const conversationJson = resultJson['messages']
+      const conversation: Message[] = []
+      for (const raw_message of conversationJson) {
+        const message: Message = newMessage(raw_message.content!, raw_message.role as "user" | "assistant")
+        conversation.push(message)
+      }
+      setChatState((prev) => ({
+        ...prev,
+        messages: conversation,
+        course: course,
+      }))
+      setLoadedId(id)
+      setStatus('IDLE')
+    } catch (err) {
+      handleError(err, 'Could not fetch messages for this conversation', 'FETCH')
+    }
   }
 
 
@@ -122,7 +140,6 @@ const useConversation = () => {
     if (status != 'IDLE') {
       return
     }
-    console.log("Message in sendMessage: ", chatState.userMessage)
 
     if (!chatState.userMessage && !chatState.userImage) {
       return
@@ -133,7 +150,7 @@ const useConversation = () => {
       try {
         local_id = await newConversation(chatState.course)
       } catch(e) {
-        handleError(e, "Failed do add new conversation")
+        handleError(e, "Failed to add new conversation", "CHAT")
         return
       }
     } else {
@@ -149,14 +166,14 @@ const useConversation = () => {
 
     setStatus('WAITING')
 
-      setChatState((prev) => ({
-        ...prev,
-        streamingMessage: '',
-      }))
+    setChatState((prev) => ({
+      ...prev,
+      streamingMessage: '',
+    }))
 
     if (local_id == null) {
       const err = new Error("ID is null when asking question")
-      handleError(err, 'An error occurred while trying to get a response')
+      handleError(err, 'An error occurred while trying to get a response', "CHAT")
       return
     }
     var image = null
@@ -169,46 +186,58 @@ const useConversation = () => {
       }))
     }
 
+    var errorSymbolRead = false
     const answerGenerator = API.ask(local_id, userQuestion, image)
     const startingSymbol = await answerGenerator.next()
-    if (startingSymbol.value != START_SYMBOL) {
+    if (startingSymbol.value && startingSymbol.value.includes(ERROR_SYMBOL)){
+      errorSymbolRead = true
+    } else if (startingSymbol.value != START_SYMBOL) {
       const err = new Error("First symbol was not the start symbol: " + startingSymbol.value)
-      handleError(err, 'An error occurred while trying to get a response')
+      handleError(err, 'An error occurred while trying to get a response', "CHAT")
       return
     }
 
     var totalMessage = ''
+    var errorMessage = ''
     var firstChunkReceived = false
     try {
-    for await(const chunk of answerGenerator) {
-      if (!firstChunkReceived) {
-        console.log("received first chunk")
-        setStatus('STREAMING')
-        firstChunkReceived = true
-      } 
-      if (chunk == END_SYMBOL) {
-        break
-      }
-      if (chunk == ERROR_SYMBOL) {
-        const err = new Error("Error symbol encountered during generation")
-        handleError(err, 'An error occurred while trying to get a response')
-        break
-      }
+      for await(const chunk of answerGenerator) {
+        if (!firstChunkReceived) {
+          setStatus('STREAMING')
+          firstChunkReceived = true
+        } 
+        if (chunk.includes(END_SYMBOL)) {
+          break
+        }
+        if (chunk.includes(ERROR_SYMBOL)) {
+          errorSymbolRead = true
+        } else if (errorSymbolRead) {
+          errorMessage += chunk
+        } else {
+          totalMessage += chunk
+        }
 
-      totalMessage += chunk
-      setChatState((prev) => ({
-        ...prev,
-        streamingMessage: totalMessage
-      }))
 
-    }
+        setChatState((prev) => ({
+          ...prev,
+          streamingMessage: totalMessage
+        }))
+
+      }
     } catch (e) {
-      handleError(e, "Error thrown during generation")
+      handleError(e, "Error thrown during generation", "CHAT")
     }
+
+    if (errorSymbolRead) {
+      const err = new Error("Server yielded error: " + errorMessage)
+      handleError(err, "Error symbol read during generation", "CHAT")
+      return
+    }
+
 
     if (!totalMessage) {
       const err = new Error("AI message request returned zero tokens")
-      handleError(err, 'An error occurred while trying to get a response')
+      handleError(err, 'An error occurred while trying to get a response', "CHAT")
       return
     }
 
@@ -219,7 +248,7 @@ const useConversation = () => {
       streamingMessage: '',
     }))
     if (id == null) {
-        navigate(String(local_id), { replace: true })
+      navigate(String(local_id), { replace: true })
     }
     setStatus('IDLE')
   }

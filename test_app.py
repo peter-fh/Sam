@@ -17,13 +17,13 @@ import time
 
 from app import create_app
 from app.services.mock_ai_service import MOCK_RESPONSE as EXPECTED_RESPONSE
-from app.services.mock_ai_service import MOCK_TITLE as EXPECTED_TITLE
+from app.services.mock_ai_service import MOCK_TEXT_RESPONSE as EXPECTED_TEXT_RESPONSE
 from app.services.mock_ai_service import MOCK_SUMMARY as EXPECTED_SUMMARY
 
-_ = load_dotenv(override=True)
-SUPABASE_URL = os.getenv('LOCAL_SUPABASE_URL')
-SUPABASE_ANON_KEY = os.getenv('LOCAL_SUPABASE_ANON_KEY')
-SUPABASE_SECRET_KEY = os.getenv('LOCAL_SUPABASE_SECRET_KEY')
+_ = load_dotenv(".local.env", override=True)
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY')
+SUPABASE_SECRET_KEY = os.getenv('SUPABASE_SECRET_KEY')
 
 @pytest.fixture
 def app():
@@ -79,10 +79,6 @@ def client_with_auth(app: Flask):
     # admin_client.auth.admin.delete_user(auth_response.user.id)
 
 
-def test_root(client_with_auth: FlaskClient):
-    response = client_with_auth.get('/')
-    assert response.status_code == 200
-
 def test_get_no_conversations(client_with_auth: FlaskClient):
     response = client_with_auth.get('/api/conversations')
     assert response.status_code == 200, f"Failed! backend returned: {response.get_json()}"
@@ -123,7 +119,7 @@ def test_send_one_message(client_with_auth: FlaskClient):
             results.append(chunk)
         streamed_message = b"".join(results).decode('utf-8')
         assert len(streamed_message) != 0
-        expected_message = f"__START__{EXPECTED_RESPONSE}__END__"
+        expected_message = f"\n__START__\n{EXPECTED_RESPONSE}\n__END__\n"
         assert streamed_message == expected_message, f"Returned message: {streamed_message}, expected: {expected_message}"
 
     # [Act]
@@ -132,14 +128,14 @@ def test_send_one_message(client_with_auth: FlaskClient):
     time.sleep(3)
 
     # [Assert]
-    response = client_with_auth.get(f'/api/conversations')
+    response = client_with_auth.get('/api/conversations')
     assert response.status_code == 200
     data = response.get_json()
     assert data
     assert len(data) == 1
     conversation = data[0]
     title = conversation.get('title')
-    assert title == EXPECTED_TITLE
+    assert title == EXPECTED_TEXT_RESPONSE
 
 
 def test_send_messages_with_summary(client_with_auth: FlaskClient):
@@ -167,7 +163,7 @@ def test_send_messages_with_summary(client_with_auth: FlaskClient):
             results.append(chunk)
         streamed_message = b"".join(results).decode('utf-8')
         assert len(streamed_message) != 0
-        expected_message = f"__START__{EXPECTED_RESPONSE}__END__"
+        expected_message = f"\n__START__\n{EXPECTED_RESPONSE}\n__END__\n"
         assert streamed_message == expected_message, f"Returned message: {streamed_message}, expected: {expected_message}"
 
     # [Act]
@@ -179,7 +175,7 @@ def test_send_messages_with_summary(client_with_auth: FlaskClient):
 
 
     # [Assert]
-    response = client_with_auth.get(f'/api/conversations')
+    response = client_with_auth.get('/api/conversations')
     assert response.status_code == 200
     data = response.get_json()
     assert data
@@ -188,7 +184,7 @@ def test_send_messages_with_summary(client_with_auth: FlaskClient):
     summary = conversation.get('summary')
     assert summary == EXPECTED_SUMMARY
     title = conversation.get('title')
-    assert title == EXPECTED_TITLE
+    assert title == EXPECTED_TEXT_RESPONSE
 
     response = client_with_auth.get(f'/api/conversations/{id}')
     assert response.status_code == 200

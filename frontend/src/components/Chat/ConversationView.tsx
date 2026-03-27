@@ -6,6 +6,39 @@ import { LoadingConversationSpinner, ThinkingSpinner, WaitingSpinner } from './S
 
 const INTRO_MESSAGE = "Hello! I'm Sam, an AI chatbot powered by Chat-GPT. I use context specific to Concordia to provide better explanations. AI makes mistakes, so please double check any answers you are given."
 
+type MessageProps = {
+  message: Message,
+}
+
+const MessageView = (props: MessageProps) => {
+ if (props.message.url != null) {
+    return (
+      <img 
+        className="message-image"
+        src={props.message.url}/> 
+    )
+  }
+
+  if (props.message.role == 'error') {
+    return (
+      <>
+        <i 
+          className="fa-solid fa-triangle-exclamation" 
+          style={{
+            color: "rgb(255, 59, 59)"
+          }}>
+        </i>
+        <p className="error-message-content">An error occurred while trying to fetch the message, please try again.</p>
+      </>
+    )
+  }
+
+  return (
+  <>
+      <MarkTeX content={props.message.content}/>
+  </>
+  )
+}
 type MessageContentProps = {
   streamingMessage: string | undefined,
   messages: Message[],
@@ -24,14 +57,12 @@ const MessageContent = (props: MessageContentProps) => {
   return (
     <>
       {messages?.map((message, index) => (
-        <span key={index}className={message.role == "user" ? "question" : "output"}>
-          {message.url != null ? (
-            <img 
-              className="message-image"
-              src={message.url}/> 
-          ):(
-          <MarkTeX content={message.content}/>
-            )}
+        <span 
+          key={index} 
+          className={message.role}
+          data-testid={`message-${index}`}
+        >
+          <MessageView message={message}/>
         </span>
       ))}
       {props.status == "THINKING" && (
@@ -41,7 +72,8 @@ const MessageContent = (props: MessageContentProps) => {
         <WaitingSpinner/>
       )}
       {props.status == "STREAMING" && props.streamingMessage && (
-        <span key={-1}className="output">
+        <span key={-1}className="assistant" 
+        data-testid="streaming-message">
           <MarkTeX content={props.streamingMessage}/>
         </span>
       )}

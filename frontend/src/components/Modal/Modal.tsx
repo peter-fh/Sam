@@ -35,7 +35,7 @@ function Modal() {
 
     return (
       <>
-	<div className="course-modal">
+	<div className="course-modal" data-testid="course-modal">
 	  <div className="course-modal-content">
 	    <p className="modal-text">Select the course you are taking</p>
 	    <select className="interactive select-box" onChange={onChange}> 
@@ -59,7 +59,7 @@ function Modal() {
   const disclaimerModal = () => {
     return (
       <>
-	<div id="DisclaimerModal" className="type-modal">
+	<div id="DisclaimerModal" className="type-modal" data-testid="disclaimer-modal">
 	  <div className="disclaimer-modal-content">
 	    <span className="modal-text">
 	      <h2>
@@ -97,7 +97,6 @@ function Modal() {
       </>
     )
   }
-
 
   if (!disclaimerAccepted) return disclaimerModal()
   if (showCourseSelect) return courseSelectModal()

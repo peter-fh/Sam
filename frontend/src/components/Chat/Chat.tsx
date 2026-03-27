@@ -5,6 +5,7 @@ import useConversation from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
 import useFileReader from './useFileReader'
 import MessageContent from './ConversationView'
+import ErrorBar from './ErrorBar'
 
 
 const Chat: React.FC = () => {
@@ -54,12 +55,12 @@ const Chat: React.FC = () => {
 
   useEffect(() => {
     scrollIntoView()
-    if (status == "ERROR") {
-      alert("An error occurred! Please try again.")
-      window.location.reload()
-    }
   }, [status])
 
+  if (status === "ERROR" && chatState.errorMessage === "CHAT") {
+    alert("An error occurred! Please try again.")
+    window.location.reload()
+  }
 
 
 
@@ -67,8 +68,13 @@ const Chat: React.FC = () => {
     <>
       <div className="chat" onDrop={handleDrop} style={{
         marginLeft: sidebar ? '15em' : 0
-      }}>
+      }} data-testid="chat">
         <div className="messages" ref={messagesRef}>
+        {status === "ERROR" && 
+          <ErrorBar
+            message={chatState.errorMessage!}
+          />
+        }
           <MessageContent
             messages={chatState.messages}
             status={status}

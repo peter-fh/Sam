@@ -2,12 +2,16 @@ import Endpoints from "../endpoints"
 import { Log, LogLevel } from "../log"
 import supabase from "../supabase"
 
+
+const BASE_URL = import.meta.env.VITE_API_URL ?? ''
+
 async function fetchWithAuth(endpoint: string, headers: any, body: string) {
   const { data: { session }, error } = await supabase.auth.getSession()
   if (error || !session) {
     throw new Error('Not authenticated')
   }
-  const request = new Request(endpoint, {
+  const url = BASE_URL + endpoint
+  const request = new Request(url, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${session.access_token}`,
@@ -25,7 +29,8 @@ async function authorizedGet(endpoint: string) {
   if (error || !session) {
     throw new Error('Not authenticated')
   }
-  const response = await fetch(endpoint, {
+  const url = BASE_URL + endpoint
+  const response = await fetch(url, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -34,7 +39,8 @@ async function authorizedGet(endpoint: string) {
   })
 
   if (!response.ok) {
-    throw new Error(`Http error: ${response.status}`)
+    const bodyText = await response.text().catch(() => '')
+    throw new Error(`Http error: ${response.status}${bodyText ? ` - ${bodyText}` : ''}`)
   }
   const response_json = await response.json()
   return response_json
@@ -46,7 +52,8 @@ async function authorizedPost(endpoint: string, body: string) {
   if (error || !session) {
     throw new Error('Not authenticated')
   }
-  const response = await fetch(endpoint, {
+  const url = BASE_URL + endpoint
+  const response = await fetch(url, {
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',
@@ -56,7 +63,8 @@ async function authorizedPost(endpoint: string, body: string) {
   })
 
   if (!response.ok) {
-    throw new Error(`Http error: ${response.status}`)
+    const bodyText = await response.text().catch(() => '')
+    throw new Error(`Http error: ${response.status}${bodyText ? ` - ${bodyText}` : ''}`)
   }
   return response.json()
 }
@@ -93,6 +101,7 @@ export namespace API {
     Log(LogLevel.Info, `Fetching response for conversation ${JSON.stringify(message)}`)
     const reader = response.body!.getReader()
     const decoder = new TextDecoder('utf-8')
+    let buffer = ""
 
     while (true) {
       const {value, done} = await reader.read()
@@ -100,10 +109,13 @@ export namespace API {
         break
       }
 
-      const chunk = decoder.decode(value, { stream: true})
-      yield chunk
+      buffer += decoder.decode(value, { stream: true})
+      const lines = buffer.split("\n")
+      buffer = lines.pop()!
+      for (const line of lines) {
+        if (line) yield line + "\n"
+      }
     }
 
   }
 }
-

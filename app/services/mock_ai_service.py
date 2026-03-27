@@ -3,8 +3,9 @@ import time
 from typing import Any, override
 from collections.abc import Generator
 
+from app.core.prompt import PromptManager
 from app.core.types import Mode
-from app.services.ai_service import AIService
+from app.services.ai_service import AIService, AIConfig
 
 MOCK_RESPONSE = '''
 To find the derivative of the function \\( f(x) = \\sqrt{x}(x^{-1/2} - x^{-3/2})e^{3x} \\), we'll use the product rule, the chain rule, and the power rule.
@@ -73,56 +74,44 @@ So, the derivative of \\( f(x) = \\sqrt{x}(x^{-1/2} - x^{-3/2})e^{3x} \\) is:
 
 MOCK_TRANSCRIPTION = "$$ \\lim_{x \\to -3} \\frac{|x+3|}{x^2+x-6} $$"
 
-MOCK_SUMMARY = '''
-    The following is a summary of the previous conversation:
-
-1. The math question that is being asked about **BY THE STUDENT**: The student has not asked a question yet. The current question is from the assistant: "Can you factor the denominator $x^2+x-6$?"
-
-2. All events mentioned in the previous summary: The student indicated they were ready.
-
-3. The events in the most recent messages: The assistant introduced a limit problem involving an absolute value, $\\lim_{x \\to -3} \\frac{|x+3|}{x^2+x-6}$, and asked the student to factor the denominator $x^2+x-6$.
-    '''
-
-MOCK_TITLE = "Mock title"
+MOCK_TEXT_RESPONSE = "This is a mock text response"
+MOCK_SUMMARY = "The following is a summary of the previous conversation:\n\n" + MOCK_TEXT_RESPONSE
 
 class MockAIService(AIService):
-    
+    config: AIConfig
     def __init__(self, config: Any, client: Any, async_client: Any, prompt_manager: Any): # pyright: ignore[reportMissingSuperCall]
+        self.config = config
+        self.prompt_manager: PromptManager = prompt_manager
         pass
 
     @override
-    def getMessage(self, current_conversation: Any, course_code: str, prompt_type: Mode, brevity: str = "Detailed") -> Generator[str]:
-        _ = current_conversation
-        _ = course_code
-        _ = prompt_type
-        _ = brevity
+    async def _textResponse(self, instructions: Any, modelName: str, maxTokens: int=1000) -> str:
+        _ = instructions
+        _ = modelName
+        _ = maxTokens
+        time.sleep(2)
+        return MOCK_TEXT_RESPONSE
 
+    @override
+    async def _textResponseFormatted(self, instructions: Any, modelName: str, fmt: Any) -> str:
+        _ = instructions
+        _ = modelName
+        _ = fmt
+        return random.choice(list(Mode)).value
+
+    @override
+    def _textResponseGenerator(self, conversation: Any, modelName: str) -> Generator[str]:
+        _ = conversation
+        _ = modelName
         for chunk in MOCK_RESPONSE:
             time.sleep(0.001)
             yield chunk
 
     @override
-    async def getTranscription(self, image: str) -> str:
+    async def _imageTranscription(self, instructions: str, image: str, modelName: str) -> str:
+        _ = instructions
         _ = image
+        _ = modelName
         time.sleep(2)
         return MOCK_TRANSCRIPTION
-
-    @override
-    async def getSummary(self, conversation: Any) -> str:
-        _ = conversation
-        time.sleep(2)
-        return MOCK_SUMMARY
-
-    @override
-    async def getTitle(self, question: str) -> str:
-        _ = question
-        time.sleep(1)
-        return MOCK_TITLE
-
-    @override
-    async def getMode(self, question: str, type: Mode | None) -> str:
-        _ = question
-        _ = type
-        time.sleep(1)
-        return random.choice(list(Mode)).value
 

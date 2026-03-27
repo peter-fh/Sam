@@ -1,0 +1,115 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+    - main
+
+  pull_request:
+    branches:
+    - main
+
+jobs:
+  lint:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions/setup-python@v5
+      with: { python-version: "3.12" }
+
+    - name: Install linter
+      run: pip3 install ruff
+
+    - name: Lint
+      run: python -m ruff check
+
+
+  test-backend:
+    needs: [lint]
+    if: github.event_name == 'pull_request'
+
+    strategy:
+      matrix:
+        os: [ ubuntu-24.04 ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Setup Supabase CLI
+      uses: supabase/setup-cli@v1
+      with:
+        version: latest
+
+    - name: Start Supabase
+      run: supabase start
+
+    - name: Set Supabase env vars
+      run: |
+        eval "$(supabase status -o env)"
+        echo "SUPABASE_URL=$API_URL" >> $GITHUB_ENV
+        echo "SUPABASE_ANON_KEY=$ANON_KEY" >> $GITHUB_ENV
+        echo "SUPABASE_SECRET_KEY=$SERVICE_ROLE_KEY" >> $GITHUB_ENV
+
+    - uses: actions/setup-python@v5
+      with: { python-version: "3.13" }
+
+    - name: Install backend dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Install prompts
+      run: |
+          git clone https://github.com/peter-fh/Sam-Prompts.git
+          cp -r ./Sam-Prompts/prompts ./prompts
+
+    - name: Test Backend
+      run: >-
+        pytest --log-cli-level=INFO test_app.py
+
+  test-frontend:
+    needs: [lint]
+    if: github.event_name == 'pull_request'
+
+    strategy:
+      matrix:
+        os: [ ubuntu-24.04 ]
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v5
+
+    - name: Install frontend dependencies
+      working-directory: ./frontend
+      run: npm ci
+
+    - name: Test Frontend
+      working-directory: ./frontend
+      run: npm test
+
+  publish:
+    runs-on: ubuntu-latest
+    needs: [test-frontend, test-backend]
+    if: github.event_name == 'push'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          tags: peterfh/sam:latest
+          platforms: linux/amd64
+

@@ -49,6 +49,7 @@ export function NewConversationText() {
     <button
       title="New Chat"
       className="interactive sidebar-text-button"
+      data-testid="new-chat-button"
       onClick={() => {
         navigate("/")
       }}
@@ -169,8 +170,8 @@ export function Threads() {
     }, [id])
 
     return (
-      <div className={current_classes} onClick={handleClick}>
-        <p>{props.title}</p>
+      <div className={current_classes} onClick={handleClick} data-testid="thread">
+        <p data-testid={props.title}>{props.title}</p>
       </div>
     )
   }
@@ -200,7 +201,7 @@ export function Threads() {
     } finally {
       setLoading(false)
     }
-    
+
   }
 
   useEffect(() => {

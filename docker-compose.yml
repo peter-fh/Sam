@@ -1,0 +1,8 @@
+services:
+  app:
+    image: peterfh:sam
+    platform: linux/amd64
+    build:
+      context: .
+    ports:
+        - "8080:5000"

@@ -1,5 +1,5 @@
 
-.output {
+.assistant {
 	text-align: left;
 	width: 100%;
 	padding: .2em 1em .2em 1em;
@@ -10,7 +10,7 @@
 	overflow-y: auto;
 }
 
-.question {
+.user {
 	width: auto;
 	text-align: left;
 	margin-left: auto;
@@ -20,8 +20,27 @@
 	margin-bottom: 1em;
 }
 
+.error {
+	display: flex;
+	column-gap: 1rem;
+	flex-direction: row;
+	align-items: center;
+	text-align: left;
+	width: 100%;
+	padding: .2em 1em .2em 1em;
+	margin: 0em 0em 1em 0em;
+	overflow-y: auto;
+}
+
 .message-image {
 	border-radius: 1.2em;
 	padding: 1em;
 
+}
+
+
+.error-message-content {
+	padding-left: 0.5rem;
+	padding-right: 1rem;
+	font-size: 1rem;
 }

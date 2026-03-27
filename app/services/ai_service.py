@@ -2,13 +2,11 @@ from dataclasses import dataclass
 import json
 from typing import Any
 from collections.abc import Generator
-from flask import current_app
 from openai import AsyncOpenAI, OpenAI
 from pydantic import BaseModel
 
 from app.core.types import Mode, ModelType
 from app.core.prompt import PromptManager, UtilityType
-import os
 
 
 @dataclass
@@ -50,19 +48,43 @@ class AIService:
         else:
             return "system"
 
-    def getMessage(self, current_conversation: Any, course_code: str, prompt_type: Mode, brevity: str = "Detailed") -> Generator[str]:
+    async def _textResponse(self, instructions: Any, modelName: str, maxTokens: int=1000) -> str:
+        response = await self.async_client.chat.completions.create(
+            model=modelName,
+            messages=[
+                {
+                    "role": "user",
+                    "content": instructions
+                },
+            ],
+            temperature=0,
+            max_tokens=maxTokens
+        )
 
-        model = self._getModel(prompt_type)
-        instructions = self.prompt_manager.getInstructions(prompt_type, model)
-        outline = self.prompt_manager.getOutline(course_code)
-        prompt = instructions + "\n" + outline
-        prompt = prompt.replace("{$brevity}", brevity)
+        return str(response.choices[0].message.content)
 
-        conversation: Any = [{"role": "system", "content": prompt}, *current_conversation]
+    async def _textResponseFormatted(self, instructions: Any, modelName: str, fmt: Any) -> str:
 
+        response = await self.async_client.responses.parse(
+            model=modelName,
+            input=[
+                {
+                    "role": "user",
+                    "content": instructions,
+                },
+            ],
+            text_format=fmt
+        )
+
+        res = response.output_parsed
+        if res is None:
+            raise ValueError("Mode fetch did not return a response")
+        return res.mode.value
+
+    def _textResponseGenerator(self, conversation: Any, modelName: str) -> Generator[str]:
         stream = self.client.chat.completions.create(
             messages=conversation,
-            model=model.value,
+            model=modelName,
             reasoning_effort="low",
             max_tokens=5000,
             stream=True,
@@ -72,11 +94,9 @@ class AIService:
             if content:
                 yield content
 
-
-    async def getTranscription(self, image: str) -> str:
-        instructions = self.prompt_manager.getUtilityPrompt(UtilityType.TRANSCRIPTION)
+    async def _imageTranscription(self, instructions: str, image: str, modelName: str) -> str:
         response = await self.async_client.chat.completions.create(
-            model=self.config.utility_model.value,
+            model=modelName,
             messages=[
                 {
                     "role": "user",
@@ -93,48 +113,58 @@ class AIService:
             ],
             temperature=0,
             max_tokens=1000
-        )   
+        )
 
-        transcription = str(response.choices[0].message.content)
+        return str(response.choices[0].message.content)
 
-        return transcription
+    def healthCheck(self) -> bool:
+        prompts: list[str] = []
+        try:
+            for mode in Mode:
+                prompts.append(self.prompt_manager.getInstructions(mode, self._getModel(mode)))
+                prompts.append(self.prompt_manager.getModePrompt(mode))
+            prompts.append(self.prompt_manager.getModePrompt(None))
+            prompts.append(self.prompt_manager.getOutline("MATH 203"))
+            for utilityType in UtilityType:
+                prompts.append(self.prompt_manager.getUtilityPrompt(utilityType))
+        except Exception:
+            return False
+
+        for prompt in prompts:
+            if not prompt or prompt == "":
+                return False
+
+        return True
+
+    def getMessage(self, current_conversation: Any, course_code: str, prompt_type: Mode, brevity: str = "Detailed") -> Generator[str]:
+
+        model = self._getModel(prompt_type)
+        instructions = self.prompt_manager.getInstructions(prompt_type, model)
+        outline = self.prompt_manager.getOutline(course_code)
+        prompt = instructions + "\n" + outline
+        prompt = prompt.replace("{$brevity}", brevity)
+
+        conversation: Any = [{"role": "system", "content": prompt}, *current_conversation]
+
+        return self._textResponseGenerator(conversation, model.value)
+
+
+
+    async def getTranscription(self, image: str) -> str:
+        instructions = self.prompt_manager.getUtilityPrompt(UtilityType.TRANSCRIPTION)
+        return await self._imageTranscription(instructions, image, self.config.utility_model.value)
+
 
     async def getSummary(self, conversation: Any) -> str:
 
         instructions = self.prompt_manager.getUtilityPrompt(UtilityType.SUMMARY).replace("${conversation}", json.dumps(conversation))
-
-        response = await self.async_client.chat.completions.create(
-            model=self.config.utility_model.value,
-            messages=[
-                {
-                    "role": "user",
-                    "content": instructions
-                },
-            ],
-            temperature=0,
-            max_tokens=600
-        )   
-
-        summary = str(response.choices[0].message.content)
+        summary = await self._textResponse(instructions, self.config.utility_model.value, maxTokens=600)
         summary = "The following is a summary of the previous conversation:\n\n" + summary
-
         return summary
 
     async def getTitle(self, question: str) -> str:
-
-
         instructions = self.prompt_manager.getUtilityPrompt(UtilityType.TITLE).replace("${question}", question)
-        response = await self.async_client.chat.completions.create(
-            model=self.config.utility_model.value,
-            messages=[
-                {
-                    "role": "user",
-                    "content": instructions
-                },
-            ],
-        )
-
-        title = str(response.choices[0].message.content)
+        title = await self._textResponse(instructions, self.config.utility_model.value, maxTokens=100)
         return title
 
     async def getMode(self, question: str, type: Mode | None) -> str:
@@ -142,18 +172,5 @@ class AIService:
 
         class ModeResponse(BaseModel):
             mode: Mode
-        response = await self.async_client.responses.parse(
-            model=self.config.mode_model.value,
-            input=[
-                {
-                    "role": "user",
-                    "content": instructions,
-                },
-            ],
-            text_format=ModeResponse
-        )
 
-        res = response.output_parsed
-        if res == None:
-            raise ValueError("Mode fetch did not return a response")
-        return res.mode.value
+        return await self._textResponseFormatted(instructions, self.config.mode_model.value, ModeResponse)

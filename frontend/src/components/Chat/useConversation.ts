@@ -56,7 +56,7 @@ const useConversation = () => {
   const [loadedId, setLoadedId] = useState<number | null>(null)
 
   const handleError = (err: unknown, msg: string, type: ErrorType) => {
-    console.error(err)
+    console.error(`${msg}: ${err}`)
 
     const detail =
       err instanceof Error ? err.message : (typeof err === 'string' ? err : '')
@@ -206,10 +206,10 @@ const useConversation = () => {
           setStatus('STREAMING')
           firstChunkReceived = true
         } 
-        if (chunk == END_SYMBOL) {
+        if (chunk.includes(END_SYMBOL)) {
           break
         }
-        if (chunk == ERROR_SYMBOL) {
+        if (chunk.includes(ERROR_SYMBOL)) {
           errorSymbolRead = true
         } else if (errorSymbolRead) {
           errorMessage += chunk

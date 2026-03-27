@@ -137,7 +137,7 @@ class API:
 
             t["message_start"] = perf_counter()
             chunks = []
-            yield "__START__\n"
+            yield "\n__START__\n"
             for chunk in self.aiService.getMessage(currentConversation, conversationResult["course"], mode):
                 chunks.append(chunk)
                 yield chunk
@@ -171,9 +171,9 @@ class API:
         except Exception as e:
             current_app.logger.exception("Failed to get next message")
             current_app.logger.exception(e)
-            yield "__ERROR__\n"
+            yield "\n__ERROR__\n"
             yield str(e) + "\n"
-            yield "__END__" + "\n"
+            yield "\n__END__" + "\n"
 
 
 

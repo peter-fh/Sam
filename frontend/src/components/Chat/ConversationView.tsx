@@ -57,7 +57,11 @@ const MessageContent = (props: MessageContentProps) => {
   return (
     <>
       {messages?.map((message, index) => (
-        <span key={index}className={message.role}>
+        <span 
+          key={index} 
+          className={message.role}
+          data-testid={`message-${index}`}
+        >
           <MessageView message={message}/>
         </span>
       ))}

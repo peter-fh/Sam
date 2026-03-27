@@ -15,7 +15,7 @@ const mockSession: Session = {
   access_token: "mock_access_token",
   refresh_token: "mock_refresh_token",
   expires_in: 99999,
-  token_type: "mock_token_type",
+  token_type: 'bearer',
   user: {
     id: "cb844986-e61c-4f7c-99bb-1ea340145c7a", // Randomly generated UUID
     app_metadata: {
@@ -25,6 +25,20 @@ const mockSession: Session = {
     aud: "mock_aud",
     created_at: "mock_created_at",
   }
+}
+
+export function createStreamResponse(tokens: string[], delayMs = 50) {
+  const stream = new ReadableStream({
+    async start(controller) {
+      const encoder = new TextEncoder();
+      for (const token of tokens) {
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
+        controller.enqueue(encoder.encode(token));
+      }
+      controller.close();
+    },
+  });
+  return new Response(stream, { status: 200 });
 }
 
 const mockSubscription: Subscription = {

@@ -164,7 +164,7 @@ class API:
             current_app.logger.info(f'Total time:             {t['end'] - t0}s')
 
             # Yield the end symbol to ensure the app knows when this conversation is done processing
-            yield "__END__\n"
+            yield "\n__END__\n"
         except GeneratorExit:
             current_app.logger.exception('Client disconnected the stream')
             return

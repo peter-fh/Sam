@@ -119,7 +119,7 @@ def test_send_one_message(client_with_auth: FlaskClient):
             results.append(chunk)
         streamed_message = b"".join(results).decode('utf-8')
         assert len(streamed_message) != 0
-        expected_message = f"__START__\n{EXPECTED_RESPONSE}__END__\n"
+        expected_message = f"\n__START__\n{EXPECTED_RESPONSE}\n__END__\n"
         assert streamed_message == expected_message, f"Returned message: {streamed_message}, expected: {expected_message}"
 
     # [Act]
@@ -163,7 +163,7 @@ def test_send_messages_with_summary(client_with_auth: FlaskClient):
             results.append(chunk)
         streamed_message = b"".join(results).decode('utf-8')
         assert len(streamed_message) != 0
-        expected_message = f"__START__\n{EXPECTED_RESPONSE}__END__\n"
+        expected_message = f"\n__START__\n{EXPECTED_RESPONSE}\n__END__\n"
         assert streamed_message == expected_message, f"Returned message: {streamed_message}, expected: {expected_message}"
 
     # [Act]

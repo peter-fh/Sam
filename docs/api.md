@@ -1,77 +1,141 @@
-# Endpoints (server.py)
+# Base endpoints
 
-## Auth
+These endpoints are used to serve the website, and are the standard endpoints required to serve a react application. These do not require authorization, as they serve the login page along with the site.
 
-Authorization is added to each endpoint via the require_auth decorator. It uses Supabases's auth library, meaning both saving user data and ensuring a user is authorized is handled using their API. This decorator both ensures authorization and saves their info and user id for each endpoint handler to use.
-
-## API: /api/{endpoint}
-
-All API endpoints integrate with the OpenAI API. The instructions, models used, and content of the queries to the API differ depending on the endpoint.
-
-### POST /api/question
-Used for asking Sam a question. Sends the user question directly to whatever model is chosen, using instructions based on the mode selected and outline based on the course selected.
-
-### POST /api/summary
-Takes a list of messages in the conversation and summarizes them. Prevents conversations from getting too long and costing us a lot of input tokens.
-
-### POST /api/image
-Takes an image and gives a transcription of the text on it. Allows us to use models that don't take image input within Sam, since we take the transcription of the math on the image.
-
-### POST /api/title
-
-Gives each conversation a title, displayed in the threads view ({url}/threads)
-
-### POST /api/mode
-
-Determines the mode that the conversation should be in based on the previous conversation and most recent message. Used every message that the user sends in case they are asking a new question that should be handled differently from the current mode.
-
-## Database: /db/{endpoint}
-
-### /db/conversations
-
-#### GET
-Returns an ordered list of conversations linked to the specific user
-
-#### POST
-Adds a new conversation to the database with a title, course and current mode collumns
-
-### /db/conversations/<conversation_id>
-
-#### GET
-Returns an ordered list of messages in the specified conversation
-
-#### POST
-Adds a new message to a conversation with the given conversation ID
-
-### /db/conversations/settings/<conversation_id>
-
-#### GET
-Returns the settings (course and current mode) for the specified conversation
-
-#### POST
-Updates the settings (course and mode) for the specified conversation
-
-### /db/conversations/summary/<conversation_id>
-
-#### GET
-Returns the summary for the specified conversation
-
-#### POST
-Updates the summary for the specified conversation
-
-
-## Other endpoints
-
-### icon.png
-
-serves frontend/dist/icon.png
-
-### /assets/\<path:path>
-
-serves all files in frontend/dist/assets/
-
-### /
+## GET /
 
 Serves index.html (generated automatically from the react-typescript frontent)
 
+## GET /assets/\<path:path>
+
+Serves the css and js files output by the react build. This endpoint is automatically called by the index.html returned by the root `/` endpoint
+
+
+## GET /icon.png
+
+Serves the page's icon, called automatically
+
+# API Endpoints: `/api/*`
+
+## Auth
+
+Authorization is added to each endpoint via the require_auth decorator. It uses Supabases's auth library, meaning both saving user data and ensuring a user is authorized is handled using their API. This decorator both ensures authorization and saves their info and user id for each endpoint handler to use. All `/api/` endpoints require authorization
+
+Authorization should be sent as a header, as follows:
+
+```json
+"Authorization": "Bearer 12345"
+```
+
+where `12345` is an example authorization token.
+
+## POST /api/conversations
+
+Adds a new conversation to the database and returns the new conversation ID
+
+### Request
+
+Content-Type: "application/json"
+
+Schema:
+```json
+{
+    "course": string
+}
+```
+
+### Response
+
+Success code: 201
+
+Content-Type: "application/json"
+
+Schema:
+```json
+{
+    "id": int
+}
+```
+
+## GET /api/conversations
+
+Returns all the conversations linked to the current user
+
+### Response
+
+Success code: 201
+
+Content-Type: "application/json"
+
+Schema:
+```json
+[
+    {
+        "id": int,
+        "updated_at": timestamp,
+        "summary": string,
+        "title": string,
+        "course_id": int,
+        "mode_id": int | null,
+        "user_id": UUID
+    },
+    ...
+]
+```
+
+## GET /api/conversations/\<int:conversation_id\>
+
+Returns all of the chat settings and messages linked to the conversation, if that conversation belongs to the current user 
+
+### Response
+
+Success code: 200
+
+Content-Type: "application/json"
+
+Response Schema:
+```json
+{
+    "messages": [
+    {
+        "content": string,
+        "role": string,
+        "timestamp": timestamp
+    },
+    ...
+    ]
+    "summary": string,
+    "mode": string,
+    "course": string,
+    "summarized_at": timestamp
+}
+```
+
+## POST /api/chat
+
+Endpoint for getting the response to the user's message, taking the message in the request body and returning a stream.
+
+### Request
+
+Content-Type: "application/json"
+
+Schema:
+```json
+{
+    "id": int,
+    "message": string,
+    "image": string | null
+}
+```
+
+### Response
+
+Content-Type: "text/plain"
+
+Returns a stream with chunks separated by newlines. Each chunk is expected to be read separated by newlines, though multiple chunks may be sent at the same time. There is a start symbol, `__START__`, and end symbol, `__END__`, and a possible error symbol if an error occurs during generation, `__ERROR__`.
+
+Example successful response:
+```text
+__START__\nThis\nis\nan\nexample\nresponse\n\n\n__END__\n
+```
 

@@ -73,7 +73,10 @@ test('Test that the end symbol does not appear', async() => {
   const message = screen.getByTestId('message-2')
   console.log(message.innerHTML)
   await waitFor(() => {
-  expect(message.textContent).toBe('hi there!\n')
+    expect(message.textContent).toBe('hi there!\n')
+    expect(message.textContent).not.toContain('__START__')
+    expect(message.textContent).not.toContain('__END__')
+    expect(message.textContent).not.toContain('__ERROR__')
   }, {timeout: 1000})
 
 })

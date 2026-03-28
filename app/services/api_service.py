@@ -91,6 +91,19 @@ class API:
             current_app.logger.info(f"Should summarize: total {total_chars} > max {current_app.config["CONVERSATION_MAX_TOKENS"]}")
         return should_summarize
 
+    def _logConversation(self, conversation):
+        logMessageList = []
+        for message in conversation:
+            if "The following is a summary" in message["content"]:
+                logMessageList.append("summary")
+            else:
+                logMessageList.append(message["role"] + message["content"][:5])
+
+        if len(logMessageList) > 2 and logMessageList[0] == 'user' and logMessageList[1] == 'user':
+            current_app.logger.error('First message should be summary but is displaying as user: ' + json.dumps(conversation, indent=4))
+
+        return str(logMessageList)
+
     def newMessage(self, userId: int, conversationId: int, message: str, image: str | None=None):
         t0 = perf_counter()
         t = {}
@@ -126,12 +139,13 @@ class API:
             })
             if (conversationResult["summary"]):
                 currentConversation.insert(0, {
-                'content': userRequest,
+                'content': conversationResult["summary"],
                 'role': 'user',
                 'timestamp': conversationResult["summarized_at"],
                 })
 
             # Fetch the current mode
+            current_app.logger.info(f'Current conversation: {self._logConversation(currentConversation)}')
             raw_mode = self._asyncRunner.run(self.aiService.getMode(json.dumps(currentConversation), conversationResult["mode"]))
             mode = Mode[raw_mode.upper()]
 

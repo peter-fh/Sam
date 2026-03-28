@@ -7,7 +7,7 @@ from app.core.prompt import PromptManager
 from app.core.types import Mode
 from app.services.ai_service import AIService, AIConfig
 
-MOCK_RESPONSE = '''
+MOCK_RESPONSE = '''${in}
 To find the derivative of the function \\( f(x) = \\sqrt{x}(x^{-1/2} - x^{-3/2})e^{3x} \\), we'll use the product rule, the chain rule, and the power rule.
 
 ### Simplifying the Function
@@ -79,9 +79,11 @@ MOCK_SUMMARY = "The following is a summary of the previous conversation:\n\n" + 
 
 class MockAIService(AIService):
     config: AIConfig
+    responseIndex: int
     def __init__(self, config: Any, client: Any, async_client: Any, prompt_manager: Any): # pyright: ignore[reportMissingSuperCall]
         self.config = config
         self.prompt_manager: PromptManager = prompt_manager
+        self.responseIndex = 0
         pass
 
     @override
@@ -103,7 +105,9 @@ class MockAIService(AIService):
     def _textResponseGenerator(self, conversation: Any, modelName: str) -> Generator[str]:
         _ = conversation
         _ = modelName
-        for chunk in MOCK_RESPONSE:
+        response = MOCK_RESPONSE.replace("${in}", "${" + f'{self.responseIndex:02d}' + "}")
+        self.responseIndex += 1
+        for chunk in response:
             time.sleep(0.001)
             yield chunk
 

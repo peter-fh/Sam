@@ -15,5 +15,5 @@ class Config:
         _mock_mode = True
     MOCK_MODE: bool = _mock_mode
 
-    CONVERSATION_MAX_TOKENS: int = 5000
+    CONVERSATION_MAX_TOKENS: int = 25000
 

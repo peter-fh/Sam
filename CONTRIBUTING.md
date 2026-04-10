@@ -1,3 +1,5 @@
+NOTE: This doc is outdated. I will update this ASAP.
+
 # Contributing
 
 Thank you for considering contributing to this project! Any contribution is welcome. 
@@ -10,9 +12,10 @@ Issues with the "help wanted" label are those that would be the most appreciated
 
 There are a few things that are needed to get started with this project:
 
-- Python: Any version 3.x should work but only 3.12+ have been tested
+- Python: The deployment uses python 3.12
 - Git
-- npm (tested with 11.0.0)
+- npm
+- [Supabase CLI](https://supabase.com/docs/guides/local-development)
 
 ### Cloning and setting up the repository
 
@@ -29,17 +32,12 @@ On macos and linux:
 ./build.sh
 ```
 
-On windows:
-```bash
-.\build.bat
-```
-
 ### Making a contribution
 
 - Create a new branch:
 
 ```bash
-git checkout -b {new_branch_name}
+git checkout -b dev/{new_branch_name}
 ```
 
 After changes are made and pushed to this branch, open a pull request to merge this branch into main. A preview deployment is automatically made for every pull request. Click "view deployment" on the comment automatically made on the pull request to see what the site will look like after your changes are deployed.
@@ -52,7 +50,7 @@ Once a pull request is created, a preview deployment is made after every commit.
 
 ### Locally (optional)
 
-If you want to interact with the OpenAI API locally, you must obtain an api key from [platform.openai.com/api-keys](https://platform.openai.com/api-keys/) and make a minimum payment of 5 USD. To use this key, rename example.env to .env and replace secret_chatgpt_api_key with your key.
+If you want to interact with the Openrouter API locally, you must obtain an api key from [Openrouter](https://openrouter.ai/).
 
 ## Developing
 
@@ -63,13 +61,13 @@ When in development mode, the frontend and backend run on different localhost po
 To run the server, run:
 
 ```bash
-python server.py
+flask --app run:app run
 ```
 
 No-API mode will send the same example response from ChatGPT every time regardless of the input. Use this if you did not get an OpenAI API key or do not need to interact directly with their API:
 
 ```bash
-python server.py --no-api
+flask --app run_mock:app run
 ```
 
 

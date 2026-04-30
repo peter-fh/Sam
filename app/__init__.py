@@ -43,9 +43,11 @@ def create_app(test_config: Any = None):
         api_key=app.config["OPENROUTER_API_KEY"]
     )
 
-    supabase: Client = create_client(
-        app.config["SUPABASE_URL"], app.config["SUPABASE_KEY"]
-    )
+    supabase: Client | None = None
+    if not app.config["DATABASE_URL"]:
+        supabase = create_client(
+            app.config["SUPABASE_URL"], app.config["SUPABASE_KEY"]
+        )
 
     ai_config = AIConfig(
         concept_model=ModelType.claude_haiku_4_5,
@@ -73,6 +75,7 @@ def create_app(test_config: Any = None):
                  asyncAiClient=async_openai_client,
                  promptManager=prompt_manager,
                  supabaseClient=supabase,
+                 databaseUrl=app.config["DATABASE_URL"],
                  mockMode=app.config["MOCK_MODE"],
         )
 

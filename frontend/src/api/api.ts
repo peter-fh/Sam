@@ -1,20 +1,14 @@
 import Endpoints from "../endpoints"
 import { Log, LogLevel } from "../log"
-import supabase from "../supabase"
 
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
-async function fetchWithAuth(endpoint: string, headers: any, body: string) {
-  const { data: { session }, error } = await supabase.auth.getSession()
-  if (error || !session) {
-    throw new Error('Not authenticated')
-  }
+async function postStream(endpoint: string, headers: any, body: string) {
   const url = BASE_URL + endpoint
   const request = new Request(url, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${session.access_token}`,
       ...headers
     },
     body: body,
@@ -24,17 +18,12 @@ async function fetchWithAuth(endpoint: string, headers: any, body: string) {
 
 }
 
-async function authorizedGet(endpoint: string) {
-  const { data: { session }, error } = await supabase.auth.getSession()
-  if (error || !session) {
-    throw new Error('Not authenticated')
-  }
+async function get(endpoint: string) {
   const url = BASE_URL + endpoint
   const response = await fetch(url, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session.access_token}`,
     },
   })
 
@@ -47,17 +36,12 @@ async function authorizedGet(endpoint: string) {
 
 }
 
-async function authorizedPost(endpoint: string, body: string) {
-  const { data: { session }, error } = await supabase.auth.getSession()
-  if (error || !session) {
-    throw new Error('Not authenticated')
-  }
+async function post(endpoint: string, body: string) {
   const url = BASE_URL + endpoint
   const response = await fetch(url, {
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session.access_token}`,
     },
     body: body
   })
@@ -72,24 +56,24 @@ async function authorizedPost(endpoint: string, body: string) {
 export namespace API {
 
   export function getConversations() {
-    return authorizedGet(Endpoints.Conversation)
+    return get(Endpoints.Conversation)
   }
 
   export async function getConversation(conversation_id: number) {
-    return authorizedGet(Endpoints.Conversation + `/${conversation_id}`)
+    return get(Endpoints.Conversation + `/${conversation_id}`)
   }
 
   export async function addConversation(course: string) {
     const body =  JSON.stringify({
       course: course,
     })
-    return authorizedPost(Endpoints.Conversation, body)
+    return post(Endpoints.Conversation, body)
   }
 
 
   export async function* ask(id: number, message: string, image: string | null = null) {
 
-    const response = await fetchWithAuth(Endpoints.Chat, {
+    const response = await postStream(Endpoints.Chat, {
       'Content-Type': 'application/json',
     }, JSON.stringify({
         'id': id,
@@ -97,9 +81,16 @@ export namespace API {
         'image': image,
       }))
 
+    if (!response.ok) {
+      const bodyText = await response.text().catch(() => '')
+      throw new Error(`Http error: ${response.status}${bodyText ? ` - ${bodyText}` : ''}`)
+    }
+    if (!response.body) {
+      throw new Error('Chat response did not include a readable stream')
+    }
 
     Log(LogLevel.Info, `Fetching response for conversation ${JSON.stringify(message)}`)
-    const reader = response.body!.getReader()
+    const reader = response.body.getReader()
     const decoder = new TextDecoder('utf-8')
     let buffer = ""
 

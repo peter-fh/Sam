@@ -37,25 +37,26 @@ class API:
                  aiClient: OpenAI,
                  asyncAiClient: AsyncOpenAI,
                  promptManager: PromptManager,
-                 supabaseClient: SupabaseClient,
+                 supabaseClient: SupabaseClient | None,
+                 databaseUrl: str = "",
                  mockMode: bool=False
                  ):
         self.aiService = AIService(aiConfig, aiClient, asyncAiClient, promptManager)
         if mockMode:
             self.aiService = MockAIService(aiConfig, aiClient, asyncAiClient, promptManager)
-        self.dbService = db_service.Database(supabaseClient)
+        self.dbService = db_service.Database(supabaseClient, databaseUrl)
         self._asyncRunner = AsyncRunner()
 
     def healthCheck(self) -> bool:
         return self.aiService.healthCheck()
-    def newConversation(self, userId: int, course: str):
+    def newConversation(self, userId: str | None, course: str):
         id = self.dbService.AddConversation(userId, course)
         return id
 
-    def getConversationMessages(self, userId: int, conversationId: int) -> db_service.ConversationResult:
+    def getConversationMessages(self, userId: str | None, conversationId: int) -> db_service.ConversationResult:
         return self.dbService.GetConversation(userId, conversationId)
 
-    def getConversationList(self, userId: int, index: int = 0):
+    def getConversationList(self, userId: str | None, index: int = 0):
         return self.dbService.GetConversations(userId, index, index + THREAD_RANGE)
 
     async def _updateTitle(self, conversation_id: int, userMessage: str):
@@ -104,7 +105,7 @@ class API:
 
         return str(logMessageList)
 
-    def newMessage(self, userId: int, conversationId: int, message: str, image: str | None=None):
+    def newMessage(self, userId: str | None, conversationId: int, message: str, image: str | None=None):
         t0 = perf_counter()
         t = {}
         # Update the conversation and fetch current state

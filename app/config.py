@@ -5,6 +5,7 @@ _ = load_dotenv(override=True)
 
 class Config:
     FLASK_ENV: str= os.getenv("FLASK_ENV", "production")
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
     SUPABASE_URL: str = os.getenv("SUPABASE_URL", "")
     SUPABASE_KEY: str = os.getenv("SUPABASE_SERVICE_KEY", "")
     OPENROUTER_API_KEY: str =os.getenv("OPENROUTER_API_KEY", "")

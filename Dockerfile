@@ -26,10 +26,13 @@ RUN mkdir -p /var/run/postgresql && chmod 777 /var/run/postgresql
 
 COPY --from=frontend /app/frontend/dist ./static
 COPY --from=prompts /app/prompts ./prompts
-COPY . .
+COPY --chown=postgres:postgres . .
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+RUN chmod +x /entrypoint.sh \
+    && mkdir -p /app/postgres_data \
+    && chown -R postgres:postgres /app /entrypoint.sh
 RUN pip install --no-cache-dir -r requirements.txt
 
 EXPOSE 5000
+USER postgres
 CMD ["/entrypoint.sh"]

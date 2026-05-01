@@ -12,9 +12,8 @@ fi
 # Initialize PostgreSQL data directory if it doesn't exist
 if [ ! -f "$POSTGRES_DATA/PG_VERSION" ]; then
   echo "Initializing PostgreSQL database..."
-  mkdir -p $POSTGRES_DATA
-  chown postgres:postgres $POSTGRES_DATA
-  su - postgres -c "$POSTGRES_BIN/initdb -D $POSTGRES_DATA --encoding=UTF8 --locale=C.UTF-8"
+  mkdir -p "$POSTGRES_DATA"
+  "$POSTGRES_BIN/initdb" -D "$POSTGRES_DATA" --encoding=UTF8 --locale=C.UTF-8
 fi
 
 if ! grep -q "mathchat docker host access" "$POSTGRES_DATA/pg_hba.conf"; then
@@ -23,7 +22,7 @@ fi
 
 # Start PostgreSQL in the background with TCP listening on all container interfaces
 echo "Starting PostgreSQL..."
-su - postgres -c "$POSTGRES_BIN/postgres -D $POSTGRES_DATA -p 5432 -c listen_addresses='*'" > /app/postgres.log 2>&1 &
+"$POSTGRES_BIN/postgres" -D "$POSTGRES_DATA" -p 5432 -c listen_addresses='*' > /app/postgres.log 2>&1 &
 POSTGRES_PID=$!
 
 # Wait for PostgreSQL to be ready
@@ -39,8 +38,8 @@ done
 
 # Create mathchat database if it doesn't exist
 echo "Setting up mathchat database..."
-su - postgres -c "createdb -h 127.0.0.1 -p 5432 -E UTF8 mathchat" 2>/dev/null || echo "Database already exists or creation skipped"
-su - postgres -c "psql -h 127.0.0.1 -p 5432 -d postgres -c \"ALTER DATABASE mathchat SET client_encoding TO 'UTF8';\"" >/dev/null
+createdb -h 127.0.0.1 -p 5432 -E UTF8 mathchat 2>/dev/null || echo "Database already exists or creation skipped"
+psql -h 127.0.0.1 -p 5432 -d postgres -c "ALTER DATABASE mathchat SET client_encoding TO 'UTF8';" >/dev/null
 
 # Start Flask application
 echo "Starting Flask application..."

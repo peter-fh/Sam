@@ -8,7 +8,7 @@ RUN npm run build
 FROM alpine:3.14 AS prompts
 WORKDIR /app
 RUN apk add --no-cache git
-RUN git clone https://github.com/peter-fh/Sam-Prompts.git repo
+RUN git clone -b concordia https://github.com/peter-fh/Sam-Prompts.git repo
 RUN cp -r repo/prompts ./prompts
 
 FROM python:3.12-slim

@@ -5,6 +5,7 @@ import { useChatSettings } from '../../context/useChatContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from "react"
 import { API } from '../../api/api.ts'
+import { useEntraID } from '../../context/useEntraID.tsx';
 
 export function SidebarButton() {
   const {
@@ -29,7 +30,18 @@ export function SidebarButton() {
 
 
 export function LogoutText() {
-  return null
+  const { logout, user } = useEntraID()
+
+  return (
+    <button
+      title={user?.email ? `Signed in as ${user.email}` : "Sign out"}
+      className="interactive sidebar-text-button"
+      onClick={logout}
+    >
+      <i className="fa-solid fa-right-from-bracket" />
+      <p>Sign Out</p>
+    </button>
+  )
 }
 
 export function NewConversationText() {

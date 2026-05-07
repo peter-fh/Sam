@@ -5,6 +5,7 @@ import { Course } from '../types/options'
 import { render, RenderOptions } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
 import App from '../App'
+import { EntraIDProvider } from '../context/useEntraID'
 
 export const defaultSettings: ChatSettingsContextType = {
   course: Course.MATH203,
@@ -23,9 +24,11 @@ interface CustomRenderOptions extends RenderOptions {
 export function renderApp() {
   return render(
     <BrowserRouter>
-      <ChatSettingsProvider>
-        <App/>
-      </ChatSettingsProvider>
+      <EntraIDProvider>
+        <ChatSettingsProvider>
+          <App/>
+        </ChatSettingsProvider>
+      </EntraIDProvider>
     </BrowserRouter>,
   )
 }
@@ -33,9 +36,11 @@ export function renderApp() {
 export function renderComponent(ui: React.ReactElement) {
   return render(
     <BrowserRouter>
-      <ChatSettingsProvider>
-        {ui}
-      </ChatSettingsProvider>
+      <EntraIDProvider>
+        <ChatSettingsProvider>
+          {ui}
+        </ChatSettingsProvider>
+      </EntraIDProvider>
     </BrowserRouter>,
   )
 }
@@ -46,9 +51,11 @@ export function renderWithProviders(
 ) {
   return render(
     <BrowserRouter>
-      <ChatSettingsContext.Provider value={{ ...defaultSettings, ...settings }}>
-        {ui}
-      </ChatSettingsContext.Provider>
+      <EntraIDProvider>
+        <ChatSettingsContext.Provider value={{ ...defaultSettings, ...settings }}>
+          {ui}
+        </ChatSettingsContext.Provider>
+      </EntraIDProvider>
     </BrowserRouter>,
     options
   );

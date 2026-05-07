@@ -34,21 +34,23 @@ export default defineConfig(({ mode }) => {
     }
   }
 
+  const apiTarget = env.VITE_API_URL || 'http://127.0.0.1:5000'
+
   return {
     plugins: [react()],
     envDir: "../",
     server: mode === 'development' ? {
       proxy: {
-        '/api':{
-          target: 'http://127.0.0.1:8070',
+        '/api': {
+          target: apiTarget,
           changeOrigin: true,
         },
-        '/db':{
-          target: 'http://127.0.0.1:8070',
+        '/db': {
+          target: apiTarget,
           changeOrigin: true,
         },
       },
-    }: undefined,
+    } : undefined,
     build: {
       rollupOptions: {
         output: {

@@ -1,7 +1,16 @@
 import '@testing-library/jest-dom'
-import supabase from '../supabase'
 import { afterAll, beforeAll, beforeEach, vi } from 'vitest'
 import type { Session, Subscription } from '@supabase/supabase-js'
+import supabase from '../supabase'
+
+vi.mock('../supabase', () => ({
+  default: {
+    auth: {
+      getSession: vi.fn(),
+      onAuthStateChange: vi.fn(),
+    },
+  },
+}))
 
 window.MathJax = {
   typeset: vi.fn(),
@@ -9,7 +18,34 @@ window.MathJax = {
 
 window.HTMLElement.prototype.scrollIntoView = vi.fn()
 
-vi.mock('../supabase.ts')
+// Mock Entra ID context
+const mockEntraIDContext = {
+  isAuthenticated: true,
+  user: {
+    id: 'mock_user_id',
+    email: 'test@example.com',
+    name: 'Test User',
+  },
+  loading: false,
+  accessToken: 'mock_access_token',
+  idToken: 'mock_id_token',
+  login: vi.fn(),
+  logout: vi.fn(),
+  acquireToken: vi.fn(() => Promise.resolve('mock_token')),
+  refreshToken: vi.fn(() => Promise.resolve(true)),
+  error: null,
+}
+
+const mockEntraIDModule = {
+  useEntraID: () => mockEntraIDContext,
+  EntraIDProvider: ({ children }: any) => children,
+}
+
+vi.mock('../context/useEntraID', () => mockEntraIDModule)
+
+vi.mock('../context/useEntraID.tsx', () => mockEntraIDModule)
+
+vi.mock('../context/useEntraID.ts', () => mockEntraIDModule)
 
 const mockSession: Session = {
   access_token: "mock_access_token",

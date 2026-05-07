@@ -12,8 +12,6 @@ from flask import Flask
 from flask.testing import FlaskClient
 import pytest
 from dotenv import load_dotenv
-from supabase import Client as SupabaseClient
-from supabase import create_client
 import time
 
 from app import create_app
@@ -27,17 +25,13 @@ def generateExpectedResponse(index: int):
     return expected_message
 
 _ = load_dotenv(".local.env", override=True)
-SUPABASE_URL = os.getenv('SUPABASE_URL')
-SUPABASE_ANON_KEY = os.getenv('SUPABASE_ANON_KEY')
-SUPABASE_SECRET_KEY = os.getenv('SUPABASE_SECRET_KEY')
 
 @pytest.fixture
 def app():
     app = create_app({
         'TESTING': True,
         'MOCK_MODE': True,
-        'SUPABASE_URL': SUPABASE_URL,
-        'SUPABASE_KEY': SUPABASE_SECRET_KEY,
+        'MOCK_AUTH': True,
         'CONVERSATION_MAX_TOKENS': len(EXPECTED_RESPONSE)+1,
         'FLASK_ENV': 'development',
     })
@@ -45,39 +39,11 @@ def app():
 
 @pytest.fixture
 def client_with_auth(app: Flask):
-    assert SUPABASE_URL
-    assert SUPABASE_ANON_KEY
-    assert SUPABASE_SECRET_KEY
-
-    auth_client: SupabaseClient = create_client(
-        SUPABASE_URL,
-        SUPABASE_ANON_KEY,
-    )
-    try:
-
-        auth_response = auth_client.auth.sign_up({
-            'email': 'test@concordia.ca',
-            'password': 'testpassword123!'
-        })
-    except Exception:
-        auth_response = auth_client.auth.sign_in_with_password({
-            'email': 'test@concordia.ca',
-            'password': 'testpassword123!'
-        })
-
-    assert auth_response.session
-    assert auth_response.user
-    jwt = auth_response.session.access_token
+    """Create a test client with mock authentication enabled"""
     client = app.test_client()
-    client.environ_base['HTTP_AUTHORIZATION'] = f'Bearer {jwt}'
-
-    admin_client = create_client(SUPABASE_URL, SUPABASE_SECRET_KEY)
-    # Deleting previous messages and conversations is required for the tests
-    _ = admin_client.table('messages').delete().gte('id', 0).execute()
-    _ = admin_client.table('conversations').delete().gte('id', 0).execute()
+    # Mock token for testing - with MOCK_AUTH enabled, the token content doesn't matter
+    client.environ_base['HTTP_AUTHORIZATION'] = 'Bearer mock_test_token'
     yield client
-
-    # Avoid deleting after the test so the db can be manually verified
 
     # admin_client = create_client(SUPABASE_URL, SUPABASE_SECRET_KEY)
     # _ = admin_client.table('messages').delete().gte('id', 0).execute()

@@ -1,5 +1,6 @@
-from flask import Blueprint, Response, jsonify, request, current_app, stream_with_context
+from flask import Blueprint, Response, jsonify, request, current_app, stream_with_context, g
 from app.services.api_service import API
+from app.auth import require_auth
 
 
 bp = Blueprint('api', __name__, url_prefix='/api')
@@ -17,31 +18,35 @@ def handle_exception(e: Exception):
         '''
 
 @bp.route('/conversations', methods=['POST'])
+@require_auth
 def new_conversation():
     settings = request.get_json()
     course = settings['course']
     api: API = current_app.extensions['api']
-    id = api.newConversation(None, course)
+    id = api.newConversation(g.user_id, course)
     return jsonify({
         'id': id
     }), 201
 
 @bp.route('/conversations', methods=['GET'])
+@require_auth
 def get_conversations():
     index = request.headers.get('index')
     if index is None:
         index = 0
     api: API = current_app.extensions['api']
-    conversations = api.getConversationList(None, int(index))
+    conversations = api.getConversationList(g.user_id, int(index))
     return jsonify(conversations), 200
 
 @bp.route('/conversations/<int:conversation_id>', methods=['GET'])
+@require_auth
 def get_messages(conversation_id: int):
     api: API = current_app.extensions['api']
-    res = api.getConversationMessages(None, conversation_id)
+    res = api.getConversationMessages(g.user_id, conversation_id)
     return jsonify(res), 200
 
 @bp.route('/chat', methods=['POST'])
+@require_auth
 def new_message():
     data = request.get_json()
     id = data.get('id')
@@ -49,7 +54,7 @@ def new_message():
     image = data.get('image')
 
     api: API = current_app.extensions['api']
-    stream = api.newMessage(None, id, message, image)
+    stream = api.newMessage(g.user_id, id, message, image)
     response = Response(
         stream_with_context(stream), 
         content_type="text/plain",

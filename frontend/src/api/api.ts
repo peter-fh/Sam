@@ -4,13 +4,21 @@ import { Log, LogLevel } from "../log"
 
 const BASE_URL = import.meta.env.VITE_API_URL ?? ''
 
+function authHeaders(headers: Record<string, string> = {}) {
+  const token = sessionStorage.getItem("entra_id_token")
+  if (!token) return headers
+
+  return {
+    ...headers,
+    Authorization: `Bearer ${token}`,
+  }
+}
+
 async function postStream(endpoint: string, headers: any, body: string) {
   const url = BASE_URL + endpoint
   const request = new Request(url, {
     method: 'POST',
-    headers: {
-      ...headers
-    },
+    headers: authHeaders(headers),
     body: body,
   })
   const response = await fetch(request)
@@ -22,9 +30,9 @@ async function get(endpoint: string) {
   const url = BASE_URL + endpoint
   const response = await fetch(url, {
     method: 'GET',
-    headers: {
+    headers: authHeaders({
       'Content-Type': 'application/json',
-    },
+    }),
   })
 
   if (!response.ok) {
@@ -40,9 +48,9 @@ async function post(endpoint: string, body: string) {
   const url = BASE_URL + endpoint
   const response = await fetch(url, {
     method: 'POST',
-    headers: { 
+    headers: authHeaders({
       'Content-Type': 'application/json',
-    },
+    }),
     body: body
   })
 

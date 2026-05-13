@@ -1,10 +1,10 @@
 services:
   app:
-    image: peterfh:sam
+    image: robmendes/mathchat:latest
     platform: linux/amd64
     build:
       context: .
-    container_name: mathchat_app
+    container_name: mathchat
     ports:
       - "8080:5000"
       - "127.0.0.1:5432:5432"

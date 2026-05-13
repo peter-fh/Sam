@@ -1,5 +1,4 @@
 import '@testing-library/jest-dom'
-import supabase from '../supabase'
 import { afterAll, beforeAll, beforeEach, vi } from 'vitest'
 
 window.MathJax = {
@@ -8,20 +7,15 @@ window.MathJax = {
 
 window.HTMLElement.prototype.scrollIntoView = vi.fn()
 
-beforeAll(async () => {
-  await supabase.auth.signUp({
-    email: 'test@concordia.ca',
-    password: 'testpassword123!'
-  })
-
-  await supabase.auth.signInWithPassword({
-    email: 'test@concordia.ca',
-    password: 'testpassword123!'
-  })
+// Mock Entra ID authentication
+beforeAll(() => {
+  // Store mock Entra ID token in session storage for e2e tests
+  sessionStorage.setItem('entra_id_token', 'mock_id_token_for_testing')
 })
 
-afterAll(async () => {
-  await supabase.auth.signOut()
+afterAll(() => {
+  // Clear mock token
+  sessionStorage.removeItem('entra_id_token')
 })
 
 beforeEach(() => {

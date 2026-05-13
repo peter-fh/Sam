@@ -1,8 +1,24 @@
 services:
   app:
-    image: peterfh:sam
+    image: robmendes/mathchat:latest
     platform: linux/amd64
     build:
       context: .
+    container_name: mathchat
     ports:
-        - "8080:5000"
+      - "8080:5000"
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/app/postgres_data
+    environment:
+      DATABASE_URL: postgresql://postgres@127.0.0.1:5432/mathchat
+    healthcheck:
+      test: ["CMD", "pg_isready", "-h", "127.0.0.1", "-p", "5432", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    env_file:
+      - .env
+volumes:
+  postgres_data:

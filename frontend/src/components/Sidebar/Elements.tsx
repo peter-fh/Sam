@@ -5,7 +5,7 @@ import { useChatSettings } from '../../context/useChatContext';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useEffect, useState } from "react"
 import { API } from '../../api/api.ts'
-import supabase from '../../supabase.ts'
+import { useEntraID } from '../../context/useEntraID.tsx';
 
 export function SidebarButton() {
   const {
@@ -30,14 +30,16 @@ export function SidebarButton() {
 
 
 export function LogoutText() {
+  const { logout, user } = useEntraID()
+
   return (
     <button
-      title='Toggle Sidebar'
+      title={user?.email ? `Signed in as ${user.email}` : "Sign out"}
       className="interactive sidebar-text-button"
-      onClick={ () => supabase.auth.signOut() }
+      onClick={logout}
     >
-      <i className="fa-solid fa-right-from-bracket"></i>
-      <p>Logout</p>
+      <i className="fa-solid fa-right-from-bracket" />
+      <p>Sign Out</p>
     </button>
   )
 }

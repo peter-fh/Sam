@@ -1,6 +1,6 @@
 from flask import Blueprint, Response, jsonify, request, current_app, stream_with_context, g
-from app.auth import require_auth
 from app.services.api_service import API
+from app.auth import require_auth
 
 
 bp = Blueprint('api', __name__, url_prefix='/api')

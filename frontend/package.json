@@ -12,14 +12,14 @@
     "test:e2e": "TEST_MODE=e2e vitest"
   },
   "dependencies": {
+    "@azure/msal-browser": "^3.18.0",
     "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/free-brands-svg-icons": "^6.7.2",
     "@fortawesome/free-regular-svg-icons": "^6.7.2",
     "@fortawesome/free-solid-svg-icons": "^6.7.2",
     "@fortawesome/react-fontawesome": "^0.2.2",
-    "@supabase/auth-ui-react": "^0.4.7",
-    "@supabase/auth-ui-shared": "^0.1.8",
-    "@supabase/supabase-js": "^2.57.0",
+    "@supabase/supabase-js": "^2.105.3",
+    "axios": "^1.7.7",
     "browser-image-compression": "^2.0.2",
     "dompurify": "^3.2.3",
     "html2canvas": "^1.4.1",

@@ -4,8 +4,7 @@ Microsoft Entra ID OAuth2 Routes
 Provides endpoints for OAuth2 authentication flow with Microsoft Entra ID
 """
 
-from flask import Blueprint, request, jsonify, current_app, session, redirect, url_for
-from app.entra_id_auth import EntraIDAuthFlow
+from flask import Blueprint, request, jsonify, current_app, session
 import secrets
 import logging
 

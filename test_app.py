@@ -7,7 +7,6 @@
 ##########################################################################################
 
 import logging
-import os
 from flask import Flask
 from flask.testing import FlaskClient
 import pytest

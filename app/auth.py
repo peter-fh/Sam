@@ -3,7 +3,6 @@ from flask import g, jsonify, request, current_app
 from functools import wraps
 import logging
 
-from app.entra_id_auth import EntraIDTokenValidator
 
 logger = logging.getLogger(__name__)
 

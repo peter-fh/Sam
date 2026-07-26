@@ -7,7 +7,6 @@ import { Log, LogLevel } from "../../log";
 import { useNavigate, useParams } from "react-router-dom";
 import { ImageInfo } from "./useFileReader";
 
-
 export type ChatStatus = 'IDLE'          // Waiting for user input
 | 'LOADING'       // Initial loading of conversation
 | 'STREAMING'     // Message from the assistant is currently streaming
@@ -35,15 +34,9 @@ interface ChatState {
 }
 
 const useConversation = () => {
-
-  const {
-    id
-  } = useParams()
-
+  const { id } = useParams()
   const navigate = useNavigate()
-  const {
-    course
-  } = useChatSettings()
+  const { course, setCourse } = useChatSettings()
 
   const [chatState, setChatState] = useState<ChatState>({
     userMessage: '',
@@ -61,7 +54,7 @@ const useConversation = () => {
     const detail =
       err instanceof Error ? err.message : (typeof err === 'string' ? err : '')
     const formattedMessage = detail ? `${msg}: ${detail}` : msg
-    if (type == "FETCH") {
+    if (type === "FETCH") {
       setStatus('ERROR')
       setChatState((prev) => ({
         ...prev,
@@ -85,7 +78,7 @@ const useConversation = () => {
     setStatus('LOADING')
     try {
       const resultJson = await API.getConversation(id)
-      const course = resultJson['course']
+      const fetchedCourse = resultJson['course']
       const conversationJson = resultJson['messages']
       const conversation: Message[] = []
       for (const raw_message of conversationJson) {
@@ -95,8 +88,11 @@ const useConversation = () => {
       setChatState((prev) => ({
         ...prev,
         messages: conversation,
-        course: course,
+        course: fetchedCourse || prev.course,
       }))
+      if (fetchedCourse) {
+        setCourse(fetchedCourse as Course)
+      }
       setLoadedId(id)
       setStatus('IDLE')
     } catch (err) {
@@ -104,21 +100,17 @@ const useConversation = () => {
     }
   }
 
-
   useEffect(() => {
     if (id == null) {
       return
     }
-    if (loadedId == parseInt(id)) {
+    if (loadedId === parseInt(id)) {
       return
     }
     loadConversation(parseInt(id))
-
-
   }, [id])
 
   const newConversation = async (course: Course) => {
-
     if (id) {
       const err = new Error(`Creating new conversation where ID already exists: ${id}`)
       throw err
@@ -133,11 +125,10 @@ const useConversation = () => {
     }
     setLoadedId(new_id)
     return parseInt(new_id)
-
   }
 
   const handleSendMessage = async () => {
-    if (status != 'IDLE') {
+    if (status !== 'IDLE') {
       return
     }
 
@@ -191,7 +182,7 @@ const useConversation = () => {
     const startingSymbol = await answerGenerator.next()
     if (startingSymbol.value && startingSymbol.value.includes(ERROR_SYMBOL)){
       errorSymbolRead = true
-    } else if (startingSymbol.value != START_SYMBOL) {
+    } else if (startingSymbol.value !== START_SYMBOL) {
       const err = new Error("First symbol was not the start symbol: " + startingSymbol.value)
       handleError(err, 'An error occurred while trying to get a response', "CHAT")
       return
@@ -217,12 +208,10 @@ const useConversation = () => {
           totalMessage += chunk
         }
 
-
         setChatState((prev) => ({
           ...prev,
           streamingMessage: totalMessage
         }))
-
       }
     } catch (e) {
       handleError(e, "Error thrown during generation", "CHAT")
@@ -233,7 +222,6 @@ const useConversation = () => {
       handleError(err, "Error symbol read during generation", "CHAT")
       return
     }
-
 
     if (!totalMessage) {
       const err = new Error("AI message request returned zero tokens")

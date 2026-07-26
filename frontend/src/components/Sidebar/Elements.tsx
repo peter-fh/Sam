@@ -16,59 +16,55 @@ export function SidebarButton() {
   return (
     <button
       title='Toggle Sidebar'
-      className="interactive sidebar-button"
-      onClick={ () => setSidebar(!sidebar) }
+      className="p-2.5 rounded-xl text-zinc-400 hover:text-zinc-100 hover:bg-zinc-800/80 active:scale-95 transition-all cursor-pointer border border-transparent hover:border-zinc-700/50"
+      onClick={() => setSidebar(!sidebar)}
     >
       {sidebar ? 
-        <i className="fa-solid fa-bars-staggered"></i>
+        <i className="fa-solid fa-bars-staggered text-lg"></i>
         :
-        <i className="fa-solid fa-bars"></i>
+        <i className="fa-solid fa-bars text-lg"></i>
       }
     </button>
   )
 }
 
-
 export function LogoutText() {
   return (
     <button
-      title='Toggle Sidebar'
-      className="interactive sidebar-text-button"
-      onClick={ () => supabase.auth.signOut() }
+      title='Logout'
+      className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/80 active:scale-[0.98] transition-all cursor-pointer text-sm font-medium text-left border border-transparent hover:border-zinc-700/50"
+      onClick={() => supabase.auth.signOut()}
     >
-      <i className="fa-solid fa-right-from-bracket"></i>
-      <p>Logout</p>
+      <i className="fa-solid fa-right-from-bracket text-base"></i>
+      <span>Logout</span>
     </button>
   )
 }
 
 export function NewConversationText() {
-
   const navigate = useNavigate()
   return (
     <button
       title="New Chat"
-      className="interactive sidebar-text-button"
+      className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-zinc-100 bg-zinc-800 hover:bg-zinc-700/90 active:scale-[0.98] transition-all cursor-pointer text-sm font-semibold border border-zinc-700/80 shadow-sm"
       data-testid="new-chat-button"
       onClick={() => {
         navigate("/")
       }}
     >
-      <i className="fa-solid fa-plus" />
-      <p>New Conversation</p>
+      <i className="fa-solid fa-plus text-base text-emerald-400"></i>
+      <span>New Conversation</span>
     </button>
   );
 }
 
-
 export function InvisibleButton() {
   return (
-    <button className="invisible-button">
+    <button className="hidden">
       <i className="fa-solid fa-download"/>
     </button>
   )
 }
-
 
 export function SidebarButtons() {
   const {
@@ -76,68 +72,84 @@ export function SidebarButtons() {
   } = useChatSettings()
 
   return (
-    <>
-      <div className="sidebar-buttons">
-        { sidebar ? 
-          <>
-            <SidebarButton/>
-            <h1 className="sidebar-title">Sam</h1>
-            <InvisibleButton/>
-            <InvisibleButton/>
-          </> :
-          <>
-            <SidebarButton/>
-            <InvisibleButton/>
-            <InvisibleButton/>
-            <InvisibleButton/>
-          </>
-        }
-      </div>
-    </>
+    <div className="flex items-center justify-between px-4 py-3.5 border-b border-zinc-800/80">
+      { sidebar ? 
+        <>
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-emerald-400 text-sm font-bold shadow-sm">
+              S
+            </div>
+            <h1 className="text-lg font-bold tracking-tight text-zinc-100 m-0 no-underline">Sam</h1>
+          </div>
+          <SidebarButton/>
+        </> :
+        <div className="bg-zinc-900/90 border border-zinc-800 backdrop-blur-md rounded-2xl shadow-xl p-1">
+          <SidebarButton/>
+        </div>
+      }
+    </div>
   )
 }
 
-
 export function CourseSelect() {
-  const {
-    course,
-    setCourse,
-  } = useChatSettings()
+  const { course, setCourse } = useChatSettings()
+  const { id } = useParams()
+  const isExistingConversation = Boolean(id)
 
   const onChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
-    setCourse(event.target.value as Course)
+    if (!isExistingConversation) {
+      setCourse(event.target.value as Course)
+    }
   }
 
   return (
-    <div className="option">
+    <div className="px-3 py-2">
+      <div className="flex items-center justify-between mb-1.5 px-1">
+        <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+          Course
+        </label>
+        {isExistingConversation && (
+          <span className="flex items-center gap-1 text-[10px] text-zinc-400 font-medium">
+            <i className="fa-solid fa-lock text-[9px]"></i>
+            Fixed
+          </span>
+        )}
+      </div>
 
-      <select
-        className="interactive sidebar-select-box"
-        onChange={onChange}
-        value={course}
-      >
-        {Object.values(Course).map((option) => (
-          <option key={option} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
+      {isExistingConversation ? (
+        <div className="w-full bg-zinc-800/50 border border-zinc-700/50 rounded-xl px-3 py-2 text-xs font-semibold text-zinc-300 flex items-center justify-between">
+          <span className="flex items-center gap-1.5 truncate">
+            <i className="fa-solid fa-book-open text-zinc-400 text-xs"></i>
+            {course}
+          </span>
+          <i className="fa-solid fa-lock text-zinc-500 text-xs shrink-0" title="Course is locked for this conversation"></i>
+        </div>
+      ) : (
+        <select
+          className="w-full bg-zinc-800/80 text-zinc-200 border border-zinc-700/70 rounded-xl px-3 py-2 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-zinc-600 cursor-pointer shadow-sm"
+          onChange={onChange}
+          value={course}
+        >
+          {Object.values(Course).map((option) => (
+            <option key={option} value={option} className="bg-zinc-900 text-zinc-100">
+              {option}
+            </option>
+          ))}
+        </select>
+      )}
     </div>
   );
 }
 
-
 interface ConversationItem {
   title: string,
   id: number,
+  course?: string,
 }
-export function Threads() {
 
+export function Threads() {
   const { id } = useParams()
   const navigate = useNavigate()
-
-  const {
-  } = useChatSettings()
 
   const [conversations, setConversations] = useState<ConversationItem[]>([])
   const [loading, setLoading] = useState<boolean>(true)
@@ -146,36 +158,37 @@ export function Threads() {
   interface ClickableThreadProps {
     id: number,
     title: string,
+    course?: string,
   }
 
   function ClickableThread(props: ClickableThreadProps) {
     const handleClick = () => {
       navigate(`/chat/${props.id}`)
     }
-    let current_classes = ""
-    const thread_classes = "thread thread-list-item"
-    const selected_thread_classes = "thread thread-list-item thread-selected"
-    if (id && props.id == parseInt(id)){
-      current_classes = selected_thread_classes
-    } else {
-      current_classes = thread_classes
-    }
-
-    useEffect(() => {
-      if (id && props.id == parseInt(id)){
-        current_classes = selected_thread_classes
-      } else {
-      }
-      current_classes = thread_classes
-    }, [id])
+    const isSelected = id && props.id === parseInt(id);
 
     return (
-      <div className={current_classes} onClick={handleClick} data-testid="thread">
-        <p data-testid={props.title}>{props.title}</p>
+      <div 
+        className={`group relative flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-xl cursor-pointer transition-all ${
+          isSelected 
+            ? 'bg-zinc-800/90 text-zinc-100 border border-zinc-700/90 shadow-sm' 
+            : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/50 border border-transparent'
+        }`} 
+        onClick={handleClick} 
+        data-testid="thread"
+      >
+        <div className="flex items-center gap-2.5 flex-1 min-w-0">
+          <i className={`fa-regular fa-message text-xs shrink-0 ${isSelected ? 'text-emerald-400' : 'text-zinc-500 group-hover:text-zinc-400'}`}></i>
+          <p className="truncate m-0 text-xs font-medium text-zinc-200 flex-1" title={props.title} data-testid={props.title}>{props.title}</p>
+        </div>
+        {props.course && (
+          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-zinc-800 text-zinc-300 border border-zinc-700/70 shrink-0">
+            {props.course}
+          </span>
+        )}
       </div>
     )
   }
-
 
   async function updateConversations() {
     setError(false)
@@ -186,11 +199,16 @@ export function Threads() {
         return
       }
 
-      const total_conversations = []
+      const total_conversations: ConversationItem[] = []
       for (const conversation of conversation_data) {
+        let courseName = conversation.course || (conversation.courses && conversation.courses.code)
+        if (!courseName && conversation.course_id === 1) {
+          courseName = 'MATH 203'
+        }
         const convo: ConversationItem = {
           title: conversation.title!,
           id: conversation.id!,
+          course: courseName || 'MATH 203',
         }
         total_conversations.push(convo)
       }
@@ -201,7 +219,6 @@ export function Threads() {
     } finally {
       setLoading(false)
     }
-
   }
 
   useEffect(() => {
@@ -210,62 +227,53 @@ export function Threads() {
 
   if (loading) {
     return (
-      <>
-        <div className="threads-list">
-          <i>
-            Loading Conversations...
-          </i>
-        </div>
-      </>
+      <div className="px-3 py-4 text-center">
+        <div className="inline-block w-5 h-5 border-2 border-zinc-700 border-t-emerald-500 rounded-full animate-spin mb-2"></div>
+        <p className="text-xs text-zinc-500 italic">Loading conversations...</p>
+      </div>
     )
   }
 
   if (error) {
     return (
-      <>
-        <div className="threads-list">
-          <p>
-            There was an error fetching previous conversations. Try again later.
-          </p>
-        </div>
-      </>
-    )
-  }
-
-  if (conversations.length == 0) {
-    return (
-      <>
-        <div className="threads-list">
-          <p>
-            No previous chats. Click "New Chat" to start a conversation.
-          </p>
-        </div>
-      </>
-    )
-  }
-  return (
-    <>
-      <div className="threads">
-        <ul className="threads-list">
-          <p className="thread-list-item thread-title">Chats</p>
-          {conversations.map((conversation) => (
-            <ClickableThread key={conversation.id} id={conversation.id} title={conversation.title}/>
-          ))}
-        </ul>
+      <div className="px-3 py-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs text-center">
+        Error fetching conversations. Try again later.
       </div>
-    </>
-  )
+    )
+  }
 
+  if (conversations.length === 0) {
+    return (
+      <div className="px-3 py-6 text-center text-zinc-500 text-xs leading-relaxed">
+        No previous chats.<br/>Click <span className="text-zinc-300 font-medium">"New Conversation"</span> to start.
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-1">
+      <div className="px-3 py-1">
+        <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-500">Recent Chats</span>
+      </div>
+      <div className="space-y-1">
+        {conversations.map((conversation) => (
+          <ClickableThread key={conversation.id} id={conversation.id} title={conversation.title} course={conversation.course}/>
+        ))}
+      </div>
+    </div>
+  )
 }
 
 export function Attribution() {
   return (
     <a 
-      className="attribution" 
+      className="flex items-center gap-2.5 p-2.5 rounded-xl bg-zinc-800/40 hover:bg-zinc-800/80 border border-zinc-800/60 text-zinc-400 hover:text-zinc-200 text-xs leading-snug transition-all no-underline group" 
       href="https://www.concordia.ca/students/success/learning-support/math-help.html"
       target='_blank'
-      title="robot icons">
-      Get learning support for math-based courses via the Student Success Center
+      rel="noreferrer"
+      title="Student Success Center Math Help">
+      <i className="fa-solid fa-graduation-cap text-emerald-400 text-sm group-hover:scale-110 transition-transform shrink-0"></i>
+      <span>Concordia Student Success Center Math Support</span>
     </a>
   )
 }

@@ -97,25 +97,27 @@ const Chat: React.FC = () => {
       </header>
 
       {/* Messages Scroll Area */}
-      <main className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-8 pt-20 pb-40 w-full max-w-4xl mx-auto flex flex-col gap-6" ref={messagesRef}>
-        {status === "ERROR" && 
-          <ErrorBar
-            message={chatState.errorMessage!}
+      <main className="flex-1 overflow-y-auto pt-20 pb-40 w-full" ref={messagesRef}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 flex flex-col gap-6 w-full">
+          {status === "ERROR" && 
+            <ErrorBar
+              message={chatState.errorMessage!}
+            />
+          }
+          <MessageContent
+            messages={chatState.messages}
+            status={status}
+            streamingMessage={chatState.streamingMessage}
           />
-        }
-        <MessageContent
-          messages={chatState.messages}
-          status={status}
-          streamingMessage={chatState.streamingMessage}
-        />
-        <div ref={bottomMarkerRef} className="h-0 w-0 m-0 p-0 border-none leading-none opacity-0" />
+          <div ref={bottomMarkerRef} className="h-0 w-0 m-0 p-0 border-none leading-none opacity-0" />
+        </div>
       </main>
 
       {/* Floating Input Area Bar */}
-      <div className={`fixed bottom-0 right-0 z-20 p-4 sm:p-6 bg-gradient-to-t from-slate-50 via-slate-50/90 dark:from-slate-950 dark:via-slate-950/90 to-transparent transition-all duration-300 ${
+      <div className={`fixed bottom-0 right-0 z-20 p-4 sm:p-6 bg-gradient-to-t from-slate-50 via-slate-50/90 dark:from-slate-950 dark:via-slate-950/90 to-transparent transition-all duration-300 pointer-events-none ${
         sidebar ? 'left-0 lg:left-72' : 'left-0'
       }`}>
-        <div className="max-w-4xl mx-auto">
+        <div className="max-w-4xl mx-auto pointer-events-auto">
           <InputArea
             isLocked={status !== "IDLE"}
             fileRef={fileInputRef}

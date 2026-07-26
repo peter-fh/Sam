@@ -66,7 +66,7 @@ const Chat: React.FC = () => {
 
   return (
     <div 
-      className={`flex-1 h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-all duration-300 relative flex flex-col ${
+      className={`flex-1 h-screen bg-[#FAF8F5] dark:bg-[#0F090B] text-slate-900 dark:text-slate-100 transition-colors duration-200 relative flex flex-col ${
         sidebar ? 'pl-0 lg:pl-72' : 'pl-0'
       }`} 
       onDrop={handleDrop} 
@@ -74,7 +74,7 @@ const Chat: React.FC = () => {
       data-testid="chat"
     >
       {/* Fixed top header navbar */}
-      <header className={`fixed top-0 right-0 z-30 h-14 backdrop-blur-xl bg-white/90 dark:bg-slate-950/90 border-b border-slate-200 dark:border-slate-800/80 px-4 sm:px-6 flex items-center justify-between shadow-sm transition-all duration-300 ${
+      <header className={`fixed top-0 right-0 z-30 h-14 backdrop-blur-xl bg-white/90 dark:bg-[#0F090B]/90 border-b border-[#E6DDD3] dark:border-[#261418] px-4 sm:px-6 flex items-center justify-between shadow-sm transition-colors duration-200 ${
         sidebar ? 'left-0 lg:left-72' : 'left-0'
       }`}>
         <div className="flex items-center gap-3">
@@ -82,13 +82,13 @@ const Chat: React.FC = () => {
             <SidebarButton />
           )}
           <div className="flex items-center gap-2.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+            <div className="w-2.5 h-2.5 rounded-full bg-[#E5A712] animate-pulse"></div>
             <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200 tracking-tight m-0 no-underline">
               Concordia Sam
             </h2>
             {chatState.course && (
-              <span className="px-2.5 py-1 text-xs font-semibold bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 rounded-lg flex items-center gap-1.5">
-                <i className="fa-solid fa-book-open text-[10px] text-indigo-600 dark:text-indigo-400"></i>
+              <span className="px-2.5 py-1 text-xs font-semibold bg-[#FFF8E6] dark:bg-[#E5A712]/15 text-[#855D00] dark:text-[#F5C242] border border-[#F5E1A4] dark:border-[#E5A712]/30 rounded-lg flex items-center gap-1.5 transition-colors duration-200">
+                <i className="fa-solid fa-book-open text-[10px] text-[#912338] dark:text-[#E5A712]"></i>
                 {chatState.course}
               </span>
             )}
@@ -114,7 +114,7 @@ const Chat: React.FC = () => {
       </main>
 
       {/* Floating Input Area Bar */}
-      <div className={`fixed bottom-0 right-0 z-20 p-4 sm:p-6 bg-gradient-to-t from-slate-50 via-slate-50/90 dark:from-slate-950 dark:via-slate-950/90 to-transparent transition-all duration-300 pointer-events-none ${
+      <div className={`fixed bottom-0 right-0 z-20 p-4 sm:p-6 bg-gradient-to-t from-[#FAF8F5] via-[#FAF8F5]/90 dark:from-[#0F090B] dark:via-[#0F090B]/90 to-transparent transition-colors duration-200 pointer-events-none ${
         sidebar ? 'left-0 lg:left-72' : 'left-0'
       }`}>
         <div className="max-w-4xl mx-auto pointer-events-auto">

@@ -34,7 +34,7 @@ function Sidebar() {
   return (
     <>
       { sidebar && (
-        <aside className="fixed left-0 top-0 bottom-0 w-72 bg-white/95 dark:bg-slate-900/95 border-r border-slate-200 dark:border-slate-800/80 backdrop-blur-xl z-40 flex flex-col justify-between transition-all duration-300 shadow-2xl">
+        <aside className="fixed left-0 top-0 bottom-0 w-72 bg-[#F5F0EB]/95 dark:bg-[#140B0D]/95 border-r border-[#E5DDD4] dark:border-[#281519]/90 backdrop-blur-xl z-40 flex flex-col justify-between transition-colors duration-200 shadow-2xl">
           <div className="flex flex-col h-full overflow-hidden">
             <SidebarButtons/>
             <div className="px-3 pt-3 pb-1 space-y-1.5">
@@ -43,12 +43,12 @@ function Sidebar() {
               <LogoutText/>
             </div>
             <div className="my-2 px-4">
-              <div className="h-px bg-slate-200 dark:bg-slate-800/80 w-full"></div>
+              <div className="h-px bg-[#E5DDD4] dark:bg-[#281519] w-full"></div>
             </div>
             <div className="flex-1 overflow-y-auto px-3 min-h-0">
               <Threads/>
             </div>
-            <div className="p-3 border-t border-slate-200 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/50">
+            <div className="p-3 border-t border-[#E5DDD4] dark:border-[#281519]/90 bg-[#EFE8E1]/50 dark:bg-[#1B0F12]/50">
               <Attribution/>
             </div>
           </div>

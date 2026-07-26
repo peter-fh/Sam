@@ -51,18 +51,18 @@ const InputArea : React.FC<InputAreaProps> = (props: InputAreaProps) => {
   }
 
   return (
-    <div className="w-full bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 shadow-2xl backdrop-blur-xl transition-all focus-within:border-indigo-500/50 focus-within:ring-2 focus-within:ring-indigo-500/20">
+    <div className="w-full bg-white dark:bg-[#180D10]/95 border border-[#E6DDD3] dark:border-[#2D181C] rounded-2xl p-3 shadow-2xl backdrop-blur-xl transition-colors duration-200 focus-within:border-[#912338]/60 focus-within:ring-2 focus-within:ring-[#912338]/20">
       {/* File attachment preview badge if present */}
       {imageFilename && (
-        <div className="mb-2 px-3 py-1.5 bg-indigo-50 dark:bg-indigo-500/10 border border-indigo-200 dark:border-indigo-500/20 rounded-xl flex items-center justify-between text-xs text-indigo-700 dark:text-indigo-300 w-fit gap-2">
+        <div className="mb-2 px-3 py-1.5 bg-[#FFF8E6] dark:bg-[#E5A712]/15 border border-[#F5E1A4] dark:border-[#E5A712]/30 rounded-xl flex items-center justify-between text-xs text-[#855D00] dark:text-[#F5C242] w-fit gap-2 transition-colors duration-200">
           <div className="flex items-center gap-1.5 truncate max-w-xs">
-            <i className="fa-solid fa-image text-indigo-600 dark:text-indigo-400"></i>
+            <i className="fa-solid fa-image text-[#912338] dark:text-[#E5A712]"></i>
             <span className="truncate font-medium">{imageFilename}</span>
           </div>
           <button 
             type="button" 
             onClick={() => setImageFilename('')}
-            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-200 cursor-pointer ml-2"
+            className="text-[#912338] dark:text-[#F5C242] hover:opacity-80 cursor-pointer ml-2 transition-colors duration-200"
           >
             <i className="fa-solid fa-xmark"></i>
           </button>
@@ -77,7 +77,7 @@ const InputArea : React.FC<InputAreaProps> = (props: InputAreaProps) => {
         value={message}
         rows={2} 
         placeholder="Enter your message here..."
-        className="w-full bg-transparent text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm sm:text-base border-0 outline-none resize-none focus:outline-none focus:ring-0 p-1"
+        className="w-full bg-transparent text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 text-sm sm:text-base border-0 outline-none resize-none focus:outline-none focus:ring-0 p-1 transition-colors duration-200"
         data-testid="chat-input"
       />
 
@@ -95,7 +95,7 @@ const InputArea : React.FC<InputAreaProps> = (props: InputAreaProps) => {
           <button 
             className={`p-2.5 rounded-xl transition-all cursor-pointer flex items-center justify-center text-sm ${
               imageFilename 
-                ? "bg-indigo-100 dark:bg-indigo-600/30 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/40" 
+                ? "bg-[#912338]/10 dark:bg-[#912338]/30 text-[#912338] dark:text-[#FFB3C0] border border-[#912338]/20 dark:border-[#912338]/40" 
                 : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 border border-transparent"
             } ${buttonClass}`}
             onClick={handleFileButtonClick}
@@ -114,7 +114,7 @@ const InputArea : React.FC<InputAreaProps> = (props: InputAreaProps) => {
             props.isLocked 
               ? "bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 cursor-not-allowed" 
               : message.trim() || imageFilename
-              ? "bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-indigo-500/20"
+              ? "bg-gradient-to-r from-[#912338] to-[#7A1D2F] hover:from-[#A82942] hover:to-[#8E2237] text-white shadow-md shadow-[#912338]/25"
               : "bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700/80"
           }`} 
           onClick={handleSend}

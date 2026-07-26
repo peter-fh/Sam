@@ -3,6 +3,14 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --color-concordia-burgundy: #912338;
+  --color-concordia-burgundy-light: #a82942;
+  --color-concordia-burgundy-dark: #6e1a2a;
+  --color-concordia-gold: #e5a712;
+  --color-concordia-blue: #0072a8;
+}
+
 @layer base {
   :root {
     color-scheme: light dark;
@@ -10,12 +18,12 @@
   }
 
   body {
-    @apply bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 min-h-screen antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-200;
+    @apply bg-[#FAF8F5] text-slate-900 dark:bg-[#0F090B] dark:text-slate-100 min-h-screen antialiased selection:bg-[#912338] selection:text-white transition-colors duration-200;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar styled with Concordia Burgundy accent */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -24,11 +32,11 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
+  background: rgba(145, 35, 56, 0.3);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
+  background: rgba(145, 35, 56, 0.6);
 }
 
 /* MathJax & Markdown Enhancements */

@@ -8,6 +8,7 @@ class ModelType(Enum):
     o4_mini = "openai/o4-mini"
     gpt_4_1 = "openai/gpt-4.1"
     gpt_4_1_mini = "openai/gpt-4.1-mini"
+    gpt_5_4_mini = "openai/gpt-5.4-mini"
     gemini_2_5_flash = "google/gemini-2.5-flash"
     gemini_2_5_flash_lite = "google/gemini-2.5-flash-lite"
     gemini_2_0_flash_lite = "google/gemini-2.0-flash-lite-001"

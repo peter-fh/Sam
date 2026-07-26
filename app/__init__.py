@@ -48,9 +48,9 @@ def create_app(test_config: Any = None):
     )
 
     ai_config = AIConfig(
-        concept_model=ModelType.claude_haiku_4_5,
-        problem_model=ModelType.claude_haiku_4_5,
-        study_model=ModelType.claude_haiku_4_5,
+        concept_model=ModelType.gpt_5_4_mini,
+        problem_model=ModelType.gpt_5_4_mini,
+        study_model=ModelType.gpt_5_4_mini,
         utility_model=ModelType.gemini_2_5_flash_lite,
         mode_model=ModelType.gemini_2_5_flash_lite,
         debug_mode=app.config["FLASK_ENV"] == "development",

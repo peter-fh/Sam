@@ -5,11 +5,11 @@ export const LoadingConversationSpinner = () => {
   return (
     <div key={-1} className="flex flex-col items-center justify-center p-8 gap-4">
       <PropagateLoader 
-        color="#a1a1aa"
+        color="#818cf8"
         speedMultiplier={1.2}
         size={12}
       />
-      <span className="text-xs text-zinc-400 font-medium tracking-wide animate-pulse">
+      <span className="text-xs text-slate-400 font-medium tracking-wide animate-pulse">
         Loading conversation history...
       </span>
     </div>
@@ -18,9 +18,9 @@ export const LoadingConversationSpinner = () => {
 
 export const WaitingSpinner = () => {
   return (
-    <div key={-1} className="flex items-center gap-2 py-1 px-2 text-zinc-400">
+    <div key={-1} className="flex items-center gap-2 py-1 px-2 text-indigo-400">
       <BeatLoader 
-        color="#a1a1aa"
+        color="#818cf8"
         speedMultiplier={0.8}
         size={8}
       />
@@ -30,13 +30,13 @@ export const WaitingSpinner = () => {
 
 export const ThinkingSpinner = () => {
   return (
-    <div key={-1} className="flex items-center gap-3 py-1 px-2 text-zinc-400">
+    <div key={-1} className="flex items-center gap-3 py-1 px-2 text-indigo-400">
       <BeatLoader 
-        color="#a1a1aa"
+        color="#818cf8"
         speedMultiplier={0.8}
         size={8}
       />
-      <span className="text-xs font-semibold tracking-wide text-zinc-300">
+      <span className="text-xs font-semibold tracking-wide text-indigo-300">
         Thinking...
       </span>
     </div>

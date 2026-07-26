@@ -14,7 +14,7 @@ const MessageView = (props: MessageProps) => {
   if (props.message.url != null) {
     return (
       <img 
-        className="message-image max-w-sm max-h-80 rounded-xl border border-zinc-700 shadow-md object-contain my-2"
+        className="message-image max-w-sm max-h-80 rounded-xl border border-slate-700 shadow-md object-contain my-2"
         src={props.message.url}
         alt="User attachment"
       /> 
@@ -62,7 +62,7 @@ const MessageContent = (props: MessageContentProps) => {
         return (
           <div key={index} className={`flex items-start gap-3 w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
             {!isUser && (
-              <div className="w-8 h-8 rounded-xl bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-emerald-400 text-xs font-bold shadow-sm shrink-0 mt-1">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white text-xs font-bold shadow-md shrink-0 mt-1">
                 S
               </div>
             )}
@@ -70,9 +70,9 @@ const MessageContent = (props: MessageContentProps) => {
             <span 
               className={`assistant ${message.role} block transition-all ${
                 isUser 
-                  ? 'max-w-[85%] sm:max-w-[75%] bg-zinc-800 border border-zinc-700 text-zinc-100 rounded-2xl rounded-tr-xs px-5 py-3.5 shadow-sm font-normal' 
+                  ? 'max-w-[85%] sm:max-w-[75%] bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-2xl rounded-tr-xs px-5 py-3.5 shadow-md' 
                   : isAssistant 
-                  ? 'flex-1 max-w-[90%] bg-zinc-900/90 border border-zinc-800 text-zinc-100 rounded-2xl rounded-tl-xs px-5 py-4 shadow-sm backdrop-blur-md'
+                  ? 'flex-1 max-w-[90%] bg-slate-900/90 border border-slate-800 text-slate-100 rounded-2xl rounded-tl-xs px-5 py-4 shadow-sm backdrop-blur-md'
                   : 'w-full bg-rose-500/10 border border-rose-500/20 text-rose-200 rounded-2xl px-5 py-3.5'
               }`}
               data-testid={`message-${index}`}
@@ -85,10 +85,10 @@ const MessageContent = (props: MessageContentProps) => {
 
       {props.status === "THINKING" && (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-emerald-400 text-xs font-bold shadow-sm shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white text-xs font-bold shadow-md shrink-0">
             S
           </div>
-          <div className="bg-zinc-900/90 border border-zinc-800 rounded-2xl rounded-tl-xs px-4 py-3 text-zinc-400 text-xs">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl rounded-tl-xs px-4 py-3 text-slate-400 text-xs">
             <ThinkingSpinner/>
           </div>
         </div>
@@ -96,10 +96,10 @@ const MessageContent = (props: MessageContentProps) => {
 
       {props.status === "WAITING" && (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-emerald-400 text-xs font-bold shadow-sm shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white text-xs font-bold shadow-md shrink-0">
             S
           </div>
-          <div className="bg-zinc-900/90 border border-zinc-800 rounded-2xl rounded-tl-xs px-4 py-3 text-zinc-400 text-xs">
+          <div className="bg-slate-900/90 border border-slate-800 rounded-2xl rounded-tl-xs px-4 py-3 text-slate-400 text-xs">
             <WaitingSpinner/>
           </div>
         </div>
@@ -107,12 +107,12 @@ const MessageContent = (props: MessageContentProps) => {
 
       {props.status === "STREAMING" && props.streamingMessage && (
         <div className="flex items-start gap-3 w-full">
-          <div className="w-8 h-8 rounded-xl bg-zinc-800 border border-zinc-700/80 flex items-center justify-center text-emerald-400 text-xs font-bold shadow-sm shrink-0 mt-1">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white text-xs font-bold shadow-md shrink-0 mt-1">
             S
           </div>
           <span 
             key={-1}
-            className="assistant block flex-1 max-w-[90%] bg-zinc-900/90 border border-zinc-800 text-zinc-100 rounded-2xl rounded-tl-xs px-5 py-4 shadow-sm backdrop-blur-md" 
+            className="assistant block flex-1 max-w-[90%] bg-slate-900/90 border border-slate-800 text-slate-100 rounded-2xl rounded-tl-xs px-5 py-4 shadow-sm backdrop-blur-md" 
             data-testid="streaming-message"
           >
             <div className="prose prose-invert max-w-none text-sm sm:text-base leading-relaxed">

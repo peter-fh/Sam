@@ -66,7 +66,7 @@ const Chat: React.FC = () => {
 
   return (
     <div 
-      className={`flex-1 h-screen bg-slate-950 text-slate-100 transition-all duration-300 relative flex flex-col ${
+      className={`flex-1 h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-all duration-300 relative flex flex-col ${
         sidebar ? 'pl-0 lg:pl-72' : 'pl-0'
       }`} 
       onDrop={handleDrop} 
@@ -74,7 +74,7 @@ const Chat: React.FC = () => {
       data-testid="chat"
     >
       {/* Fixed top header navbar */}
-      <header className={`fixed top-0 right-0 z-30 h-14 backdrop-blur-xl bg-slate-950/90 border-b border-slate-800/80 px-4 sm:px-6 flex items-center justify-between shadow-md transition-all duration-300 ${
+      <header className={`fixed top-0 right-0 z-30 h-14 backdrop-blur-xl bg-white/90 dark:bg-slate-950/90 border-b border-slate-200 dark:border-slate-800/80 px-4 sm:px-6 flex items-center justify-between shadow-sm transition-all duration-300 ${
         sidebar ? 'left-0 lg:left-72' : 'left-0'
       }`}>
         <div className="flex items-center gap-3">
@@ -83,12 +83,12 @@ const Chat: React.FC = () => {
           )}
           <div className="flex items-center gap-2.5">
             <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-            <h2 className="text-sm font-semibold text-slate-200 tracking-tight m-0 no-underline">
+            <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-200 tracking-tight m-0 no-underline">
               Concordia Sam
             </h2>
             {chatState.course && (
-              <span className="px-2.5 py-1 text-xs font-semibold bg-indigo-500/15 text-indigo-300 border border-indigo-500/30 rounded-lg flex items-center gap-1.5">
-                <i className="fa-solid fa-book-open text-[10px] text-indigo-400"></i>
+              <span className="px-2.5 py-1 text-xs font-semibold bg-indigo-50 dark:bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 rounded-lg flex items-center gap-1.5">
+                <i className="fa-solid fa-book-open text-[10px] text-indigo-600 dark:text-indigo-400"></i>
                 {chatState.course}
               </span>
             )}
@@ -112,7 +112,7 @@ const Chat: React.FC = () => {
       </main>
 
       {/* Floating Input Area Bar */}
-      <div className={`fixed bottom-0 right-0 z-20 p-4 sm:p-6 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent transition-all duration-300 ${
+      <div className={`fixed bottom-0 right-0 z-20 p-4 sm:p-6 bg-gradient-to-t from-slate-50 via-slate-50/90 dark:from-slate-950 dark:via-slate-950/90 to-transparent transition-all duration-300 ${
         sidebar ? 'left-0 lg:left-72' : 'left-0'
       }`}>
         <div className="max-w-4xl mx-auto">

@@ -50,14 +50,30 @@ const Chat: React.FC = () => {
   }
 
   const messagesRef = useRef<HTMLDivElement>(null)
+  const isUserScrolledUpRef = useRef<boolean>(false)
+
+  const handleScroll = () => {
+    if (!messagesRef.current) return
+    const { scrollTop, scrollHeight, clientHeight } = messagesRef.current
+    const distanceFromBottom = scrollHeight - (scrollTop + clientHeight)
+    // If distance from bottom is greater than 100px, user has manually scrolled up to read
+    isUserScrolledUpRef.current = distanceFromBottom > 100
+  }
 
   const scrollIntoView = () => {
     bottomMarkerRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
   useEffect(() => {
-    scrollIntoView()
-  }, [status, chatState.messages.length, chatState.streamingMessage])
+    // If a new message is starting (WAITING or THINKING), reset scroll lock and scroll down
+    if (status === 'WAITING' || status === 'THINKING') {
+      isUserScrolledUpRef.current = false
+      scrollIntoView()
+    } else if (!isUserScrolledUpRef.current) {
+      // Only auto-scroll to bottom if user is NOT scrolled up reading
+      scrollIntoView()
+    }
+  }, [status, chatState.messages.length])
 
   if (status === "ERROR" && chatState.errorMessage === "CHAT") {
     alert("An error occurred! Please try again.")
@@ -97,7 +113,7 @@ const Chat: React.FC = () => {
       </header>
 
       {/* Messages Scroll Area */}
-      <main className="flex-1 overflow-y-auto pt-20 pb-40 w-full" ref={messagesRef}>
+      <main className="flex-1 overflow-y-auto pt-20 pb-40 w-full" ref={messagesRef} onScroll={handleScroll}>
         <div className="max-w-4xl mx-auto px-4 sm:px-6 md:px-8 flex flex-col gap-6 w-full">
           {status === "ERROR" && 
             <ErrorBar

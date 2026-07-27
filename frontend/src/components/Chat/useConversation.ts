@@ -229,6 +229,7 @@ const useConversation = () => {
       return
     }
 
+    console.log("ai message:\n", totalMessage)
     const aiResponse: Message = newMessage(totalMessage, 'assistant')
     setChatState((prev) => ({
       ...prev,

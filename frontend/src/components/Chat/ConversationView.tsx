@@ -74,12 +74,12 @@ const MessageContent = (props: MessageContentProps) => {
             )}
             
             <span 
-              className={`assistant ${message.role} block transition-all ${
+              className={`assistant ${message.role} block transition-colors duration-200 ${
                 isUser 
-                  ? 'max-w-[85%] sm:max-w-[75%] bg-gradient-to-r from-[#912338] to-[#7A1D2F] text-white rounded-2xl rounded-tr-xs px-5 py-3.5 shadow-md shadow-[#912338]/20' 
+                  ? 'max-w-[85%] sm:max-w-[75%] bg-gradient-to-r from-[#912338] to-[#7A1D2F] text-white rounded-2xl rounded-tr-xs px-5 py-4 shadow-md shadow-[#912338]/20' 
                   : isAssistant 
-                  ? 'flex-1 max-w-[90%] bg-white dark:bg-[#180D10]/95 border border-[#E6DDD3] dark:border-[#2D181C] text-slate-800 dark:text-slate-100 rounded-2xl rounded-tl-xs px-5 py-4 shadow-sm backdrop-blur-md'
-                  : 'w-full bg-rose-500/10 border border-rose-500/20 text-rose-800 dark:text-rose-200 rounded-2xl px-5 py-3.5'
+                  ? 'flex-1 max-w-[90%] bg-white dark:bg-[#180D10]/95 border border-[#E6DDD3] dark:border-[#2D181C] text-slate-800 dark:text-slate-100 rounded-2xl rounded-tl-xs px-6 py-5 shadow-sm backdrop-blur-md'
+                  : 'w-full bg-rose-500/10 border border-rose-500/20 text-rose-800 dark:text-rose-200 rounded-2xl px-5 py-4'
               }`}
               data-testid={`message-${index}`}
             >
@@ -94,7 +94,7 @@ const MessageContent = (props: MessageContentProps) => {
           <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#912338] to-[#B82B46] flex items-center justify-center text-[#FFE8B3] text-xs font-bold shadow-md shadow-[#912338]/25 shrink-0">
             S
           </div>
-          <div className="bg-white dark:bg-[#180D10]/95 border border-[#E6DDD3] dark:border-[#2D181C] rounded-2xl rounded-tl-xs px-4 py-3 text-slate-500 dark:text-slate-400 text-xs">
+          <div className="bg-white dark:bg-[#180D10]/95 border border-[#E6DDD3] dark:border-[#2D181C] rounded-2xl rounded-tl-xs px-5 py-4 text-slate-500 dark:text-slate-400 text-xs">
             <ThinkingSpinner/>
           </div>
         </div>
@@ -105,7 +105,7 @@ const MessageContent = (props: MessageContentProps) => {
           <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#912338] to-[#B82B46] flex items-center justify-center text-[#FFE8B3] text-xs font-bold shadow-md shadow-[#912338]/25 shrink-0">
             S
           </div>
-          <div className="bg-white dark:bg-[#180D10]/95 border border-[#E6DDD3] dark:border-[#2D181C] rounded-2xl rounded-tl-xs px-4 py-3 text-slate-500 dark:text-slate-400 text-xs">
+          <div className="bg-white dark:bg-[#180D10]/95 border border-[#E6DDD3] dark:border-[#2D181C] rounded-2xl rounded-tl-xs px-5 py-4 text-slate-500 dark:text-slate-400 text-xs">
             <WaitingSpinner/>
           </div>
         </div>
@@ -118,7 +118,7 @@ const MessageContent = (props: MessageContentProps) => {
           </div>
           <span 
             key={-1}
-            className="assistant block flex-1 max-w-[90%] bg-white dark:bg-[#180D10]/95 border border-[#E6DDD3] dark:border-[#2D181C] text-slate-800 dark:text-slate-100 rounded-2xl rounded-tl-xs px-5 py-4 shadow-sm backdrop-blur-md" 
+            className="assistant block flex-1 max-w-[90%] bg-white dark:bg-[#180D10]/95 border border-[#E6DDD3] dark:border-[#2D181C] text-slate-800 dark:text-slate-100 rounded-2xl rounded-tl-xs px-6 py-5 shadow-sm backdrop-blur-md" 
             data-testid="streaming-message"
           >
             <div className="prose dark:prose-invert max-w-none text-sm sm:text-base leading-relaxed">

@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import './ConversationView.css'
 import MarkTeX from '../MarkTeX'
 import { Message, newMessage } from '../../api/message'
@@ -10,7 +11,7 @@ type MessageProps = {
   message: Message,
 }
 
-const MessageView = (props: MessageProps) => {
+const MessageView = memo((props: MessageProps) => {
   if (props.message.url != null) {
     return (
       <img 
@@ -41,7 +42,7 @@ const MessageView = (props: MessageProps) => {
       <MarkTeX content={props.message.content}/>
     </div>
   )
-}
+})
 
 type MessageContentProps = {
   streamingMessage: string | undefined,

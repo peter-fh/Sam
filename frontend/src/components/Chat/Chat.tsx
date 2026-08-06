@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import './Chat.css'
 import InputArea from './InputArea'
-import useConversation from './useConversation'
+import useConversation, { ChatStatus } from './useConversation'
 import { useChatSettings } from '../../context/useChatContext'
 import useFileReader from './useFileReader'
 import MessageContent from './ConversationView'
@@ -51,6 +51,7 @@ const Chat: React.FC = () => {
 
   const messagesRef = useRef<HTMLDivElement>(null)
   const isUserScrolledUpRef = useRef<boolean>(false)
+  const prevStatusRef = useRef<ChatStatus>(status)
 
   const handleScroll = () => {
     if (!messagesRef.current) return
@@ -65,15 +66,26 @@ const Chat: React.FC = () => {
   }
 
   useEffect(() => {
-    // If a new message is starting (WAITING or THINKING), reset scroll lock and scroll down
-    if (status === 'WAITING' || status === 'THINKING') {
+    const isNewMessageStarting = status === 'WAITING' || status === 'THINKING'
+    const justFinishedStreaming = prevStatusRef.current === 'STREAMING' && status === 'IDLE'
+
+    if (isNewMessageStarting) {
+      // If a new message is starting (WAITING or THINKING), reset scroll lock and scroll down
       isUserScrolledUpRef.current = false
       scrollIntoView()
-    } else if (!isUserScrolledUpRef.current) {
-      // Only auto-scroll to bottom if user is NOT scrolled up reading
+    } else if (status === 'STREAMING') {
+      // Auto-scroll while streaming only if user is NOT scrolled up reading
+      if (!isUserScrolledUpRef.current) {
+        scrollIntoView()
+      }
+    } else if (!justFinishedStreaming && !isUserScrolledUpRef.current) {
+      // Auto-scroll to bottom if user is NOT scrolled up reading,
+      // but do NOT snap/scroll to bottom when the message has just finished streaming
       scrollIntoView()
     }
-  }, [status, chatState.messages.length])
+
+    prevStatusRef.current = status
+  }, [status, chatState.messages.length, chatState.streamingMessage])
 
   if (status === "ERROR" && chatState.errorMessage === "CHAT") {
     alert("An error occurred! Please try again.")

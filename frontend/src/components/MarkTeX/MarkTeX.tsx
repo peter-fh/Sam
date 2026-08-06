@@ -1,56 +1,71 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import DOMPurify from 'dompurify';
 import { marked } from "marked";
+import katex from "katex";
 
 interface MarkTeXProps {
-  content: string
+  content: string;
 }
 
-interface LaTeXProps {
-  content: string
+export function renderLatexWithKaTeX(text: string): string {
+  if (!text) return "";
+
+  // Normalize AI-generated Markdown dividers
+  const normalizedContent = text.replace(/([^\n])\n---/g, '$1\n\n---');
+
+  const mathRegex = /(\\\[[\s\S]*?\\\]|\$\$[\s\S]*?\$\$|\\\([\s\S]*?\\\))/g;
+  const mathBlocks: { html: string }[] = [];
+
+  const placeholderContent = normalizedContent.replace(mathRegex, (match) => {
+    let expression = match;
+    let isDisplay = false;
+
+    if (match.startsWith('\\[') && match.endsWith('\\]')) {
+      expression = match.slice(2, -2);
+      isDisplay = true;
+    } else if (match.startsWith('$$') && match.endsWith('$$')) {
+      expression = match.slice(2, -2);
+      isDisplay = true;
+    } else if (match.startsWith('\\(') && match.endsWith('\\)')) {
+      expression = match.slice(2, -2);
+      isDisplay = false;
+    }
+
+    try {
+      const renderedHtml = katex.renderToString(expression, {
+        displayMode: isDisplay,
+        throwOnError: false,
+      });
+      mathBlocks.push({ html: renderedHtml });
+    } catch (e) {
+      mathBlocks.push({ html: match });
+    }
+
+    return `%%MATH_${mathBlocks.length - 1}%%`;
+  });
+
+  let parsedContent = marked.parse(placeholderContent, { async: false }) as string;
+
+  mathBlocks.forEach((block, index) => {
+    parsedContent = parsedContent.replace(`%%MATH_${index}%%`, block.html);
+  });
+
+  return DOMPurify.sanitize(parsedContent, {
+    ADD_TAGS: [
+      'annotation', 'semantics', 'math', 'mrow', 'mi', 'mo', 'mn', 
+      'mfrac', 'msup', 'msub', 'mover', 'munder', 'msubsup', 'msqrt', 
+      'mroot', 'mtable', 'mtr', 'mtd', 'span', 'path', 'svg'
+    ],
+    ADD_ATTR: ['aria-hidden', 'viewBox', 'd', 'style', 'class', 'encoding']
+  });
 }
 
-const CustomLatex: React.FC<LaTeXProps> = ({content}) => {
-  const containerRef = React.useRef<HTMLDivElement>(null);
+const MarkTeX: React.FC<MarkTeXProps> = ({ content }) => {
+  const html = useMemo(() => renderLatexWithKaTeX(content), [content]);
 
-  useEffect(() => {
-    window.MathJax!.typeset!([containerRef.current])
-  }, [content])
   return (
-    <div ref={containerRef} dangerouslySetInnerHTML={{__html: content}}>
-    </div>
-  )
-}
+    <div dangerouslySetInnerHTML={{ __html: html }} />
+  );
+};
 
-const MarkTeX: React.FC<MarkTeXProps> = ({content}) => {
-
-  const parsedHTML = useMemo(() => {
-    const mathBlocks: string[] = [];
-    const mathRegex = /(\\\[[\s\S]*?\\\]|\\\([\s\S]*?\\\))/g;
-
-    // Normalize AI-generated Markdown: ensure blank line before --- dividers so marked doesn't convert text into Setext H2 headers
-    const normalizedContent = content.replace(/([^\n])\n---/g, '$1\n\n---');
-
-    const placeholderContent = normalizedContent.replace(mathRegex, (match) => {
-      mathBlocks.push(match);
-      return `%%MATH_${mathBlocks.length - 1}%%`;
-    });
-
-    let parsedContent = marked.parse(placeholderContent, { async: false }) as string;
-
-    mathBlocks.forEach((math, index) => {
-      parsedContent = parsedContent.replace(`%%MATH_${index}%%`, math);
-    });
-
-    const purifiedContent = DOMPurify.sanitize(parsedContent);
-    return purifiedContent;
-  }, [content]);
-
-  return (
-    <>
-      <CustomLatex content={parsedHTML}/>
-    </>
-  )
-}
-
-export default MarkTeX
+export default MarkTeX;

@@ -27,7 +27,7 @@ export function ChatSettingsProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     const saved = localStorage.getItem('theme')
     if (saved === 'light' || saved === 'dark') return saved
-    return 'dark'
+    return window.matchMedia?.('(prefers-color-scheme: dark)')?.matches ? 'dark' : 'light'
   });
 
   const setTheme = (newTheme: Theme) => {

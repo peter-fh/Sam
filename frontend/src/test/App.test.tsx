@@ -80,3 +80,44 @@ test('Test that the end symbol does not appear', async() => {
   }, {timeout: 1000})
 
 })
+
+test('Test that scrollIntoView is not called when streaming completes', async () => {
+  vi.mocked(global.fetch).mockResolvedValueOnce(
+    new Response(JSON.stringify({
+      "id": 1
+    }), { status: 200 })
+  )
+
+  vi.mocked(global.fetch).mockResolvedValueOnce(
+    createStreamResponse(['\n__START__\n', 'chunk1', '\n__END__\n'], 150)
+  )
+
+  renderComponent(<Chat/>)
+  await act(async () => {})
+  await waitFor(() => {
+    expect(screen.queryByTestId('chat-input')).toBeInTheDocument()
+  })
+
+  vi.mocked(window.HTMLElement.prototype.scrollIntoView).mockClear()
+
+  const chatInput = screen.getByTestId('chat-input')
+  await userEvent.type(chatInput, "test message{enter}")
+
+  // Wait for streaming message to appear
+  await waitFor(() => {
+    expect(screen.queryByTestId('streaming-message')).toBeInTheDocument()
+  }, { timeout: 3000 })
+
+  const callsDuringStreaming = vi.mocked(window.HTMLElement.prototype.scrollIntoView).mock.calls.length
+
+  // Wait for streaming to finish
+  await waitFor(() => {
+    expect(screen.queryByTestId('streaming-message')).not.toBeInTheDocument()
+  }, { timeout: 3000 })
+
+  const callsAfterStreamingDone = vi.mocked(window.HTMLElement.prototype.scrollIntoView).mock.calls.length
+
+  // Verify no new calls to scrollIntoView were made when streaming finished
+  expect(callsAfterStreamingDone).toBe(callsDuringStreaming)
+})
+

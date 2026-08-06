@@ -15,6 +15,9 @@ export const defaultSettings: ChatSettingsContextType = {
   setSmallScreen: vi.fn(),
   disclaimerAccepted: false,
   setDisclaimerAccepted: vi.fn(),
+  theme: 'dark',
+  setTheme: vi.fn(),
+  toggleTheme: vi.fn(),
 }
 
 interface CustomRenderOptions extends RenderOptions {

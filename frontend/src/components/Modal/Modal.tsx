@@ -5,19 +5,12 @@ import { useChatSettings } from '../../context/useChatContext';
 import { useNavigate } from 'react-router-dom';
 
 function Modal() {
-
-  const {
-  } = useChatSettings()
   const [showCourseSelect, setShowCourseSelect] = useState(true)
 
-  // TODO: Add "unspecified" option to course and don't allow closing the course modal
-  // if unspecified is selected
-  // This shouldn't be done until either more courses are added or rapid testing of the UI is not required anymore
   const { 
     setCourse,
     disclaimerAccepted, setDisclaimerAccepted
   } = useChatSettings();
-
 
   const navigate = useNavigate()
 
@@ -25,76 +18,96 @@ function Modal() {
     navigate("/chat")
   }
 
-
-  /* The course-select select box can be changed to its own function/component if the sidebar version
-   * should look identical to this modal version */
   const courseSelectModal = () => {
     const onChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
       setCourse(event.target.value as Course)
     }
 
     return (
-      <>
-	<div className="course-modal" data-testid="course-modal">
-	  <div className="course-modal-content">
-	    <p className="modal-text">Select the course you are taking</p>
-	    <select className="interactive select-box" onChange={onChange}> 
-	      {Object.values(Course).map((option) => (
-		<option key={option} value={option}>
-		  {option}
-		</option>
-	      ))}
-	    </select>
-	    <button onClick={() => {
-	      setShowCourseSelect(false)
-	      navigateToChat()
-	    }} className="interactive modal-close-button">Done</button>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#0F090B]/50 dark:bg-[#0F090B]/85 backdrop-blur-md transition-all duration-300" data-testid="course-modal">
+        <div className="w-full max-w-md bg-white dark:bg-[#160C0E]/95 border border-[#E6DDD3] dark:border-[#2D181C] rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl flex flex-col items-center text-center animate-in fade-in zoom-in duration-200">
+          <div className="w-12 h-12 rounded-2xl bg-[#FFF8E6] dark:bg-[#E5A712]/15 border border-[#F5E1A4] dark:border-[#E5A712]/30 text-[#E5A712] flex items-center justify-center mb-4 shadow-inner">
+            <i className="fa-solid fa-book-open text-xl"></i>
+          </div>
+          <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2 no-underline">Select Your Course</h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">Choose your Concordia course so Sam can provide tailored assistance.</p>
+          
+          <div className="w-full mb-6">
+            <select 
+              className="w-full bg-[#FAF8F5] dark:bg-[#1F1215] text-slate-800 dark:text-slate-100 border border-[#E5DDD4] dark:border-[#331C21] rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#912338]/50 focus:border-[#912338] transition-all cursor-pointer text-center font-medium shadow-sm" 
+              onChange={onChange}
+            > 
+              {Object.values(Course).map((option) => (
+                <option key={option} value={option} className="bg-white dark:bg-[#160C0E] text-slate-800 dark:text-slate-100">
+                  {option}
+                </option>
+              ))}
+            </select>
+          </div>
 
-	  </div>
-	</div>
-      </>
-    )}
-
+          <button 
+            onClick={() => {
+              setShowCourseSelect(false)
+              navigateToChat()
+            }} 
+            className="w-full py-3 px-6 bg-gradient-to-r from-[#912338] to-[#7A1D2F] hover:from-[#A82942] hover:to-[#8E2237] text-white font-semibold rounded-xl shadow-lg shadow-[#912338]/25 active:scale-[0.98] transition-all cursor-pointer"
+          >
+            Continue to Chat
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   const disclaimerModal = () => {
     return (
-      <>
-	<div id="DisclaimerModal" className="type-modal" data-testid="disclaimer-modal">
-	  <div className="disclaimer-modal-content">
-	    <span className="modal-text">
-	      <h2>
-		Disclaimer
-	      </h2>
+      <div id="DisclaimerModal" className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-[#0F090B]/50 dark:bg-[#0F090B]/85 backdrop-blur-md overflow-y-auto" data-testid="disclaimer-modal">
+        <div className="w-full max-w-2xl my-auto bg-white dark:bg-[#160C0E]/95 border border-[#E6DDD3] dark:border-[#2D181C] rounded-3xl p-6 sm:p-8 shadow-2xl backdrop-blur-xl flex flex-col text-slate-800 dark:text-slate-200 animate-in fade-in zoom-in duration-200">
+          <div className="flex items-center gap-3 mb-4 pb-4 border-b border-[#E6DDD3] dark:border-[#2D181C]">
+            <div className="w-10 h-10 rounded-xl bg-[#FFF8E6] dark:bg-[#E5A712]/15 border border-[#F5E1A4] dark:border-[#E5A712]/30 text-[#E5A712] flex items-center justify-center shrink-0">
+              <i className="fa-solid fa-shield-halved text-lg"></i>
+            </div>
+            <div>
+              <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100 no-underline">Disclaimer & Ethical Use</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Concordia Sam AI Tutoring Assistant</p>
+            </div>
+          </div>
 
-	      <p> 
-		This bot is designed to assist Concordia University students in understanding basic Calculus concepts, solving problems, and enhancing their learning experience. This bot is not to replace lectures, classes, or group projects. 
-	      </p>
+          <div className="space-y-4 text-sm text-slate-600 dark:text-slate-300 leading-relaxed max-h-[60vh] overflow-y-auto pr-2">
+            <p>
+              This bot is designed to assist Concordia University students in understanding basic Calculus concepts, solving problems, and enhancing their learning experience. This bot is not to replace lectures, classes, or group projects. 
+            </p>
 
-	      <p> 
-		By using this tool, you agree to the following:
-	      </p>
+            <p className="font-semibold text-slate-800 dark:text-slate-200">
+              By using this tool, you agree to the following:
+            </p>
 
-	      <ol>
-		<li>
-		  Accuracy: Gen AI can make mistakes. It is the student's responsibility to double check any answers they are given.
-		</li>
+            <ol className="list-decimal pl-5 space-y-3 marker:text-[#912338] dark:marker:text-[#F5C242] marker:font-semibold">
+              <li className="pl-1">
+                <span className="font-semibold text-slate-800 dark:text-slate-200">Accuracy:</span> Gen AI can make mistakes. It is the student's responsibility to double check any answers they are given.
+              </li>
+              <li className="pl-1">
+                <span className="font-semibold text-slate-800 dark:text-slate-200">Academic Integrity:</span> Plagiarism, including submitting work that is generated or assisted by AI tools as your own without proper understanding or citation, is a violation of academic integrity policies. Always adhere to your professor's guidelines as per how and to what extent Gen AI can be used in your studies.
+              </li>
+            </ol>
 
-		<li>
-		  Academic Integrity: Plagiarism, including submitting work that is generated or assisted by AI tools as your own without proper understanding or citation, is a violation of academic integrity policies. Always adhere to your professor's guidelines as per how and to what extent Gen AI can be used in your studies.
-		</li>
+            <div className="p-4 rounded-xl bg-[#912338]/5 dark:bg-[#912338]/15 border border-[#912338]/20 dark:border-[#912338]/30 text-[#801F31] dark:text-[#FFC2CC] text-xs leading-normal">
+              By continuing to use this tool, you acknowledge that you are using it ethically and responsibly to enhance your understanding of the material, while upholding academic honesty and integrity.
+            </div>
+          </div>
 
-
-	      </ol>
-	      By continuing to use this tool, you acknowledge that you are using it ethically and responsibly to enhance your understanding of the material, while upholding academic honesty and integrity.
-
-	    </span>
-	    <button onClick={() => {
-	      setDisclaimerAccepted(true)
-	    }} className="interactive modal-close-button disclaimer-button">I Accept</button>
-
-	  </div>
-	</div>
-      </>
+          <div className="mt-6 pt-4 border-t border-[#E6DDD3] dark:border-[#2D181C] flex justify-end">
+            <button 
+              onClick={() => {
+                setDisclaimerAccepted(true)
+              }} 
+              className="w-full sm:w-auto px-8 py-3 bg-gradient-to-r from-[#912338] to-[#7A1D2F] hover:from-[#A82942] hover:to-[#8E2237] text-white font-semibold rounded-xl shadow-lg shadow-[#912338]/25 active:scale-[0.98] transition-all cursor-pointer"
+            >
+              I Accept & Continue
+            </button>
+          </div>
+        </div>
+      </div>
     )
   }
 

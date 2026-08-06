@@ -1,8 +1,7 @@
 import './Sidebar.css'
 import { useEffect } from 'react'
 import { useChatSettings } from '../../context/useChatContext';
-import { Attribution, LogoutText, NewConversationText, SidebarButtons, Threads } from './Elements';
-
+import { Attribution, LogoutText, NewConversationText, SidebarButtons, ThemeToggle, Threads } from './Elements';
 
 function Sidebar() {
   const { 
@@ -32,26 +31,29 @@ function Sidebar() {
     };
   }, [smallScreen]);
 
-
   return (
     <>
-      { (sidebar) ?
-        <div className="sidebar">
-          <SidebarButtons/>
-          <div className="options">
-            <LogoutText/>
-            <NewConversationText/>
+      { sidebar && (
+        <aside className="fixed left-0 top-0 bottom-0 w-72 bg-[#F5F0EB]/95 dark:bg-[#140B0D]/95 border-r border-[#E5DDD4] dark:border-[#281519]/90 backdrop-blur-xl z-40 flex flex-col justify-between transition-colors duration-200 shadow-2xl">
+          <div className="flex flex-col h-full overflow-hidden">
+            <SidebarButtons/>
+            <div className="px-3 pt-3 pb-1 space-y-1.5">
+              <NewConversationText/>
+              <ThemeToggle/>
+              <LogoutText/>
+            </div>
+            <div className="my-2 px-4">
+              <div className="h-px bg-[#E5DDD4] dark:bg-[#281519] w-full"></div>
+            </div>
+            <div className="flex-1 overflow-y-auto px-3 min-h-0">
+              <Threads/>
+            </div>
+            <div className="p-3 border-t border-[#E5DDD4] dark:border-[#281519]/90 bg-[#EFE8E1]/50 dark:bg-[#1B0F12]/50">
+              <Attribution/>
+            </div>
           </div>
-          <hr className="sidebar-hr thread-top"/>
-          <Threads/>
-          <hr className="sidebar-hr thread-bottom"/>
-          <Attribution/>
-        </div>
-        : 
-        <div className="hidden-sidebar">
-          <SidebarButtons/>
-        </div>
-      }
+        </aside>
+      )}
     </>
   )
 }
